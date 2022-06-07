@@ -11,9 +11,11 @@ public class SetupController : MonoBehaviour
         var princess = GameObject.Find("Princess").GetComponent<NpcController>();
         var wiperController = GameObject.Find("Canvas/Wiper").GetComponent<WiperController>();
         var inputController = GameObject.Find("InputController").GetComponent<InputController>();
+        var positionController = GameObject.Find("PositionController").GetComponent<PositionController>();
         
         wiperController.Setup(warpingAndWiping);
-        player.Setup(warpingAndWiping, inputController.InputDirections, occupiedSpacesSubject);
-        princess.Setup(occupiedSpacesSubject);
+        player.Setup(warpingAndWiping, inputController.InputDirections, occupiedSpacesSubject, positionController.PositionGrid);
+        princess.Setup(occupiedSpacesSubject, positionController.PositionGrid);
+        positionController.Setup(occupiedSpacesSubject);
     }
 }

@@ -6,10 +6,10 @@ public class NpcController : MonoBehaviour
     public readonly List<Enums.Direction> InputDirections = new List<Enums.Direction>();
     private float timeTilNextMove;
 
-    public void Setup(Subject occupiedSpaces)
+    public void Setup(Subject occupiedSpaces, PositionGrid positionGrid)
     {
         var npcMovement = GetComponent<PersonMovement>();
-        npcMovement.Setup(InputDirections, occupiedSpaces);
+        npcMovement.Setup(InputDirections, occupiedSpaces, positionGrid);
     }
     
     void Update()

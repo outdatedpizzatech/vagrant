@@ -25,22 +25,30 @@ public class PlayerBeganWarpingEvent
 
 public class EnteredPositionEvent
 {
-    public EnteredPositionEvent(PersonMovement personMovement)
+    public EnteredPositionEvent(GameObject gameObject, int x, int y)
     {
-        PersonMovement = personMovement;
+        GameObject = gameObject;
+        X = x;
+        Y = y;
     }
 
-    public PersonMovement PersonMovement { get; }
+    public GameObject GameObject { get; }
+    public int X { get; }
+    public int Y { get; }
 }
 
 public class LeftPositionEvent
 {
-    public LeftPositionEvent(PersonMovement personMovement)
+    public LeftPositionEvent(GameObject gameObject, int x, int y)
     {
-        PersonMovement = personMovement;
+        GameObject = gameObject;
+        X = x;
+        Y = y;
     }
 
-    public PersonMovement PersonMovement { get; }
+    public GameObject GameObject { get; }
+    public int X { get; }
+    public int Y { get; }
 }
 
 public class Subject
