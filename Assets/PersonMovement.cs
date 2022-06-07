@@ -12,7 +12,7 @@ public class PersonMovement : MonoBehaviour
     public Enums.Direction? FacingDirection;
     
     private Collider2D myCollider;
-    [CanBeNull] private List<Enums.Direction> _requestedDirections;
+    [CanBeNull] private InputAction _inputAction;
     private bool isMoving;
     private Animator _animator;
     private Subject _occupiedSpacesSubject;
@@ -31,9 +31,9 @@ public class PersonMovement : MonoBehaviour
         transform.position = new Vector2(Position[0], Position[1]);
     }
 
-    public void Setup(List<Enums.Direction> requestedDirections, Subject occupiedSpacesSubject, PositionGrid positionGrid)
+    public void Setup(InputAction inputAction, Subject occupiedSpacesSubject, PositionGrid positionGrid)
     {
-        _requestedDirections = requestedDirections;
+        _inputAction = inputAction;
         _occupiedSpacesSubject = occupiedSpacesSubject;
         _positionGrid = positionGrid;
     }
@@ -47,9 +47,9 @@ public class PersonMovement : MonoBehaviour
 
     void Update()
     {
-        if (_requestedDirections == null)
+        if (_inputAction == null)
         {
-            throw new Exception($"{name}: requestedDirections not supplied");
+            throw new Exception($"{name}: inputAction not supplied");
         }
         
         if (_occupiedSpacesSubject == null)
@@ -64,14 +64,14 @@ public class PersonMovement : MonoBehaviour
                 return;
             }
 
-            for (var i = _requestedDirections.Count - 1; i >= 0; i--)
+            for (var i = _inputAction.InputDirections.Count - 1; i >= 0; i--)
             {
                 if (isMoving)
                 {
                     break;
                 }
 
-                var direction = _requestedDirections[i];
+                var direction = _inputAction.InputDirections[i];
                 
                 FacingDirection = direction;
                 

@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public void Setup(Subject warpAndWipeSubject, List<Enums.Direction> requestedDirections, Subject occupiedSpacesSubject, PositionGrid positionGrid)
+    public void Setup(Subject warpAndWipeSubject, InputAction inputAction, Subject occupiedSpacesSubject, PositionGrid positionGrid)
     {
         var playerWarp = GetComponent<PlayerWarp>();
         var playerMovement = GetComponent<PersonMovement>();
+        var playerAction = GetComponent<PlayerAction>();
         
-        playerMovement.Setup(requestedDirections, occupiedSpacesSubject, positionGrid);
+        playerMovement.Setup(inputAction, occupiedSpacesSubject, positionGrid);
         playerWarp.Setup(warpAndWipeSubject);
+        playerAction.Setup(inputAction);
     }
 }

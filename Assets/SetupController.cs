@@ -14,7 +14,7 @@ public class SetupController : MonoBehaviour
         var positionController = GameObject.Find("PositionController").GetComponent<PositionController>();
         
         wiperController.Setup(warpingAndWiping);
-        player.Setup(warpingAndWiping, inputController.InputDirections, occupiedSpacesSubject, positionController.PositionGrid);
+        player.Setup(warpingAndWiping, inputController.InputAction, occupiedSpacesSubject, positionController.PositionGrid);
         princess.Setup(occupiedSpacesSubject, positionController.PositionGrid);
         positionController.Setup(occupiedSpacesSubject);
     }

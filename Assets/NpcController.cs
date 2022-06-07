@@ -3,13 +3,13 @@ using UnityEngine;
 
 public class NpcController : MonoBehaviour
 {
-    public readonly List<Enums.Direction> InputDirections = new List<Enums.Direction>();
+    private InputAction _inputAction = new InputAction();
     private float timeTilNextMove;
 
     public void Setup(Subject occupiedSpaces, PositionGrid positionGrid)
     {
         var npcMovement = GetComponent<PersonMovement>();
-        npcMovement.Setup(InputDirections, occupiedSpaces, positionGrid);
+        npcMovement.Setup(_inputAction, occupiedSpaces, positionGrid);
     }
     
     void Update()
@@ -20,8 +20,8 @@ public class NpcController : MonoBehaviour
         {
             timeTilNextMove = Random.Range(0f, 5f);
 
-            InputDirections.Clear();
-            InputDirections.Add((Enums.Direction)Random.Range(0, 3));
+            _inputAction.ClearDirections();
+            _inputAction.AddDirection((Enums.Direction)Random.Range(0, 3));
         }
     }
 }
