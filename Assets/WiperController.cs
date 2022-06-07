@@ -27,15 +27,12 @@ public class WiperController : MonoBehaviour, IObserver
     public void OnNotify(SubjectMessage message)
     {
     }
-    public void OnNotify<T>(SubjectMessage message, T parameters) where T : PlayerBeganWarpingEvent
+    public void OnNotify<T>(T parameters)
     {
-        switch (message)
+        if (parameters is PlayerBeganWarpingEvent)
         {
-            case SubjectMessage.PlayerBeganWarping:
-                WipeOut();
-                break;
+            WipeOut();
         }
-        
     }
     
     private void WipeOut()

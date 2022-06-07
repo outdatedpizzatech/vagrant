@@ -172,15 +172,13 @@ public class PlayerMovement : MonoBehaviour, IObserver
                 break;
         }
     }
-    public void OnNotify<T>(SubjectMessage message, T parameters) where T : PlayerBeganWarpingEvent
+    public void OnNotify<T>(T parameters)
     {
-        switch (message)
+        if (parameters is PlayerBeganWarpingEvent playerBeganWarpingEvent)
         {
-            case SubjectMessage.PlayerBeganWarping:
-                facingDirection = parameters.FacingDirection;
-                position[0] = parameters.X;
-                position[1] = parameters.Y;
-                break;
+            facingDirection = playerBeganWarpingEvent.FacingDirection;
+            position[0] = playerBeganWarpingEvent.X;
+            position[1] = playerBeganWarpingEvent.Y;
         }
     }
 }

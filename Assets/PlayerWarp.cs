@@ -29,6 +29,6 @@ public class PlayerWarp : MonoBehaviour
         
         var parameters = new PlayerBeganWarpingEvent(direction, x, y);
         
-        _subject.Notify(SubjectMessage.PlayerBeganWarping, parameters);
+        _subject.Notify(parameters);
     }
 }

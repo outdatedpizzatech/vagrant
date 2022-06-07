@@ -42,13 +42,13 @@ public class Subject
     }
 
     //Send notifications if something has happened
-    public void Notify<T>(SubjectMessage message, T parameters) where T : PlayerBeganWarpingEvent
+    public void Notify<T>(T parameters)
     {
         for (int i = 0; i < observers.Count; i++)
         {
             //Notify all observers even though some may not be interested in what has happened
             //Each observer should check if it is interested in this event
-            observers[i].OnNotify(message, parameters);
+            observers[i].OnNotify(parameters);
         }
     }
 
