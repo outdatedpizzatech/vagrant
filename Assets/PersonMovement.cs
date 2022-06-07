@@ -1,51 +1,63 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using JetBrains.Annotations;
 using UnityEngine;
 using Vector2 = UnityEngine.Vector2;
 
-public class PlayerMovement : MonoBehaviour, IObserver
+public class PersonMovement : MonoBehaviour
 {
     public float speedMultiplier = 4.5f;
+    public bool CanMakeAnotherMove = true;
+    private int[] Position = new int[2] { 0, 0 };
+    public Enums.Direction? FacingDirection;
     
-    private int[] position = new int[2] { 0, 0 };
     private Collider2D myCollider;
     [CanBeNull] private List<Enums.Direction> _requestedDirections;
-    [CanBeNull] private Subject _subject;
-    private Enums.Direction? facingDirection;
     private bool isMoving;
-    private bool canMakeAnotherMove = true;
     private Animator _animator;
+    private Subject _occupiedSpacesSubject;
 
-    public void Setup(List<Enums.Direction> requestedDirections, Subject subject)
+    public void SetPosition(int x, int y)
     {
-        _requestedDirections = requestedDirections;
-        _subject = subject;
+        _occupiedSpacesSubject.Notify(new LeftPositionEvent(this));
+        Position[0] = x;
+        Position[1] = y;
+        _occupiedSpacesSubject.Notify(new EnteredPositionEvent(this));
     }
 
-    public void Awake()
+    public void MoveTransformToPosition()
+    {
+        transform.position = new Vector2(Position[0], Position[1]);
+    }
+
+    public void Setup(List<Enums.Direction> requestedDirections, Subject occupiedSpacesSubject)
+    {
+        _requestedDirections = requestedDirections;
+        _occupiedSpacesSubject = occupiedSpacesSubject;
+    }
+
+    public void Start()
     {
         myCollider = GetComponent<Collider2D>();
         _animator = GetComponent<Animator>();
+        SetPosition((int)transform.position.x, (int)transform.position.y);
     }
 
     void Update()
     {
         if (_requestedDirections == null)
         {
-            throw new Exception("requestedDirections not supplied");
+            throw new Exception($"{name}: requestedDirections not supplied");
         }
         
-        if (_subject == null)
+        if (_occupiedSpacesSubject == null)
         {
-            throw new Exception("subject not supplied");
+            throw new Exception($"{name}: occupiedSpacesSubject not supplied");
         }
 
         if (!isMoving)
         {
-            if (!canMakeAnotherMove)
+            if (!CanMakeAnotherMove)
             {
                 return;
             }
@@ -59,7 +71,7 @@ public class PlayerMovement : MonoBehaviour, IObserver
 
                 var direction = _requestedDirections[i];
                 
-                facingDirection = direction;
+                FacingDirection = direction;
                 
                 if (!WouldBeObstructed(direction))
                 {
@@ -73,9 +85,9 @@ public class PlayerMovement : MonoBehaviour, IObserver
                 _animator.SetBool("isMoving", false);
             }
 
-            if (facingDirection != null)
+            if (FacingDirection != null)
             {
-                _animator.SetInteger("facingDirection", (int)facingDirection);
+                _animator.SetInteger("facingDirection", (int)FacingDirection);
             }
             else
             {
@@ -84,19 +96,19 @@ public class PlayerMovement : MonoBehaviour, IObserver
 
             if (isMoving)
             {
-                switch (facingDirection)
+                switch (FacingDirection)
                 {
                     case Enums.Direction.Down:
-                        position[1] -= 1;
+                        SetPosition(Position[0], Position[1] - 1);
                         break;
                     case Enums.Direction.Up:
-                        position[1] += 1;
+                        SetPosition(Position[0], Position[1] + 1);
                         break;
                     case Enums.Direction.Left:
-                        position[0] -= 1;
+                        SetPosition(Position[0] - 1, Position[1]);
                         break;
                     case Enums.Direction.Right:
-                        position[0] += 1;
+                        SetPosition(Position[0] + 1, Position[1]);
                         break;
                 }
             }
@@ -104,14 +116,14 @@ public class PlayerMovement : MonoBehaviour, IObserver
             return;
         }
         
-        var destination = new Vector2(position[0], position[1]);
+        var destination = new Vector2(Position[0], Position[1]);
         var distance = destination - (Vector2)transform.position;
 
         if (
-            (facingDirection == Enums.Direction.Down && (distance.y > 0)) ||
-            (facingDirection == Enums.Direction.Up && distance.y < 0) ||
-            (facingDirection == Enums.Direction.Right && distance.x < 0) ||
-            (facingDirection == Enums.Direction.Left && distance.x > 0)
+            (FacingDirection == Enums.Direction.Down && (distance.y > 0)) ||
+            (FacingDirection == Enums.Direction.Up && distance.y < 0) ||
+            (FacingDirection == Enums.Direction.Right && distance.x < 0) ||
+            (FacingDirection == Enums.Direction.Left && distance.x > 0)
         )
         {
             transform.position = destination;
@@ -119,7 +131,7 @@ public class PlayerMovement : MonoBehaviour, IObserver
         }
         else
         {
-            transform.Translate(ToVector2((Enums.Direction)facingDirection) * Time.deltaTime *
+            transform.Translate(ToVector2((Enums.Direction)FacingDirection) * Time.deltaTime *
                                 speedMultiplier);
         }
     }
@@ -153,32 +165,5 @@ public class PlayerMovement : MonoBehaviour, IObserver
         var isObstructive = obstruction != null && obstruction.GetComponent<Doorway>() == null;
         myCollider.enabled = true;
         return isObstructive;
-    }
-    
-    public void OnNotify(SubjectMessage message)
-    {
-        switch (message)
-        {
-            case SubjectMessage.PlayerRequestingWarp:
-                canMakeAnotherMove = false;
-                break;
-            case SubjectMessage.ScreenFinishedWipeOut:
-                transform.position = new Vector2(position[0], position[1]);
-                _animator.SetInteger("facingDirection", (int)facingDirection);
-                _animator.SetBool("isMoving", false);
-                break;
-            case SubjectMessage.ScreenFinishedWipeIn:
-                canMakeAnotherMove = true;
-                break;
-        }
-    }
-    public void OnNotify<T>(T parameters)
-    {
-        if (parameters is PlayerBeganWarpingEvent playerBeganWarpingEvent)
-        {
-            facingDirection = playerBeganWarpingEvent.FacingDirection;
-            position[0] = playerBeganWarpingEvent.X;
-            position[1] = playerBeganWarpingEvent.Y;
-        }
     }
 }

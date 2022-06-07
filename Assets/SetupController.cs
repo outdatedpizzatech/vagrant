@@ -2,20 +2,18 @@ using UnityEngine;
 
 public class SetupController : MonoBehaviour
 {
-    private void Start()
+    private void Awake()
     {
-        var subject = new Subject();
+        var warpingAndWiping = new Subject("warping and wiping");
+        var occupiedSpacesSubject = new Subject("occupied spaces");
         
-        var playerMovement = GameObject.Find("Hero").GetComponent<PlayerMovement>();
-        var playerWarp = GameObject.Find("Hero").GetComponent<PlayerWarp>();
-        var inputController = GameObject.Find("InputController").GetComponent<InputController>();
+        var player = GameObject.Find("Player").GetComponent<PlayerController>();
+        var princess = GameObject.Find("Princess").GetComponent<NpcController>();
         var wiperController = GameObject.Find("Canvas/Wiper").GetComponent<WiperController>();
+        var inputController = GameObject.Find("InputController").GetComponent<InputController>();
         
-        playerMovement.Setup(inputController.InputDirections, subject);
-        wiperController.Setup(subject);
-        playerWarp.Setup(subject);
-
-        subject.AddObserver(wiperController);
-        subject.AddObserver(playerMovement);
+        wiperController.Setup(warpingAndWiping);
+        player.Setup(warpingAndWiping, inputController.InputDirections, occupiedSpacesSubject);
+        princess.Setup(occupiedSpacesSubject);
     }
 }

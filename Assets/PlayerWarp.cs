@@ -1,15 +1,23 @@
 using System.Collections;
 using JetBrains.Annotations;
 using UnityEngine;
-using Vector2 = UnityEngine.Vector2;
 
-public class PlayerWarp : MonoBehaviour
+public class PlayerWarp : MonoBehaviour, IObserver
 {
     [CanBeNull] private Subject _subject;
+    private PersonMovement _personMovement;
+    private Animator _animator;
 
-    public void Setup(Subject subject)
+    private void Awake()
     {
-        _subject = subject;
+        _personMovement = GetComponent<PersonMovement>();
+        _animator = GetComponent<Animator>();
+    }
+
+    public void Setup(Subject warpAndWipeSubject)
+    {
+        _subject = warpAndWipeSubject;
+        warpAndWipeSubject.AddObserver(this);
     }
 
     public void WarpTo(int x, int y, Enums.Direction direction)
@@ -30,5 +38,31 @@ public class PlayerWarp : MonoBehaviour
         var parameters = new PlayerBeganWarpingEvent(direction, x, y);
         
         _subject.Notify(parameters);
+    }
+    
+    public void OnNotify(SubjectMessage message)
+    {
+        switch (message)
+        {
+            case SubjectMessage.PlayerRequestingWarp:
+                _personMovement.CanMakeAnotherMove = false;
+                break;
+            case SubjectMessage.ScreenFinishedWipeOut:
+                _personMovement.MoveTransformToPosition();
+                _animator.SetInteger("facingDirection", (int)_personMovement.FacingDirection);
+                _animator.SetBool("isMoving", false);
+                break;
+            case SubjectMessage.ScreenFinishedWipeIn:
+                _personMovement.CanMakeAnotherMove = true;
+                break;
+        }
+    }
+    public void OnNotify<T>(T parameters)
+    {
+        if (parameters is PlayerBeganWarpingEvent playerBeganWarpingEvent)
+        {
+            _personMovement.FacingDirection = playerBeganWarpingEvent.FacingDirection;
+            _personMovement.SetPosition(playerBeganWarpingEvent.X, playerBeganWarpingEvent.Y);
+        }
     }
 }

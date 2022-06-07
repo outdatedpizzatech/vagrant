@@ -5,8 +5,6 @@ using UnityEngine;
 public enum SubjectMessage
 {
     PlayerRequestingWarp,
-    PlayerBeganWarping,
-    PlayerFinishedWarping,
     ScreenFinishedWipeOut,
     ScreenFinishedWipeIn,
 }
@@ -25,10 +23,37 @@ public class PlayerBeganWarpingEvent
     public int Y { get; }
 }
 
+public class EnteredPositionEvent
+{
+    public EnteredPositionEvent(PersonMovement personMovement)
+    {
+        PersonMovement = personMovement;
+    }
+
+    public PersonMovement PersonMovement { get; }
+}
+
+public class LeftPositionEvent
+{
+    public LeftPositionEvent(PersonMovement personMovement)
+    {
+        PersonMovement = personMovement;
+    }
+
+    public PersonMovement PersonMovement { get; }
+}
+
 public class Subject
 {
+    
     //A list with observers that are waiting for something to happen
     List<IObserver> observers = new List<IObserver>();
+    public string Topic { get; }
+    
+    public Subject(string topic)
+    {
+        Topic = topic;
+    }
 
     //Send notifications if something has happened
     public void Notify(SubjectMessage message)

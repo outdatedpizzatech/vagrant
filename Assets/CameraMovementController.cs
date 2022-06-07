@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CameraMovementController : MonoBehaviour
 {
-    public PlayerMovement playerMovement;
+    public PersonMovement playerMovement;
     
     // Start is called before the first frame update
     void Start()

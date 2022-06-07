@@ -11,6 +11,7 @@ public class WiperController : MonoBehaviour, IObserver
     public void Setup(Subject subject)
     {
         _subject = subject;
+        subject.AddObserver(this);
     }
 
     public void FinishWipeOut()
