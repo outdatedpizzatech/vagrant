@@ -6,10 +6,10 @@ public class NpcController : MonoBehaviour
     private InputAction _inputAction = new InputAction();
     private float timeTilNextMove;
 
-    public void Setup(Subject occupiedSpaces, PositionGrid positionGrid)
+    public void Setup(Subject occupiedSpaces, PositionGrid positionGrid, Subject flowSubject)
     {
         var npcMovement = GetComponent<PersonMovement>();
-        npcMovement.Setup(_inputAction, occupiedSpaces, positionGrid);
+        npcMovement.Setup(_inputAction, occupiedSpaces, positionGrid, flowSubject);
     }
     
     void Update()

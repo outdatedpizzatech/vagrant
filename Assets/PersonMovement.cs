@@ -4,19 +4,38 @@ using JetBrains.Annotations;
 using UnityEngine;
 using Vector2 = UnityEngine.Vector2;
 
-public class PersonMovement : MonoBehaviour
+public class PersonMovement : MonoBehaviour, IObserver
 {
     public float speedMultiplier = 4.5f;
     public bool CanMakeAnotherMove = true;
-    private int[] Position = new int[2] { 0, 0 };
-    public Enums.Direction? FacingDirection;
+    public int[] Position = new int[2] { 0, 0 };
+    public Enums.Direction FacingDirection = Enums.Direction.Down;
     
     private Collider2D myCollider;
     [CanBeNull] private InputAction _inputAction;
     private bool isMoving;
     private Animator _animator;
     private Subject _occupiedSpacesSubject;
+    private Subject _flowSubject;
     private PositionGrid _positionGrid;
+
+    public void OnNotify(SubjectMessage message)
+    {
+        switch (message)
+        {
+            case SubjectMessage.EndDialogue:
+                CanMakeAnotherMove = true;
+                break;
+        }
+    }
+    
+    public void OnNotify<T>(T parameters)
+    {
+        if (parameters is InteractionResponseEvent)
+        {
+            CanMakeAnotherMove = false;
+        }
+    }
 
     public void SetPosition(int x, int y)
     {
@@ -31,11 +50,14 @@ public class PersonMovement : MonoBehaviour
         transform.position = new Vector2(Position[0], Position[1]);
     }
 
-    public void Setup(InputAction inputAction, Subject occupiedSpacesSubject, PositionGrid positionGrid)
+    public void Setup(InputAction inputAction, Subject occupiedSpacesSubject, PositionGrid positionGrid, Subject flowSubject)
     {
         _inputAction = inputAction;
         _occupiedSpacesSubject = occupiedSpacesSubject;
+        _flowSubject = flowSubject;
         _positionGrid = positionGrid;
+        
+        _flowSubject.AddObserver(this);
     }
 
     public void Start()

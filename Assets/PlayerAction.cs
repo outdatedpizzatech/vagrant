@@ -5,15 +5,25 @@ using UnityEngine;
 public class PlayerAction : MonoBehaviour
 {
     private InputAction _inputAction;
+    private PersonMovement _personMovement;
+    private Subject _actionSubject;
 
-    public void Setup(InputAction inputAction)
+    private void Awake()
+    {
+        _personMovement = GetComponent<PersonMovement>();
+    }
+    
+    public void Setup(InputAction inputAction, Subject interactionActionSubject)
     {
         _inputAction = inputAction;
+        _actionSubject = interactionActionSubject;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        print("InputAction " + _inputAction.Acting);
+        if (_inputAction.Acting)
+        {
+            _actionSubject.Notify(new PlayerActionEvent(_personMovement.Position[0], _personMovement.Position[1], _personMovement.FacingDirection));
+        }
     }
 }

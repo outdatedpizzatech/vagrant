@@ -2,54 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum SubjectMessage
-{
-    PlayerRequestingWarp,
-    ScreenFinishedWipeOut,
-    ScreenFinishedWipeIn,
-}
-
-public class PlayerBeganWarpingEvent
-{
-    public PlayerBeganWarpingEvent(Enums.Direction facingDirection, int x, int y)
-    {
-        FacingDirection = facingDirection;
-        X = x;
-        Y = y;
-    }
-
-    public Enums.Direction FacingDirection { get; }
-    public int X { get; }
-    public int Y { get; }
-}
-
-public class EnteredPositionEvent
-{
-    public EnteredPositionEvent(GameObject gameObject, int x, int y)
-    {
-        GameObject = gameObject;
-        X = x;
-        Y = y;
-    }
-
-    public GameObject GameObject { get; }
-    public int X { get; }
-    public int Y { get; }
-}
-
-public class LeftPositionEvent
-{
-    public LeftPositionEvent(GameObject gameObject, int x, int y)
-    {
-        GameObject = gameObject;
-        X = x;
-        Y = y;
-    }
-
-    public GameObject GameObject { get; }
-    public int X { get; }
-    public int Y { get; }
-}
 
 public class Subject
 {

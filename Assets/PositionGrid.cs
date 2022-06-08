@@ -20,4 +20,8 @@ public class PositionGrid
         return _grid.ContainsKey($"{x},{y}");
     }
 
+    public GameObject Get(int x, int y)
+    {
+        return _grid[$"{x},{y}"];
+    }
 }
