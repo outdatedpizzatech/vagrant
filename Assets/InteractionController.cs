@@ -67,7 +67,8 @@ public class InteractionController : MonoBehaviour, IObserver
 
                     if (interactible != null)
                     {
-                        _flowSubject.Notify(new InteractionResponseEvent(interactible.ReceiveInteraction()));
+                        var receivedFromDirection = (Enums.Direction)(((int)playerActionEvent.Direction + 2) % 4);
+                        _flowSubject.Notify(new InteractionResponseEvent(interactible.ReceiveInteraction(receivedFromDirection)));
                     }
                 }
             } else if (_state == State.InDialogue)

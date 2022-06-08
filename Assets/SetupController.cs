@@ -10,7 +10,7 @@ public class SetupController : MonoBehaviour, IObserver
         var flowSubject = new Subject("the flow of things");
         
         var player = GameObject.Find("Player").GetComponent<PlayerController>();
-        var princess = GameObject.Find("Princess").GetComponent<NpcController>();
+        var klara = GameObject.Find("Klara").GetComponent<NpcController>();
         var grayson = GameObject.Find("Grayson").GetComponent<NpcController>();
         var wiperController = GameObject.Find("Canvas/Wiper").GetComponent<WiperController>();
         var inputController = GameObject.Find("InputController").GetComponent<InputController>();
@@ -20,7 +20,7 @@ public class SetupController : MonoBehaviour, IObserver
         
         wiperController.Setup(warpingAndWiping);
         player.Setup(warpingAndWiping, inputController.InputAction, occupiedSpacesSubject, positionController.PositionGrid, interactionSubject, flowSubject);
-        princess.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
+        klara.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         grayson.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         positionController.Setup(occupiedSpacesSubject);
         interactionController.Setup(interactionSubject, positionController.PositionGrid, flowSubject);

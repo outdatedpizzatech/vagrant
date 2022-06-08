@@ -27791,7 +27791,7 @@ GameObject:
   - component: {fileID: 661720492}
   - component: {fileID: 661720493}
   m_Layer: 0
-  m_Name: Princess
+  m_Name: Klara
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -27980,10 +27980,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 661720483}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d8e1525c815a4108b9785f355163dcf, type: 3}
+  m_Script: {fileID: 11500000, guid: 7c31df8133c964964864eeec6bbae848, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Message: I am the princess!
 --- !u!1 &757502587
 GameObject:
   m_ObjectHideFlags: 0
@@ -28099,6 +28098,10 @@ PrefabInstance:
       propertyPath: exit
       value: 
       objectReference: {fileID: 1730161139}
+    - target: {fileID: 8362834271064397899, guid: fb2d8285f52524b95ba79b7ea8f606fb, type: 3}
+      propertyPath: exitDirection
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 860530518, guid: fb2d8285f52524b95ba79b7ea8f606fb, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: fb2d8285f52524b95ba79b7ea8f606fb, type: 3}
@@ -28599,7 +28602,7 @@ PrefabInstance:
       objectReference: {fileID: 1559537568}
     - target: {fileID: 8362834271064397899, guid: fb2d8285f52524b95ba79b7ea8f606fb, type: 3}
       propertyPath: exitDirection
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fb2d8285f52524b95ba79b7ea8f606fb, type: 3}
@@ -29047,7 +29050,7 @@ PrefabInstance:
       objectReference: {fileID: -799295530, guid: 4e18f096041c64ff4b6532410333d1bb, type: 3}
     - target: {fileID: 8362834271064397899, guid: fb2d8285f52524b95ba79b7ea8f606fb, type: 3}
       propertyPath: exitDirection
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8362834271064397900, guid: fb2d8285f52524b95ba79b7ea8f606fb, type: 3}
       propertyPath: m_SpriteTilingProperty.pivot.x

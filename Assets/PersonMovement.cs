@@ -19,12 +19,15 @@ public class PersonMovement : MonoBehaviour, IObserver
     private Subject _flowSubject;
     private PositionGrid _positionGrid;
 
+    private float _tempAnimationSpeed;
+
     public void OnNotify(SubjectMessage message)
     {
         switch (message)
         {
             case SubjectMessage.EndDialogue:
                 CanMakeAnotherMove = true;
+                _animator.speed = _tempAnimationSpeed;
                 break;
         }
     }
@@ -34,8 +37,16 @@ public class PersonMovement : MonoBehaviour, IObserver
         if (parameters is InteractionResponseEvent)
         {
             CanMakeAnotherMove = false;
+            _tempAnimationSpeed = _animator.speed;
+            _animator.speed = 0;
         }
     }
+
+    // public void FaceDirection(Enums.Direction direction)
+    // {
+    //     FacingDirection = direction;
+    //     _animator.SetInteger("facingDirection", (int)FacingDirection);
+    // }
 
     public void SetPosition(int x, int y)
     {
@@ -97,25 +108,27 @@ public class PersonMovement : MonoBehaviour, IObserver
                 
                 FacingDirection = direction;
                 
+                if (name == "Player")
+                {
+                    print("checking for obstruction");
+                }
+                
                 if (!WouldBeObstructed(direction))
                 {
+                    if (name == "Player")
+                    {
+                        print("not obstructed");
+                    }
                     isMoving = true;
                     _animator.SetBool("isMoving", true);
                 }
             }
+            
+            _animator.SetInteger("facingDirection", (int)FacingDirection);
 
             if (!isMoving)
             {
                 _animator.SetBool("isMoving", false);
-            }
-
-            if (FacingDirection != null)
-            {
-                _animator.SetInteger("facingDirection", (int)FacingDirection);
-            }
-            else
-            {
-                _animator.SetInteger("facingDirection", -1);
             }
 
             if (isMoving)
