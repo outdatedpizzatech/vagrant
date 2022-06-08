@@ -2,8 +2,10 @@ using UnityEngine;
 
 public class Interactible : MonoBehaviour, IInteractible
 {
+    public string Message;
+    
     public string ReceiveInteraction()
     {
-        return ("I am the princess!");
+        return (Message);
     }
 }
