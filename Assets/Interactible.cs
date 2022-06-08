@@ -4,8 +4,8 @@ public class Interactible : MonoBehaviour, IInteractible
 {
     public string Message;
     
-    public string ReceiveInteraction()
+    public string[] ReceiveInteraction()
     {
-        return (Message);
+        return (new string[] { Message });
     }
 }

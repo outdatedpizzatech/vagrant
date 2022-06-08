@@ -10,10 +10,16 @@ public class MessageBoxController : MonoBehaviour, IObserver
     
     private Subject _flowSubject;
     private TMP_Text _text;
+    private string[] _messages;
+    private float _timeSinceLastLetter = 0;
+    private float _timeBetweenLetters = 0.025f;
+    private int _shownCharacterIndex = 0;
+    private int _messageIndex = 0;
 
-    private float timeSinceLastLetter = 0;
-    private float timeBetweenLetters = 0.025f;
-    private int shownCharacterIndex = 0;
+    private bool AtEndOfCurrentMessage()
+    {
+        return (_shownCharacterIndex >= _text.textInfo.characterCount);
+    }
 
     void LateUpdate()
     {
@@ -23,19 +29,19 @@ public class MessageBoxController : MonoBehaviour, IObserver
 
     private void Update()
     {
-        if (shownCharacterIndex >= _text.textInfo.characterCount)
+        if (AtEndOfCurrentMessage())
         {
             return;
         }
         
-        ShowCharactersUpTo(shownCharacterIndex);
+        ShowCharactersUpTo(_shownCharacterIndex);
 
-        timeSinceLastLetter += Time.deltaTime;
+        _timeSinceLastLetter += Time.deltaTime;
 
-        if (timeSinceLastLetter >= timeBetweenLetters)
+        if (_timeSinceLastLetter >= _timeBetweenLetters)
         {
-            shownCharacterIndex++;
-            timeSinceLastLetter = 0;
+            _shownCharacterIndex++;
+            _timeSinceLastLetter = 0;
         }
     }
     
@@ -56,8 +62,20 @@ public class MessageBoxController : MonoBehaviour, IObserver
     {
         switch (message)
         {
-            case SubjectMessage.EndDialogue:
-                Hide();
+            case SubjectMessage.AdvanceDialogue:
+                if (AtEndOfCurrentMessage())
+                {
+                    if (_messageIndex >= _messages.Length - 1)
+                    {
+                        _flowSubject.Notify(SubjectMessage.EndDialogue);
+                        Hide();
+                    }
+                    else
+                    {
+                        _messageIndex++;
+                        Show(_messages[_messageIndex]);
+                    }
+                }
                 break;
         }
     }
@@ -66,8 +84,15 @@ public class MessageBoxController : MonoBehaviour, IObserver
     {
         if (parameters is InteractionResponseEvent interactionResponseEvent)
         {
-            Show(interactionResponseEvent.Message);
+            PlayMessages(interactionResponseEvent.Messages);
         }
+    }
+
+    private void PlayMessages(string[] messages)
+    {
+        _messageIndex = 0;
+        _messages = messages;
+        Show(messages[_messageIndex]);
     }
 
     private void Show(string message)
@@ -75,7 +100,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
         transform.localScale = Vector3.one;
         _text.text = message;
         _text.alpha = 0;
-        shownCharacterIndex = 0;
+        _shownCharacterIndex = 0;
     }
 
     private void ShowCharactersUpTo(int characterIndex)

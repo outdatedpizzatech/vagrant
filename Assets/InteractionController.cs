@@ -72,7 +72,7 @@ public class InteractionController : MonoBehaviour, IObserver
                 }
             } else if (_state == State.InDialogue)
             {
-                _flowSubject.Notify(SubjectMessage.EndDialogue);
+                _flowSubject.Notify(SubjectMessage.AdvanceDialogue);
             }
         }
 

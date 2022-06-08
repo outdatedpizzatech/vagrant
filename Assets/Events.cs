@@ -5,17 +5,18 @@ public enum SubjectMessage
     PlayerRequestingWarp,
     ScreenFinishedWipeOut,
     ScreenFinishedWipeIn,
+    AdvanceDialogue,
     EndDialogue,
 }
 
 public class InteractionResponseEvent
 {
-    public InteractionResponseEvent(string message)
+    public InteractionResponseEvent(string[] messages)
     {
-        Message = message;
+        Messages = messages;
     }
 
-    public string Message { get; }
+    public string[] Messages { get; }
 }
 
 public class PlayerBeganWarpingEvent
