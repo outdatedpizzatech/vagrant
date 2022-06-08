@@ -16,7 +16,7 @@ public class SetupController : MonoBehaviour
         var inputController = GameObject.Find("InputController").GetComponent<InputController>();
         var positionController = GameObject.Find("PositionController").GetComponent<PositionController>();
         var interactionController = GameObject.Find("InteractionController").GetComponent<InteractionController>();
-        var messageBoxController = GameObject.Find("Canvas/MessageBox").GetComponent<MessageBoxController>();
+        var messageBoxController = GameObject.Find("WorldSpaceCanvas/MessageBox").GetComponent<MessageBoxController>();
         
         wiperController.Setup(warpingAndWiping);
         player.Setup(warpingAndWiping, inputController.InputAction, occupiedSpacesSubject, positionController.PositionGrid, interactionSubject, flowSubject);
