@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,7 +11,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
     
     private Subject _flowSubject;
     private TMP_Text _text;
-    private string[] _messages;
+    private List<string> _messages;
     private float _timeSinceLastLetter = 0;
     private float _timeBetweenLetters = 0.025f;
     private int _shownCharacterIndex = 0;
@@ -65,7 +66,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
             case SubjectMessage.AdvanceDialogue:
                 if (AtEndOfCurrentMessage())
                 {
-                    if (_messageIndex >= _messages.Length - 1)
+                    if (_messageIndex >= _messages.Count - 1)
                     {
                         _flowSubject.Notify(SubjectMessage.EndDialogue);
                         Hide();
@@ -84,11 +85,11 @@ public class MessageBoxController : MonoBehaviour, IObserver
     {
         if (parameters is InteractionResponseEvent interactionResponseEvent)
         {
-            PlayMessages(interactionResponseEvent.Messages);
+            PlayMessages(interactionResponseEvent.Responses.Select((r) => r.Message).ToList());
         }
     }
 
-    private void PlayMessages(string[] messages)
+    private void PlayMessages(List<string> messages)
     {
         _messageIndex = 0;
         _messages = messages;

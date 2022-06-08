@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum SubjectMessage
@@ -11,12 +12,12 @@ public enum SubjectMessage
 
 public class InteractionResponseEvent
 {
-    public InteractionResponseEvent(string[] messages)
+    public InteractionResponseEvent(List<NPCResponse> responses)
     {
-        Messages = messages;
+        Responses = responses;
     }
 
-    public string[] Messages { get; }
+    public List<NPCResponse> Responses { get; }
 }
 
 public class PlayerBeganWarpingEvent
