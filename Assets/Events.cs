@@ -12,12 +12,22 @@ public enum SubjectMessage
 
 public class InteractionResponseEvent
 {
-    public InteractionResponseEvent(List<NPCResponse> responses)
+    public InteractionResponseEvent(List<MessageEnvelope> responses)
     {
         Responses = responses;
     }
 
-    public List<NPCResponse> Responses { get; }
+    public List<MessageEnvelope> Responses { get; }
+}
+
+public class MenuNavigation
+{
+    public MenuNavigation(Enums.Direction direction)
+    {
+        Direction = direction;
+    }
+
+    public Enums.Direction Direction { get; }
 }
 
 public class PlayerBeganWarpingEvent

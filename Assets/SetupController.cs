@@ -23,7 +23,7 @@ public class SetupController : MonoBehaviour, IObserver
         klara.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         grayson.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         positionController.Setup(occupiedSpacesSubject);
-        interactionController.Setup(interactionSubject, positionController.PositionGrid, flowSubject);
+        interactionController.Setup(interactionSubject, positionController.PositionGrid, flowSubject, inputController.InputAction);
         messageBoxController.Setup(flowSubject);
         
         /*

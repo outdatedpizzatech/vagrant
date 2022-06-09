@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class MessageBoxController : MonoBehaviour, IObserver
 {
@@ -11,12 +11,15 @@ public class MessageBoxController : MonoBehaviour, IObserver
     
     private Subject _flowSubject;
     private TMP_Text _text;
-    private List<string> _messages;
+    private List<MessageEnvelope> _messages;
     private float _timeSinceLastLetter = 0;
     private float _timeBetweenLetters = 0.025f;
     private int _shownCharacterIndex = 0;
     private int _messageIndex = 0;
-
+    private int _selectedPromptIndex = 0;
+    private float _timeSinceLastPromptChange = 0;
+    private float _timeBetweenPromptChanges = 0.25f;
+    
     private bool AtEndOfCurrentMessage()
     {
         return (_shownCharacterIndex >= _text.textInfo.characterCount);
@@ -30,6 +33,8 @@ public class MessageBoxController : MonoBehaviour, IObserver
 
     private void Update()
     {
+        _timeSinceLastPromptChange += Time.deltaTime;
+        
         if (AtEndOfCurrentMessage())
         {
             return;
@@ -85,23 +90,78 @@ public class MessageBoxController : MonoBehaviour, IObserver
     {
         if (parameters is InteractionResponseEvent interactionResponseEvent)
         {
-            PlayMessages(interactionResponseEvent.Responses.Select((r) => r.Message).ToList());
+            PlayMessages(interactionResponseEvent.Responses);
+        }
+        if (parameters is MenuNavigation menuNavigation)
+        {
+            if (_messages != null && _timeSinceLastPromptChange > _timeBetweenPromptChanges)
+            {
+                _timeSinceLastPromptChange = 0;
+                var currentMessage = _messages[_messageIndex];
+                var promptCount = currentMessage.Prompts.Count();
+                if (promptCount > 0 && AtEndOfCurrentMessage())
+                {
+                    if (menuNavigation.Direction == Enums.Direction.Down)
+                    {
+                        _selectedPromptIndex++;
+                    } else if (menuNavigation.Direction == Enums.Direction.Up)
+                    {
+                        _selectedPromptIndex--;
+                    }
+
+                    _selectedPromptIndex = Mathf.Abs(_selectedPromptIndex % promptCount);
+                    
+                    Reload(_messages[_messageIndex]);
+                }
+            }
         }
     }
 
-    private void PlayMessages(List<string> messages)
+    private void PlayMessages(List<MessageEnvelope> messages)
     {
         _messageIndex = 0;
         _messages = messages;
         Show(messages[_messageIndex]);
     }
 
-    private void Show(string message)
+    private void Show(MessageEnvelope message)
     {
         transform.localScale = Vector3.one;
-        _text.text = message;
+        _selectedPromptIndex = 0;
+        
+        RenderMessage(message);
+        
         _text.alpha = 0;
         _shownCharacterIndex = 0;
+    }
+    private void Reload(MessageEnvelope message)
+    {
+        RenderMessage(message);
+        _text.alpha = 1;
+    }
+
+    private void RenderMessage(MessageEnvelope message)
+    {
+        _text.text = message.Message;
+        
+        var promptIndex = 0;
+
+        if (message.Prompts.Any())
+        {
+            _text.text += "\n";
+            foreach (var prompt in message.Prompts)
+            {
+                if (promptIndex == _selectedPromptIndex)
+                {
+                    _text.text += $"\n> {prompt.Text}";
+                }
+                else
+                {
+                    _text.text += $"\n  {prompt.Text}";
+                }
+                promptIndex++;
+            }
+        }
     }
 
     private void ShowCharactersUpTo(int characterIndex)
