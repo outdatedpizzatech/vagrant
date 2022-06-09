@@ -10,12 +10,12 @@ public class SetupController : MonoBehaviour, IObserver
         var flowSubject = new Subject("the flow of things");
         
         var player = GameObject.Find("Player").GetComponent<PlayerController>();
-        var klara = GameObject.Find("Klara").GetComponent<NpcController>();
-        var grayson = GameObject.Find("Grayson").GetComponent<NpcController>();
+        var klara = GameObject.Find("NPCs/Klara").GetComponent<NpcController>();
+        var grayson = GameObject.Find("NPCs/Grayson").GetComponent<NpcController>();
         var wiperController = GameObject.Find("Canvas/Wiper").GetComponent<WiperController>();
-        var inputController = GameObject.Find("InputController").GetComponent<InputController>();
-        var positionController = GameObject.Find("PositionController").GetComponent<PositionController>();
-        var interactionController = GameObject.Find("InteractionController").GetComponent<InteractionController>();
+        var inputController = GameObject.Find("Controllers/InputController").GetComponent<InputController>();
+        var positionController = GameObject.Find("Controllers/PositionController").GetComponent<PositionController>();
+        var interactionController = GameObject.Find("Controllers/InteractionController").GetComponent<InteractionController>();
         var messageBoxController = GameObject.Find("WorldSpaceCanvas/MessageBox").GetComponent<MessageBoxController>();
         
         wiperController.Setup(warpingAndWiping);
