@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using UnityEngine;
 public class MessageBoxController : MonoBehaviour, IObserver
 {
     public PersonMovement playerMovement;
-    
+
     private Subject _flowSubject;
     private TMP_Text _text;
     private List<MessageEnvelope> _messages;
@@ -19,7 +20,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
     private int _selectedPromptIndex = 0;
     private float _timeSinceLastPromptChange = 0;
     private float _timeBetweenPromptChanges = 0.25f;
-    
+
     private bool AtEndOfCurrentMessage()
     {
         return (_shownCharacterIndex >= _text.textInfo.characterCount);
@@ -34,30 +35,28 @@ public class MessageBoxController : MonoBehaviour, IObserver
     private void Update()
     {
         _timeSinceLastPromptChange += Time.deltaTime;
-        
+        _timeSinceLastLetter += Time.deltaTime;
+
         if (AtEndOfCurrentMessage())
         {
             return;
         }
-        
+
         ShowCharactersUpTo(_shownCharacterIndex);
 
-        _timeSinceLastLetter += Time.deltaTime;
-
-        if (_timeSinceLastLetter >= _timeBetweenLetters)
+        Utilities.Debounce(ref _timeSinceLastLetter, 0.025f, () =>
         {
             _shownCharacterIndex++;
-            _timeSinceLastLetter = 0;
-        }
+        });
     }
-    
+
 
     public void Setup(Subject flowSubject)
     {
         _flowSubject = flowSubject;
         _flowSubject.AddObserver(this);
     }
-    
+
     private void Start()
     {
         Hide();
@@ -82,6 +81,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
                         Show(_messages[_messageIndex]);
                     }
                 }
+
                 break;
         }
     }
@@ -92,27 +92,33 @@ public class MessageBoxController : MonoBehaviour, IObserver
         {
             PlayMessages(interactionResponseEvent.Responses);
         }
+
         if (parameters is MenuNavigation menuNavigation)
         {
-            if (_messages != null && _timeSinceLastPromptChange > _timeBetweenPromptChanges)
+            if (_messages != null)
             {
-                _timeSinceLastPromptChange = 0;
-                var currentMessage = _messages[_messageIndex];
-                var promptCount = currentMessage.Prompts.Count();
-                if (promptCount > 0 && AtEndOfCurrentMessage())
+                Action changePromptAnswer = () =>
                 {
-                    if (menuNavigation.Direction == Enums.Direction.Down)
+                    var currentMessage = _messages[_messageIndex];
+                    var promptCount = currentMessage.Prompts.Count();
+                    if (promptCount > 0 && AtEndOfCurrentMessage())
                     {
-                        _selectedPromptIndex++;
-                    } else if (menuNavigation.Direction == Enums.Direction.Up)
-                    {
-                        _selectedPromptIndex--;
-                    }
+                        if (menuNavigation.Direction == Enums.Direction.Down)
+                        {
+                            _selectedPromptIndex++;
+                        }
+                        else if (menuNavigation.Direction == Enums.Direction.Up)
+                        {
+                            _selectedPromptIndex--;
+                        }
 
-                    _selectedPromptIndex = Mathf.Abs(_selectedPromptIndex % promptCount);
-                    
-                    Reload(_messages[_messageIndex]);
-                }
+                        _selectedPromptIndex = Mathf.Abs(_selectedPromptIndex % promptCount);
+
+                        Reload(_messages[_messageIndex]);
+                    }
+                };
+
+                Utilities.Debounce(ref _timeSinceLastPromptChange, 0.25f, changePromptAnswer);
             }
         }
     }
@@ -128,12 +134,13 @@ public class MessageBoxController : MonoBehaviour, IObserver
     {
         transform.localScale = Vector3.one;
         _selectedPromptIndex = 0;
-        
+
         RenderMessage(message);
-        
+
         _text.alpha = 0;
         _shownCharacterIndex = 0;
     }
+
     private void Reload(MessageEnvelope message)
     {
         RenderMessage(message);
@@ -143,7 +150,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
     private void RenderMessage(MessageEnvelope message)
     {
         _text.text = message.Message;
-        
+
         var promptIndex = 0;
 
         if (message.Prompts.Any())
@@ -159,6 +166,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
                 {
                     _text.text += $"\n  {prompt.Text}";
                 }
+
                 promptIndex++;
             }
         }
@@ -166,7 +174,6 @@ public class MessageBoxController : MonoBehaviour, IObserver
 
     private void ShowCharactersUpTo(int characterIndex)
     {
-        
         _text.ForceMeshUpdate();
 
         for (int i = 0; i <= characterIndex; i++)
@@ -174,15 +181,15 @@ public class MessageBoxController : MonoBehaviour, IObserver
             var info = _text.textInfo.characterInfo[i];
             int meshIndex = info.materialReferenceIndex;
             int vertexIndex = info.vertexIndex;
-            
+
             Color32[] vertexColors = _text.textInfo.meshInfo[meshIndex].colors32;
             vertexColors[vertexIndex + 0].a = (byte)255;
             vertexColors[vertexIndex + 1].a = (byte)255;
             vertexColors[vertexIndex + 2].a = (byte)255;
             vertexColors[vertexIndex + 3].a = (byte)255;
         }
-        
-        _text.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32); 
+
+        _text.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
     }
 
     private void Hide()
