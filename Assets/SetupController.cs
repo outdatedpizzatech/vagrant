@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class SetupController : MonoBehaviour, IObserver
 {
+    public bool DebugMode;
+    
     private void Awake()
     {
         var warpingAndWiping = new Subject("warping and wiping");
@@ -29,8 +31,11 @@ public class SetupController : MonoBehaviour, IObserver
         /*
          * DEBUG
          */
-        
-        flowSubject.AddObserver(this);
+
+        if (DebugMode)
+        {
+            flowSubject.AddObserver(this);
+        }
     }
 
     public void OnNotify(SubjectMessage message)
