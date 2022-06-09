@@ -88,6 +88,7 @@ public class InteractionController : MonoBehaviour, IObserver
                         var receivedFromDirection = (Enums.Direction)(((int)playerActionEvent.Direction + 2) % 4);
                         _flowSubject.Notify(
                             new InteractionResponseEvent(_interactable.ReceiveInteraction(receivedFromDirection)));
+                        _flowSubject.Notify(SubjectMessage.StartDialogue);
                     }
                 }
 

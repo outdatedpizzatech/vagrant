@@ -29,15 +29,16 @@ public class PersonMovement : MonoBehaviour, IObserver
                 canMakeAnotherMove = true;
                 _animator.speed = _tempAnimationSpeed;
                 break;
+            case SubjectMessage.StartDialogue:
+                canMakeAnotherMove = false;
+                _tempAnimationSpeed = _animator.speed;
+                _animator.speed = 0;
+                break;
         }
     }
     
     public void OnNotify<T>(T parameters)
     {
-        if (parameters is not InteractionResponseEvent) return;
-        canMakeAnotherMove = false;
-        _tempAnimationSpeed = _animator.speed;
-        _animator.speed = 0;
     }
 
     public void SetPosition(int x, int y)

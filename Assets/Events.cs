@@ -8,6 +8,7 @@ public enum SubjectMessage
     ScreenFinishedWipeIn,
     AdvanceDialogue,
     EndDialogue,
+    StartDialogue,
 }
 
 public class PromptResponseEvent
