@@ -15,6 +15,7 @@ public class InteractionController : MonoBehaviour, IObserver
     private PositionGrid _positionGrid;
     private InputAction _inputAction;
     private float _timeSinceLastDirectionalInput;
+    private IInteractable _interactable;
 
     private void Update()
     {
@@ -48,6 +49,7 @@ public class InteractionController : MonoBehaviour, IObserver
         switch (subjectMessage)
         {
             case SubjectMessage.EndDialogue:
+                _interactable = null;
                 _state = State.Free;
                 break;
         }
@@ -79,13 +81,13 @@ public class InteractionController : MonoBehaviour, IObserver
 
                 if (_positionGrid.Has(position[0], position[1]))
                 {
-                    var interactable = _positionGrid.Get(position[0], position[1]).GetComponent<IInteractable>();
+                    _interactable = _positionGrid.Get(position[0], position[1]).GetComponent<IInteractable>();
 
-                    if (interactable != null)
+                    if (_interactable != null)
                     {
                         var receivedFromDirection = (Enums.Direction)(((int)playerActionEvent.Direction + 2) % 4);
                         _flowSubject.Notify(
-                            new InteractionResponseEvent(interactable.ReceiveInteraction(receivedFromDirection)));
+                            new InteractionResponseEvent(_interactable.ReceiveInteraction(receivedFromDirection)));
                     }
                 }
 
@@ -102,6 +104,10 @@ public class InteractionController : MonoBehaviour, IObserver
             }
             case InteractionResponseEvent:
                 _state = State.InDialogue;
+                break;
+            case PromptResponseEvent promptResponseEvent:
+                _flowSubject.Notify(
+                    new InteractionResponseEvent(_interactable.ReceiveInteraction(promptResponseEvent.PromptResponse)));
                 break;
         }
     }

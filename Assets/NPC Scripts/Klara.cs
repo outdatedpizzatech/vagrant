@@ -11,7 +11,7 @@ namespace NPC_Scripts
         {
             var animator = GetComponent<Animator>();
             animator.SetInteger(FacingDirection, (int)direction);
-        
+
             var response1 = new MessageEnvelope
             {
                 Message = "Be sure to visit the treasure vault on your way out."
@@ -21,6 +21,11 @@ namespace NPC_Scripts
             {
                 response1
             };
+        }
+
+        public List<MessageEnvelope> ReceiveInteraction(object promptId)
+        {
+            return new List<MessageEnvelope>();
         }
     }
 }

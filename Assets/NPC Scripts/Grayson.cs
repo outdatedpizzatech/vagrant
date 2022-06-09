@@ -10,9 +10,11 @@ namespace NPC_Scripts
         private enum PromptKeys
         {
             SeeCollection,
-            DontSeeCollection
+            DontSeeCollection,
+            TryingToGetOnGoodSide,
+            NotTryingToGetOnGoodSide,
         }
-    
+
         public List<MessageEnvelope> ReceiveInteraction(Enums.Direction direction)
         {
             var animator = GetComponent<Animator>();
@@ -29,11 +31,66 @@ namespace NPC_Scripts
             };
             response2.Prompts.Add(new Prompt(PromptKeys.SeeCollection, "Yes"));
             response2.Prompts.Add(new Prompt(PromptKeys.DontSeeCollection, "No"));
-        
+
             return new List<MessageEnvelope>
             {
                 response1, response2
             };
+        }
+
+        public List<MessageEnvelope> ReceiveInteraction(object promptId)
+        {
+            switch (promptId)
+            {
+                case PromptKeys.SeeCollection:
+                {
+                    var response = new MessageEnvelope
+                    {
+                        Message = "Trying to get on my good side, eh?"
+                    };
+                    response.Prompts.Add(new Prompt(PromptKeys.TryingToGetOnGoodSide, "You got me"));
+                    response.Prompts.Add(new Prompt(PromptKeys.NotTryingToGetOnGoodSide, "Of course not!"));
+                    return new List<MessageEnvelope>
+                    {
+                        response
+                    };
+                }
+                case PromptKeys.DontSeeCollection:
+                {
+                    var response = new MessageEnvelope
+                    {
+                        Message = "Oh, well... next time, perhaps."
+                    };
+                    return new List<MessageEnvelope>
+                    {
+                        response
+                    };
+                }
+                case PromptKeys.TryingToGetOnGoodSide:
+                {
+                    var response = new MessageEnvelope
+                    {
+                        Message = "Hah! I may be old, but I'm still sharp!"
+                    };
+                    return new List<MessageEnvelope>
+                    {
+                        response
+                    };
+                }
+                case PromptKeys.NotTryingToGetOnGoodSide:
+                {
+                    var response = new MessageEnvelope
+                    {
+                        Message = "Now, now... you're starting to embarrass yourself."
+                    };
+                    return new List<MessageEnvelope>
+                    {
+                        response
+                    };
+                }
+            }
+
+            return new List<MessageEnvelope>();
         }
     }
 }

@@ -20,7 +20,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
     {
         _flowSubject = flowSubject;
         _promptController = GetComponent<PromptController>();
-        
+
         _flowSubject.AddObserver(this);
         _promptController.Setup(flowSubject, this);
     }
@@ -35,6 +35,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
     {
         return (_messages[_messageIndex]);
     }
+
     public bool HasMessages()
     {
         return _messages != null;
@@ -111,7 +112,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
     private void Show(MessageEnvelope message)
     {
         transform.localScale = Vector3.one;
-        _promptController.Reset();
+        _promptController.ResetPrompts(message.Prompts);
 
         RenderMessage(message);
 
@@ -125,7 +126,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
 
         if (message.Prompts.Any())
         {
-            _text.text += _promptController.PromptContent(message.Prompts);
+            _text.text += _promptController.PromptContent();
         }
     }
 
@@ -158,8 +159,17 @@ public class MessageBoxController : MonoBehaviour, IObserver
     {
         if (_messageIndex >= _messages.Count - 1)
         {
-            _flowSubject.Notify(SubjectMessage.EndDialogue);
-            Hide();
+            if (CurrentMessage().Prompts.Any())
+            {
+                var selectedPrompt = _promptController.SelectedPrompt();
+                _flowSubject.Notify(
+                    new PromptResponseEvent(selectedPrompt.ID));
+            }
+            else
+            {
+                _flowSubject.Notify(SubjectMessage.EndDialogue);
+                Hide();
+            }
         }
         else
         {

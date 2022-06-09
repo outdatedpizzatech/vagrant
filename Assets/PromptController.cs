@@ -6,6 +6,7 @@ public class PromptController : MonoBehaviour, IObserver
 {
     private Subject _flowSubject;
     private int _selectedPromptIndex;
+    private List<Prompt> _prompts;
     private float _timeSinceLastPromptChange;
     private MessageBoxController _messageBoxController;
 
@@ -15,8 +16,9 @@ public class PromptController : MonoBehaviour, IObserver
         _messageBoxController = messageBoxController;
     }
 
-    public void Reset()
+    public void ResetPrompts(List<Prompt> prompts)
     {
+        _prompts = prompts;
         _selectedPromptIndex = 0;
     }
 
@@ -39,12 +41,12 @@ public class PromptController : MonoBehaviour, IObserver
         }
     }
 
-    public string PromptContent(List<Prompt> prompts)
+    public string PromptContent()
     {
         var promptIndex = 0;
         var text = "\n";
         
-        foreach (var prompt in prompts)
+        foreach (var prompt in _prompts)
         {
             if (promptIndex == _selectedPromptIndex)
             {
@@ -59,6 +61,11 @@ public class PromptController : MonoBehaviour, IObserver
         }
 
         return text;
+    }
+
+    public Prompt SelectedPrompt()
+    {
+        return _prompts[_selectedPromptIndex];
     }
 
     private void UpdatePromptSelection(MenuNavigation menuNavigation)

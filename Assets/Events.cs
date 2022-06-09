@@ -10,6 +10,16 @@ public enum SubjectMessage
     EndDialogue,
 }
 
+public class PromptResponseEvent
+{
+    public PromptResponseEvent(object promptResponse)
+    {
+        PromptResponse = promptResponse;
+    }
+
+    public object PromptResponse { get; }
+}
+
 public class InteractionResponseEvent
 {
     public InteractionResponseEvent(List<MessageEnvelope> responses)
