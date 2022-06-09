@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-public interface IInteractible
+public interface IInteractable
 {
     public abstract List<MessageEnvelope> ReceiveInteraction(Enums.Direction direction);
 }

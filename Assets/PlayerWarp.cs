@@ -1,12 +1,13 @@
 using System.Collections;
-using JetBrains.Annotations;
 using UnityEngine;
 
 public class PlayerWarp : MonoBehaviour, IObserver
 {
-    [CanBeNull] private Subject _subject;
+    private Subject _subject;
     private PersonMovement _personMovement;
     private Animator _animator;
+    private static readonly int FacingDirection = Animator.StringToHash("facingDirection");
+    private static readonly int IsMoving = Animator.StringToHash("isMoving");
 
     private void Awake()
     {
@@ -45,24 +46,22 @@ public class PlayerWarp : MonoBehaviour, IObserver
         switch (message)
         {
             case SubjectMessage.PlayerRequestingWarp:
-                _personMovement.CanMakeAnotherMove = false;
+                _personMovement.canMakeAnotherMove = false;
                 break;
             case SubjectMessage.ScreenFinishedWipeOut:
                 _personMovement.MoveTransformToPosition();
-                _animator.SetInteger("facingDirection", (int)_personMovement.FacingDirection);
-                _animator.SetBool("isMoving", false);
+                _animator.SetInteger(FacingDirection, (int)_personMovement.facingDirection);
+                _animator.SetBool(IsMoving, false);
                 break;
             case SubjectMessage.ScreenFinishedWipeIn:
-                _personMovement.CanMakeAnotherMove = true;
+                _personMovement.canMakeAnotherMove = true;
                 break;
         }
     }
     public void OnNotify<T>(T parameters)
     {
-        if (parameters is PlayerBeganWarpingEvent playerBeganWarpingEvent)
-        {
-            _personMovement.FacingDirection = playerBeganWarpingEvent.FacingDirection;
-            _personMovement.SetPosition(playerBeganWarpingEvent.X, playerBeganWarpingEvent.Y);
-        }
+        if (parameters is not PlayerBeganWarpingEvent playerBeganWarpingEvent) return;
+        _personMovement.facingDirection = playerBeganWarpingEvent.FacingDirection;
+        _personMovement.SetPosition(playerBeganWarpingEvent.X, playerBeganWarpingEvent.Y);
     }
 }

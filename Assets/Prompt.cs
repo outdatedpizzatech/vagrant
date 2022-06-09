@@ -1,11 +1,11 @@
 public class Prompt
 {
     public string Text;
-    public object ID;
+    private object _id;
 
     public Prompt(object id, string text)
     {
-        ID = id;
+        _id = id;
         Text = text;
     }
 }

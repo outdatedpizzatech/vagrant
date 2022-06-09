@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 
 public class InteractionController : MonoBehaviour, IObserver
@@ -17,21 +14,21 @@ public class InteractionController : MonoBehaviour, IObserver
     private State _state = State.Free;
     private PositionGrid _positionGrid;
     private InputAction _inputAction;
-    private float timeSinceLastDirectionalInput;
-    private float timeBetweenDirectionalInputs = 0.05f;
+    private float _timeSinceLastDirectionalInput;
 
     private void Update()
     {
-        if (timeSinceLastDirectionalInput > timeBetweenDirectionalInputs)
+        _timeSinceLastDirectionalInput += Time.deltaTime;
+        
+        void NotifyDialogueInputs()
         {
-            timeSinceLastDirectionalInput = 0;
             if (_state == State.InDialogue && _inputAction.InputDirections.Any())
             {
                 _flowSubject.Notify(new MenuNavigation(_inputAction.InputDirections.Last()));
             }
         }
-
-        timeSinceLastDirectionalInput += Time.deltaTime;
+        
+        Utilities.Debounce(ref _timeSinceLastDirectionalInput, 0.05f, NotifyDialogueInputs);
     }
 
     public void Setup(Subject interactionSubject, PositionGrid positionGrid, Subject flowSubject,
@@ -58,11 +55,11 @@ public class InteractionController : MonoBehaviour, IObserver
 
     public void OnNotify<T>(T parameters)
     {
-        if (parameters is PlayerActionEvent playerActionEvent)
+        switch (parameters)
         {
-            if (_state == State.Free)
+            case PlayerActionEvent playerActionEvent when _state == State.Free:
             {
-                int[] position = new int[] { playerActionEvent.X, playerActionEvent.Y };
+                var position = new[] { playerActionEvent.X, playerActionEvent.Y };
 
                 switch (playerActionEvent.Direction)
                 {
@@ -82,25 +79,30 @@ public class InteractionController : MonoBehaviour, IObserver
 
                 if (_positionGrid.Has(position[0], position[1]))
                 {
-                    var interactible = _positionGrid.Get(position[0], position[1]).GetComponent<IInteractible>();
+                    var interactable = _positionGrid.Get(position[0], position[1]).GetComponent<IInteractable>();
 
-                    if (interactible != null)
+                    if (interactable != null)
                     {
                         var receivedFromDirection = (Enums.Direction)(((int)playerActionEvent.Direction + 2) % 4);
                         _flowSubject.Notify(
-                            new InteractionResponseEvent(interactible.ReceiveInteraction(receivedFromDirection)));
+                            new InteractionResponseEvent(interactable.ReceiveInteraction(receivedFromDirection)));
                     }
                 }
-            }
-            else if (_state == State.InDialogue)
-            {
-                _flowSubject.Notify(SubjectMessage.AdvanceDialogue);
-            }
-        }
 
-        if (parameters is InteractionResponseEvent)
-        {
-            _state = State.InDialogue;
+                break;
+            }
+            case PlayerActionEvent:
+            {
+                if (_state == State.InDialogue)
+                {
+                    _flowSubject.Notify(SubjectMessage.AdvanceDialogue);
+                }
+
+                break;
+            }
+            case InteractionResponseEvent:
+                _state = State.InDialogue;
+                break;
         }
     }
 }

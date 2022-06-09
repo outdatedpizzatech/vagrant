@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
-using JetBrains.Annotations;
 using UnityEngine;
 
 public class WiperController : MonoBehaviour, IObserver
 {
     private Animation _animation;
-    [CanBeNull] private Subject _subject;
+    private Subject _subject;
     
     public void Setup(Subject subject)
     {

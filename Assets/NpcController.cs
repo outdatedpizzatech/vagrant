@@ -1,27 +1,24 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class NpcController : MonoBehaviour
 {
-    private InputAction _inputAction = new InputAction();
-    private float timeTilNextMove;
+    private readonly InputAction _inputAction = new();
+    private float _timeTilNextMove;
 
     public void Setup(Subject occupiedSpaces, PositionGrid positionGrid, Subject flowSubject)
     {
         var npcMovement = GetComponent<PersonMovement>();
         npcMovement.Setup(_inputAction, occupiedSpaces, positionGrid, flowSubject);
     }
-    
-    void Update()
+
+    private void Update()
     {
-        timeTilNextMove -= Time.deltaTime;
+        _timeTilNextMove -= Time.deltaTime;
 
-        if (timeTilNextMove < 0)
-        {
-            timeTilNextMove = Random.Range(0f, 5f);
+        if (!(_timeTilNextMove < 0)) return;
+        _timeTilNextMove = Random.Range(0f, 5f);
 
-            _inputAction.ClearDirections();
-            _inputAction.AddDirection((Enums.Direction)Random.Range(0, 3));
-        }
+        _inputAction.ClearDirections();
+        _inputAction.AddDirection((Enums.Direction)Random.Range(0, 3));
     }
 }

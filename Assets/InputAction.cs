@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 public class InputAction
 {
-    public readonly List<Enums.Direction> InputDirections = new List<Enums.Direction>();
+    public readonly List<Enums.Direction> InputDirections = new();
     public bool Acting = false;
     
     public void AddDirection(Enums.Direction direction)

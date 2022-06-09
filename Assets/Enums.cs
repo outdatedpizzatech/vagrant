@@ -1,4 +1,4 @@
-public class Enums
+public static class Enums
 {
     public enum Direction
     {

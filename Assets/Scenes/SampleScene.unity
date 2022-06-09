@@ -5717,9 +5717,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speedMultiplier: 4.5
-  CanMakeAnotherMove: 1
-  Position: 0000000000000000
-  FacingDirection: 1
+  canMakeAnotherMove: 1
+  position: 0000000000000000
+  facingDirection: 2
 --- !u!114 &561308867
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27956,9 +27956,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speedMultiplier: 1
-  CanMakeAnotherMove: 1
-  Position: 0000000000000000
-  FacingDirection: 1
+  canMakeAnotherMove: 1
+  position: 0000000000000000
+  facingDirection: 2
 --- !u!114 &661720492
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28252,6 +28252,7 @@ GameObject:
   - component: {fileID: 998122491}
   - component: {fileID: 998122490}
   - component: {fileID: 998122489}
+  - component: {fileID: 998122492}
   m_Layer: 5
   m_Name: MessageBox
   m_TagString: Untagged
@@ -28293,6 +28294,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerMovement: {fileID: 561308866}
+  positionOffset: 4
 --- !u!114 &998122490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28331,6 +28333,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 998122487}
   m_CullTransparentMesh: 1
+--- !u!114 &998122492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 998122487}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81815a78ac59f4694ab9c1519a230b6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1182582584
 GameObject:
   m_ObjectHideFlags: 0
@@ -28380,9 +28394,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speedMultiplier: 1
-  CanMakeAnotherMove: 1
-  Position: 0000000000000000
-  FacingDirection: 1
+  canMakeAnotherMove: 1
+  position: 0000000000000000
+  facingDirection: 2
 --- !u!95 &1182582588
 Animator:
   serializedVersion: 4

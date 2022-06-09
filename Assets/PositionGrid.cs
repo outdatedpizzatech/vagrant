@@ -3,25 +3,30 @@ using UnityEngine;
 
 public class PositionGrid
 {
-    private Dictionary<string, GameObject> _grid = new Dictionary<string, GameObject>();
+    private readonly Dictionary<string, GameObject> _grid = new();
 
     public void Add(int x, int y, GameObject value)
     {
-        _grid.Add($"{x},{y}", value);
+        _grid.Add(Keyed(x, y), value);
     }
     
     public void Remove(int x, int y)
     {
-        _grid.Remove($"{x},{y}");
+        _grid.Remove(Keyed(x, y));
     }
     
     public bool Has(int x, int y)
     {
-        return _grid.ContainsKey($"{x},{y}");
+        return _grid.ContainsKey(Keyed(x, y));
     }
 
     public GameObject Get(int x, int y)
     {
-        return _grid[$"{x},{y}"];
+        return _grid[Keyed(x, y)];
+    }
+
+    private static string Keyed(int x, int y)
+    {
+        return $"{x},{y}";
     }
 }

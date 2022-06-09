@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InputController : MonoBehaviour
 {
-    public InputAction InputAction = new InputAction();
+    public readonly InputAction InputAction = new();
 
     private void Update()
     {

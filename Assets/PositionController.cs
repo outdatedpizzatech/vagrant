@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PositionController : MonoBehaviour, IObserver
 {
-    public PositionGrid PositionGrid = new PositionGrid();
+    public readonly PositionGrid PositionGrid = new();
 
     public void OnNotify(SubjectMessage subjectMessage)
     {
@@ -15,14 +15,14 @@ public class PositionController : MonoBehaviour, IObserver
 
     public void OnNotify<T>(T parameters)
     {
-        if (parameters is EnteredPositionEvent enteredPositionEvent)
+        switch (parameters)
         {
-            PositionGrid.Add(enteredPositionEvent.X,enteredPositionEvent.Y, enteredPositionEvent.GameObject);
-        }
-        
-        if (parameters is LeftPositionEvent leftPositionEvent)
-        {
-            PositionGrid.Remove(leftPositionEvent.X,leftPositionEvent.Y);
+            case EnteredPositionEvent enteredPositionEvent:
+                PositionGrid.Add(enteredPositionEvent.X,enteredPositionEvent.Y, enteredPositionEvent.GameObject);
+                break;
+            case LeftPositionEvent leftPositionEvent:
+                PositionGrid.Remove(leftPositionEvent.X,leftPositionEvent.Y);
+                break;
         }
     }
     

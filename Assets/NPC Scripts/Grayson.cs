@@ -1,30 +1,39 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Grayson : MonoBehaviour, IInteractible
+namespace NPC_Scripts
 {
-    enum PromptKeys
+    public class Grayson : MonoBehaviour, IInteractable
     {
-        SeeCollection,
-        DontSeeCollection
-    }
-    
-    public List<MessageEnvelope> ReceiveInteraction(Enums.Direction direction)
-    {
-        var animator = GetComponent<Animator>();
-        animator.SetInteger("facingDirection", (int)direction);
+        private static readonly int FacingDirection = Animator.StringToHash("facingDirection");
 
-        var response1 = new MessageEnvelope();
-        response1.Message = "I'm Grayson. As you can see, I'm pretty much just an old man.";
-        
-        var response2 = new MessageEnvelope();
-        response2.Message = "Would you like to see my collection of antique cards?";
-        response2.Prompts.Add(new Prompt(PromptKeys.SeeCollection, "Yes"));
-        response2.Prompts.Add(new Prompt(PromptKeys.DontSeeCollection, "No"));
-        
-        return (new List<MessageEnvelope>
+        private enum PromptKeys
         {
-            response1, response2
-        });
+            SeeCollection,
+            DontSeeCollection
+        }
+    
+        public List<MessageEnvelope> ReceiveInteraction(Enums.Direction direction)
+        {
+            var animator = GetComponent<Animator>();
+            animator.SetInteger(FacingDirection, (int)direction);
+
+            var response1 = new MessageEnvelope
+            {
+                Message = "I'm Grayson. As you can see, I'm pretty much just an old man."
+            };
+
+            var response2 = new MessageEnvelope
+            {
+                Message = "Would you like to see my collection of antique cards?"
+            };
+            response2.Prompts.Add(new Prompt(PromptKeys.SeeCollection, "Yes"));
+            response2.Prompts.Add(new Prompt(PromptKeys.DontSeeCollection, "No"));
+        
+            return new List<MessageEnvelope>
+            {
+                response1, response2
+            };
+        }
     }
 }

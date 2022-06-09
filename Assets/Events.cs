@@ -74,14 +74,12 @@ public class PlayerActionEvent
 
 public class LeftPositionEvent
 {
-    public LeftPositionEvent(GameObject gameObject, int x, int y)
+    public LeftPositionEvent(int x, int y)
     {
-        GameObject = gameObject;
         X = x;
         Y = y;
     }
 
-    public GameObject GameObject { get; }
     public int X { get; }
     public int Y { get; }
 }

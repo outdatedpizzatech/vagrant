@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections;
-using JetBrains.Annotations;
 
 public class Doorway : MonoBehaviour
 {
@@ -11,8 +10,8 @@ public class Doorway : MonoBehaviour
     private SpriteRenderer _spriteRenderer;
     
     // Gizmo only
-    private Color? _gizmoColor = null;
-    [CanBeNull] private Collider2D _gizmoCollider = null;
+    private Color? _gizmoColor;
+    private Collider2D _gizmoCollider;
 
     private void Awake()
     {
@@ -46,48 +45,45 @@ public class Doorway : MonoBehaviour
     private Vector2 ExitPosition()
     {
         Vector2 exitPosition = exit.transform.position;
-        if (exit.exitDirection == Enums.Direction.Down)
+        switch (exit.exitDirection)
         {
-            exitPosition.y -= 1;
-        }
-        if (exit.exitDirection == Enums.Direction.Up)
-        {
-            exitPosition.y += 1;
-        }
-        if (exit.exitDirection == Enums.Direction.Left)
-        {
-            exitPosition.x -= 1;
-        }
-        if (exit.exitDirection == Enums.Direction.Right)
-        {
-            exitPosition.x += 1;
+            case Enums.Direction.Down:
+                exitPosition.y -= 1;
+                break;
+            case Enums.Direction.Up:
+                exitPosition.y += 1;
+                break;
+            case Enums.Direction.Left:
+                exitPosition.x -= 1;
+                break;
+            case Enums.Direction.Right:
+                exitPosition.x += 1;
+                break;
         }
 
         return exitPosition;
     }
 
-    void OnDrawGizmos()
+    private void OnDrawGizmos()
     {
-        if (exit != null)
+        if (exit == null) return;
+        if (_gizmoCollider == null)
         {
-            if (_gizmoCollider == null)
-            {
-              _gizmoCollider = GetComponent<Collider2D>();   
-            }
-            
-            if (_gizmoColor == null)
-            {
-                var h = Random.Range(0, 1f);
-                
-                _gizmoColor = Color.HSVToRGB(h, 1, 1);
-            }
-
-            var exitPosition = ExitPosition() + new Vector2(0.5f, 0.5f);
-
-            Gizmos.color = (Color)_gizmoColor;
-            
-            Gizmos.DrawLine(_gizmoCollider.bounds.center, exitPosition);
-            Gizmos.DrawCube(exitPosition, new Vector3(0.5f, 0.5f, 0.5f));
+            _gizmoCollider = GetComponent<Collider2D>();   
         }
+            
+        if (_gizmoColor == null)
+        {
+            var h = Random.Range(0, 1f);
+                
+            _gizmoColor = Color.HSVToRGB(h, 1, 1);
+        }
+
+        var exitPosition = ExitPosition() + new Vector2(0.5f, 0.5f);
+
+        if (_gizmoColor != null) Gizmos.color = (Color)_gizmoColor;
+
+        if (_gizmoCollider != null) Gizmos.DrawLine(_gizmoCollider.bounds.center, exitPosition);
+        Gizmos.DrawCube(exitPosition, new Vector3(0.5f, 0.5f, 0.5f));
     }
 }

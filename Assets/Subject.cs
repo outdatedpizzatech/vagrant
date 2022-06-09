@@ -1,13 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-
 
 public class Subject
 {
     
-    //A list with observers that are waiting for something to happen
-    List<IObserver> observers = new List<IObserver>();
+    readonly List<IObserver> _observers = new();
     public string Topic { get; }
     
     public Subject(string topic)
@@ -15,36 +11,24 @@ public class Subject
         Topic = topic;
     }
 
-    //Send notifications if something has happened
     public void Notify(SubjectMessage message)
     {
-        for (int i = 0; i < observers.Count; i++)
+        foreach (var t in _observers)
         {
-            //Notify all observers even though some may not be interested in what has happened
-            //Each observer should check if it is interested in this event
-            observers[i].OnNotify(message);
+            t.OnNotify(message);
         }
     }
 
-    //Send notifications if something has happened
     public void Notify<T>(T parameters)
     {
-        for (int i = 0; i < observers.Count; i++)
+        foreach (var t in _observers)
         {
-            //Notify all observers even though some may not be interested in what has happened
-            //Each observer should check if it is interested in this event
-            observers[i].OnNotify(parameters);
+            t.OnNotify(parameters);
         }
     }
 
-    //Add observer to the list
     public void AddObserver(IObserver observer)
     {
-        observers.Add(observer);
-    }
-
-    //Remove observer from the list
-    public void RemoveObserver(IObserver observer)
-    {
+        _observers.Add(observer);
     }
 }

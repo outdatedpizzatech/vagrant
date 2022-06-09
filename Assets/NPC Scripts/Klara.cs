@@ -1,20 +1,26 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Klara : MonoBehaviour, IInteractible
+namespace NPC_Scripts
 {
-    public List<MessageEnvelope> ReceiveInteraction(Enums.Direction direction)
+    public class Klara : MonoBehaviour, IInteractable
     {
-        var animator = GetComponent<Animator>();
-        animator.SetInteger("facingDirection", (int)direction);
-        
-        var response1 = new MessageEnvelope();
-        response1.Message = "Be sure to visit the treasure vault on your way out.";
-        
-        return (new List<MessageEnvelope>
+        private static readonly int FacingDirection = Animator.StringToHash("facingDirection");
+
+        public List<MessageEnvelope> ReceiveInteraction(Enums.Direction direction)
         {
-            response1
-        });
+            var animator = GetComponent<Animator>();
+            animator.SetInteger(FacingDirection, (int)direction);
+        
+            var response1 = new MessageEnvelope
+            {
+                Message = "Be sure to visit the treasure vault on your way out."
+            };
+
+            return new List<MessageEnvelope>
+            {
+                response1
+            };
+        }
     }
 }
