@@ -186,6 +186,12 @@ public class MessageBoxController : MonoBehaviour, IObserver
             
         if (CurrentMessage().Item != null)
         {
+            /*
+             * TODO: this feels like the wrong place for broadcasting that the player received an item,
+             * though it is not yet clear what should do this. Would be good to revisit this once player can
+             * receive items from other sources, such as shops.
+             */
+           
             _flowSubject.Notify(new ReceiveItemEvent(CurrentMessage().Item));
         }
     }

@@ -49,7 +49,6 @@ public class TreasureController : MonoBehaviour, IInteractable
 
     public List<MessageEnvelope> ReceiveInteraction(object promptId)
     {
-        print("chest received interaction");
         return new List<MessageEnvelope>();
     }
 
