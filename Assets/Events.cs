@@ -11,6 +11,16 @@ public enum SubjectMessage
     StartDialogue,
 }
 
+public class ReceiveItemEvent
+{
+    public ReceiveItemEvent(string item)
+    {
+        Item = item;
+    }
+
+    public object Item { get; }
+}
+
 public class PromptResponseEvent
 {
     public PromptResponseEvent(object promptResponse)

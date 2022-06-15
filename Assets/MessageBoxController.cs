@@ -123,6 +123,11 @@ public class MessageBoxController : MonoBehaviour, IObserver
     private void RenderMessage(MessageEnvelope message)
     {
         _text.text = message.Message;
+        
+        if (message.Item != null)
+        {
+            _text.text += $"Received {message.Item}";
+        }
 
         if (message.Prompts.Any())
         {
@@ -159,7 +164,9 @@ public class MessageBoxController : MonoBehaviour, IObserver
     {
         if (_messageIndex >= _messages.Count - 1)
         {
-            if (CurrentMessage().Prompts.Any())
+            var currentMessage = CurrentMessage();
+            
+            if (currentMessage.Prompts.Any())
             {
                 var selectedPrompt = _promptController.SelectedPrompt();
                 _flowSubject.Notify(
@@ -175,6 +182,11 @@ public class MessageBoxController : MonoBehaviour, IObserver
         {
             _messageIndex++;
             Show(CurrentMessage());
+        }
+            
+        if (CurrentMessage().Item != null)
+        {
+            _flowSubject.Notify(new ReceiveItemEvent(CurrentMessage().Item));
         }
     }
 }

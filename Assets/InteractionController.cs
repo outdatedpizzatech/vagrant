@@ -20,7 +20,7 @@ public class InteractionController : MonoBehaviour, IObserver
     private void Update()
     {
         _timeSinceLastDirectionalInput += Time.deltaTime;
-        
+
         void NotifyDialogueInputs()
         {
             if (_state == State.InDialogue && _inputAction.InputDirections.Any())
@@ -28,7 +28,7 @@ public class InteractionController : MonoBehaviour, IObserver
                 _flowSubject.Notify(new MenuNavigation(_inputAction.InputDirections.Last()));
             }
         }
-        
+
         Utilities.Debounce(ref _timeSinceLastDirectionalInput, 0.05f, NotifyDialogueInputs);
     }
 
@@ -86,9 +86,12 @@ public class InteractionController : MonoBehaviour, IObserver
                     if (_interactable != null)
                     {
                         var receivedFromDirection = (Enums.Direction)(((int)playerActionEvent.Direction + 2) % 4);
-                        _flowSubject.Notify(
-                            new InteractionResponseEvent(_interactable.ReceiveInteraction(receivedFromDirection)));
-                        _flowSubject.Notify(SubjectMessage.StartDialogue);
+                        var interactionResponse = _interactable.ReceiveInteraction(receivedFromDirection);
+                        if (interactionResponse != null)
+                        {
+                            _flowSubject.Notify(new InteractionResponseEvent(interactionResponse));
+                            _flowSubject.Notify(SubjectMessage.StartDialogue);
+                        }
                     }
                 }
 
