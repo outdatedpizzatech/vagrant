@@ -34,6 +34,15 @@ public class PersonMovement : MonoBehaviour, IObserver
                 _tempAnimationSpeed = _animator.speed;
                 _animator.speed = 0;
                 break;
+            case SubjectMessage.OpenMenuEvent:
+                canMakeAnotherMove = false;
+                _tempAnimationSpeed = _animator.speed;
+                _animator.speed = 0;
+                break;
+            case SubjectMessage.CloseMenuEvent:
+                canMakeAnotherMove = true;
+                _animator.speed = _tempAnimationSpeed;
+                break;
         }
     }
     

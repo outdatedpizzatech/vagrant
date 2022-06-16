@@ -21,8 +21,13 @@ public class PlayerAction : MonoBehaviour
     {
         if (_inputAction.Acting)
         {
-            _actionSubject.Notify(new PlayerActionEvent(_personMovement.position[0], _personMovement.position[1],
+            _actionSubject.Notify(new PlayerRequestsPrimaryActionEvent(_personMovement.position[0], _personMovement.position[1],
                 _personMovement.facingDirection));
+        }
+        
+        if (_inputAction.SecondaryActing)
+        {
+            _actionSubject.Notify(SubjectMessage.PlayerRequestsSecondaryActionEvent);
         }
     }
 }

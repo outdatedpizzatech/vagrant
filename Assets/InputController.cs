@@ -43,5 +43,6 @@ public class InputController : MonoBehaviour
         }
 
         InputAction.Acting = Input.GetKeyDown(KeyCode.Space);
+        InputAction.SecondaryActing = Input.GetKeyDown(KeyCode.M);
     }
 }

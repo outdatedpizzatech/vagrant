@@ -9,6 +9,9 @@ public enum SubjectMessage
     AdvanceDialogue,
     EndDialogue,
     StartDialogue,
+    PlayerRequestsSecondaryActionEvent,
+    OpenMenuEvent,
+    CloseMenuEvent,
 }
 
 public class ReceiveItemEvent
@@ -18,7 +21,7 @@ public class ReceiveItemEvent
         Item = item;
     }
 
-    public object Item { get; }
+    public string Item { get; }
 }
 
 public class PromptResponseEvent
@@ -79,9 +82,9 @@ public class EnteredPositionEvent
     public int Y { get; }
 }
 
-public class PlayerActionEvent
+public class PlayerRequestsPrimaryActionEvent
 {
-    public PlayerActionEvent(int x, int y, Enums.Direction direction)
+    public PlayerRequestsPrimaryActionEvent(int x, int y, Enums.Direction direction)
     {
         X = x;
         Y = y;

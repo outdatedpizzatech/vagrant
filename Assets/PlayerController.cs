@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IObserver
 {
-    private List<string> _items = new();
+    public List<string> _items = new();
     
     public void Setup(Subject warpAndWipeSubject, InputAction inputAction, Subject occupiedSpacesSubject,
         PositionGrid positionGrid, Subject interactionSubject, Subject flowSubject)
@@ -15,10 +15,32 @@ public class PlayerController : MonoBehaviour
         playerMovement.Setup(inputAction, occupiedSpacesSubject, positionGrid, flowSubject);
         playerWarp.Setup(warpAndWipeSubject);
         playerAction.Setup(inputAction, interactionSubject);
+        
+        flowSubject.AddObserver(this);
     }
 
     public void AddItem(string item)
     {
         _items.Add(item);
+    }
+
+    public List<string> Items()
+    {
+        return _items;
+    }
+    
+    public void OnNotify<T>(T parameters)
+    {
+        switch (parameters)
+        {
+            case ReceiveItemEvent receiveItemEvent:
+                AddItem(receiveItemEvent.Item);
+
+                break;
+        }
+    }
+
+    public void OnNotify(SubjectMessage message)
+    {
     }
 }

@@ -6,7 +6,8 @@ public class InteractionController : MonoBehaviour, IObserver
     private enum State
     {
         Free,
-        InDialogue
+        InDialogue,
+        InMenu
     }
 
     private Subject _interactionSubject;
@@ -15,11 +16,13 @@ public class InteractionController : MonoBehaviour, IObserver
     private PositionGrid _positionGrid;
     private InputAction _inputAction;
     private float _timeSinceLastDirectionalInput;
+    private float _timeSinceLastSecondaryAction;
     private IInteractable _interactable;
 
     private void Update()
     {
         _timeSinceLastDirectionalInput += Time.deltaTime;
+        _timeSinceLastSecondaryAction += Time.deltaTime;
 
         void NotifyDialogueInputs()
         {
@@ -52,6 +55,18 @@ public class InteractionController : MonoBehaviour, IObserver
                 _interactable = null;
                 _state = State.Free;
                 break;
+            case SubjectMessage.PlayerRequestsSecondaryActionEvent:
+                if (_state == State.Free)
+                {
+                    _flowSubject.Notify(SubjectMessage.OpenMenuEvent);
+                    _state = State.InMenu;
+                } else if (_state == State.InMenu)
+                {
+                    _state = State.Free;
+                    _flowSubject.Notify(SubjectMessage.CloseMenuEvent);
+                }
+
+                break;
         }
     }
 
@@ -59,7 +74,7 @@ public class InteractionController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case PlayerActionEvent playerActionEvent when _state == State.Free:
+            case PlayerRequestsPrimaryActionEvent playerActionEvent when _state == State.Free:
             {
                 var position = new[] { playerActionEvent.X, playerActionEvent.Y };
 
@@ -97,7 +112,7 @@ public class InteractionController : MonoBehaviour, IObserver
 
                 break;
             }
-            case PlayerActionEvent:
+            case PlayerRequestsPrimaryActionEvent:
             {
                 if (_state == State.InDialogue)
                 {
