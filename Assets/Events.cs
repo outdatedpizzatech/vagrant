@@ -6,12 +6,13 @@ public enum SubjectMessage
     PlayerRequestingWarp,
     ScreenFinishedWipeOut,
     ScreenFinishedWipeIn,
-    AdvanceDialogue,
-    EndDialogue,
-    StartDialogue,
+    AdvanceEvent,
+    EndEventSequenceEvent,
+    StartEventSequenceEvent,
     PlayerRequestsSecondaryActionEvent,
     OpenMenuEvent,
     CloseMenuEvent,
+    ReachedEndOfMessageEvent,
 }
 
 public class ReceiveItemEvent
@@ -106,4 +107,14 @@ public class LeftPositionEvent
 
     public int X { get; }
     public int Y { get; }
+}
+
+public class StartEventStepEvent
+{
+    public StartEventStepEvent(int eventStepIndex)
+    {
+        EventStepIndex = eventStepIndex;
+    }
+
+    public int EventStepIndex { get; }
 }

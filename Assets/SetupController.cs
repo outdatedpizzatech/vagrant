@@ -20,6 +20,7 @@ public class SetupController : MonoBehaviour, IObserver
         var interactionController = GameObject.Find("Controllers/InteractionController").GetComponent<InteractionController>();
         var messageBoxController = GameObject.Find("WorldSpaceCanvas/MessageBox").GetComponent<MessageBoxController>();
         var inventoryBoxController = GameObject.Find("WorldSpaceCanvas/InventoryBox").GetComponent<InventoryBoxController>();
+        var flowController = GameObject.Find("Controllers/FlowController").GetComponent<FlowController>();
         var treasure = GameObject.Find("Objects/Treasure").GetComponent<TreasureController>();
         
         wiperController.Setup(warpingAndWiping);
@@ -29,6 +30,7 @@ public class SetupController : MonoBehaviour, IObserver
         positionController.Setup(occupiedSpacesSubject);
         interactionController.Setup(interactionSubject, positionController.PositionGrid, flowSubject, inputController.InputAction);
         messageBoxController.Setup(flowSubject);
+        flowController.Setup(flowSubject);
         inventoryBoxController.Setup(flowSubject);
         treasure.Setup(occupiedSpacesSubject);
         

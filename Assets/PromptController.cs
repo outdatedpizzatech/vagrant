@@ -35,7 +35,7 @@ public class PromptController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case MenuNavigation menuNavigation when _messageBoxController.HasMessages():
+            case MenuNavigation menuNavigation:
                 UpdatePromptSelection(menuNavigation);
                 break;
         }

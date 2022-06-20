@@ -6,7 +6,7 @@ public class InteractionController : MonoBehaviour, IObserver
     private enum State
     {
         Free,
-        InDialogue,
+        InEvent,
         InMenu
     }
 
@@ -26,7 +26,7 @@ public class InteractionController : MonoBehaviour, IObserver
 
         void NotifyDialogueInputs()
         {
-            if (_state == State.InDialogue && _inputAction.InputDirections.Any())
+            if (_state == State.InEvent && _inputAction.InputDirections.Any())
             {
                 _flowSubject.Notify(new MenuNavigation(_inputAction.InputDirections.Last()));
             }
@@ -51,7 +51,7 @@ public class InteractionController : MonoBehaviour, IObserver
     {
         switch (subjectMessage)
         {
-            case SubjectMessage.EndDialogue:
+            case SubjectMessage.EndEventSequenceEvent:
                 _interactable = null;
                 _state = State.Free;
                 break;
@@ -105,7 +105,7 @@ public class InteractionController : MonoBehaviour, IObserver
                         if (interactionResponse != null)
                         {
                             _flowSubject.Notify(new InteractionResponseEvent(interactionResponse));
-                            _flowSubject.Notify(SubjectMessage.StartDialogue);
+                            _flowSubject.Notify(SubjectMessage.StartEventSequenceEvent);
                         }
                     }
                 }
@@ -114,15 +114,15 @@ public class InteractionController : MonoBehaviour, IObserver
             }
             case PlayerRequestsPrimaryActionEvent:
             {
-                if (_state == State.InDialogue)
+                if (_state == State.InEvent)
                 {
-                    _flowSubject.Notify(SubjectMessage.AdvanceDialogue);
+                    _flowSubject.Notify(SubjectMessage.AdvanceEvent);
                 }
 
                 break;
             }
             case InteractionResponseEvent:
-                _state = State.InDialogue;
+                _state = State.InEvent;
                 break;
             case PromptResponseEvent promptResponseEvent:
                 _flowSubject.Notify(

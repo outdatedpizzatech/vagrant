@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -8,22 +6,53 @@ public class MessageBoxController : MonoBehaviour, IObserver
     public PersonMovement playerMovement;
     public float positionOffset = 4;
 
+    private InteractionEvent _interactionEvent;
     private Subject _flowSubject;
     private TMP_Text _text;
-    private InteractionEvent _interactionEvent;
     private float _timeSinceLastLetter;
     private int _shownCharacterIndex;
     private int _eventStepIndex;
+    private EventStep _eventStep;
     private PromptController _promptController;
+
+    private bool _atEndOfMessage;
+
+    public InteractionEvent InteractionEvent()
+    {
+        return _interactionEvent;
+    }
 
     public void Setup(Subject flowSubject)
     {
-        _flowSubject = flowSubject;
         _promptController = GetComponent<PromptController>();
+        _promptController.Setup(flowSubject, this);
+        _flowSubject = flowSubject;
 
         _flowSubject.AddObserver(this);
-        _promptController.Setup(flowSubject, this);
     }
+
+    public void OnNotify(SubjectMessage message)
+    {
+        if (message == SubjectMessage.EndEventSequenceEvent)
+        {
+            Hide();
+        }
+    }
+
+    public void OnNotify<T>(T parameters)
+    {
+        switch (parameters)
+        {
+            case InteractionResponseEvent interactionResponseEvent:
+                _interactionEvent = interactionResponseEvent.InteractionEvent;
+                break;
+            case StartEventStepEvent startEventStepEvent:
+                _eventStepIndex = startEventStepEvent.EventStepIndex;
+                Show();
+                break;
+        }
+    }
+
 
     public void Reload()
     {
@@ -31,38 +60,9 @@ public class MessageBoxController : MonoBehaviour, IObserver
         _text.alpha = 1;
     }
 
-    public EventStep CurrentMessage()
-    {
-        return (_interactionEvent.EventSteps[_eventStepIndex]);
-    }
-    
-    public InteractionEvent InteractionEvent()
-    {
-        return (_interactionEvent);
-    }
-
-    public bool HasMessages()
-    {
-        return _interactionEvent.EventSteps.Any();
-    }
-
     public bool AtEndOfCurrentMessage()
     {
         return (_shownCharacterIndex >= _text.textInfo.characterCount);
-    }
-
-    public void OnNotify(SubjectMessage message)
-    {
-        switch (message)
-        {
-            case SubjectMessage.AdvanceDialogue:
-                if (AtEndOfCurrentMessage())
-                {
-                    AdvanceMessage();
-                }
-
-                break;
-        }
     }
 
     private void LateUpdate()
@@ -76,11 +76,16 @@ public class MessageBoxController : MonoBehaviour, IObserver
     {
         _timeSinceLastLetter += Time.deltaTime;
 
+
         if (AtEndOfCurrentMessage())
         {
+            if (_atEndOfMessage) return;
+            _atEndOfMessage = true;
+            _flowSubject.Notify(SubjectMessage.ReachedEndOfMessageEvent);
+
             return;
         }
-
+        
         ShowCharactersUpTo(_shownCharacterIndex);
 
         Utilities.Debounce(ref _timeSinceLastLetter, 0.025f, () => { _shownCharacterIndex++; });
@@ -96,26 +101,9 @@ public class MessageBoxController : MonoBehaviour, IObserver
         Hide();
     }
 
-    public void OnNotify<T>(T parameters)
-    {
-        switch (parameters)
-        {
-            case InteractionResponseEvent interactionResponseEvent:
-                PlayMessages(interactionResponseEvent.InteractionEvent);
-                break;
-        }
-    }
-
-
-    private void PlayMessages(InteractionEvent interactionEvent)
-    {
-        _eventStepIndex = 0;
-        _interactionEvent = interactionEvent;
-        Show();
-    }
-
     private void Show()
     {
+        _atEndOfMessage = false;
         transform.localScale = Vector3.one;
         _promptController.ResetPrompts(_interactionEvent.Prompts);
 
@@ -127,16 +115,11 @@ public class MessageBoxController : MonoBehaviour, IObserver
 
     private void RenderMessage()
     {
-        var message = CurrentMessage();
-        
-        if (message.Type == EventStep.Types.ItemExchange)
-        {
-            _text.text = $"Received {message.Message}";
-        }
-        else
-        {
-            _text.text = message.Message;
-        }
+        var eventStep = _interactionEvent.EventSteps[_eventStepIndex];
+
+        _text.text = eventStep.Type == EventStep.Types.ItemExchange
+            ? $"Received {eventStep.Message}"
+            : eventStep.Message;
 
         if (_eventStepIndex == _interactionEvent.EventSteps.Count - 1)
         {
@@ -169,39 +152,8 @@ public class MessageBoxController : MonoBehaviour, IObserver
         transform.localScale = Vector3.zero;
     }
 
-    private void AdvanceMessage()
+    public Prompt SelectedPrompt()
     {
-        if (_eventStepIndex >= _interactionEvent.EventSteps.Count - 1)
-        {
-            // var currentMessage = CurrentMessage();
-            
-            if (CurrentMessage().Type == EventStep.Types.ItemExchange)
-            {
-                /*
-                 * TODO: this feels like the wrong place for broadcasting that the player received an item,
-                 * though it is not yet clear what should do this. Would be good to revisit this once player can
-                 * receive items from other sources, such as shops.
-                 */
-               
-                _flowSubject.Notify(new ReceiveItemEvent(CurrentMessage().Message));
-            }
-            
-            if (_interactionEvent.Prompts.Any())
-            {
-                var selectedPrompt = _promptController.SelectedPrompt();
-                _flowSubject.Notify(
-                    new PromptResponseEvent(selectedPrompt.ID));
-            }
-            else
-            {
-                _flowSubject.Notify(SubjectMessage.EndDialogue);
-                Hide();
-            }
-        }
-        else
-        {
-            _eventStepIndex++;
-            Show();
-        }
+        return _promptController.SelectedPrompt();
     }
 }
