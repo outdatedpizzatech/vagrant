@@ -2,6 +2,6 @@ using System.Collections.Generic;
 
 public interface IInteractable
 {
-    public abstract List<MessageEnvelope> ReceiveInteraction(Enums.Direction direction);
-    public abstract List<MessageEnvelope> ReceiveInteraction(object promptId);
+    public abstract InteractionEvent ReceiveInteraction(Enums.Direction direction);
+    public abstract InteractionEvent ReceiveInteraction(object promptId);
 }

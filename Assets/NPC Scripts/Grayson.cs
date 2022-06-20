@@ -15,82 +15,54 @@ namespace NPC_Scripts
             NotTryingToGetOnGoodSide,
         }
 
-        public List<MessageEnvelope> ReceiveInteraction(Enums.Direction direction)
+        public InteractionEvent ReceiveInteraction(Enums.Direction direction)
         {
             var animator = GetComponent<Animator>();
             animator.SetInteger(FacingDirection, (int)direction);
 
-            var response1 = new MessageEnvelope
-            {
-                Message = "I'm Grayson. As you can see, I'm pretty much just an old man."
-            };
+            var response = new InteractionEvent();
+            response.AddMessage("I'm Grayson. As you can see, I'm pretty much just an old man.");
+            response.AddMessage("Would you like to see my collection of antique cards?");
 
-            var response2 = new MessageEnvelope
-            {
-                Message = "Would you like to see my collection of antique cards?"
-            };
-            response2.Prompts.Add(new Prompt(PromptKeys.SeeCollection, "Yes"));
-            response2.Prompts.Add(new Prompt(PromptKeys.DontSeeCollection, "No"));
+            response.Prompts.Add(new Prompt(PromptKeys.SeeCollection, "Yes"));
+            response.Prompts.Add(new Prompt(PromptKeys.DontSeeCollection, "No"));
 
-            return new List<MessageEnvelope>
-            {
-                response1, response2
-            };
+            return response;
         }
 
-        public List<MessageEnvelope> ReceiveInteraction(object promptId)
+        public InteractionEvent ReceiveInteraction(object promptId)
         {
             switch (promptId)
             {
                 case PromptKeys.SeeCollection:
                 {
-                    var response = new MessageEnvelope
-                    {
-                        Message = "Trying to get on my good side, eh?"
-                    };
+                    var response = new InteractionEvent();
+                    response.AddMessage("Trying to get on my good side, eh?");
                     response.Prompts.Add(new Prompt(PromptKeys.TryingToGetOnGoodSide, "You got me"));
                     response.Prompts.Add(new Prompt(PromptKeys.NotTryingToGetOnGoodSide, "Of course not!"));
-                    return new List<MessageEnvelope>
-                    {
-                        response
-                    };
+                    return response;
                 }
                 case PromptKeys.DontSeeCollection:
                 {
-                    var response = new MessageEnvelope
-                    {
-                        Message = "Oh, well... next time, perhaps."
-                    };
-                    return new List<MessageEnvelope>
-                    {
-                        response
-                    };
+                    var response = new InteractionEvent();
+                    response.AddMessage("Oh, well... next time, perhaps.");
+                    return response;
                 }
                 case PromptKeys.TryingToGetOnGoodSide:
                 {
-                    var response = new MessageEnvelope
-                    {
-                        Message = "Hah! I may be old, but I'm still sharp!"
-                    };
-                    return new List<MessageEnvelope>
-                    {
-                        response
-                    };
+                    var response = new InteractionEvent();
+                    response.AddMessage("Hah! I may be old, but I'm still sharp!");
+                    return response;
                 }
                 case PromptKeys.NotTryingToGetOnGoodSide:
                 {
-                    var response = new MessageEnvelope
-                    {
-                        Message = "Now, now... you're starting to embarrass yourself."
-                    };
-                    return new List<MessageEnvelope>
-                    {
-                        response
-                    };
+                    var response = new InteractionEvent();
+                    response.AddMessage("Now, now... you're starting to embarrass yourself.");
+                    return response;
                 }
             }
 
-            return new List<MessageEnvelope>();
+            return null;
         }
     }
 }

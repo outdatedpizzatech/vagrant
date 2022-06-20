@@ -10,10 +10,10 @@ public class MessageBoxController : MonoBehaviour, IObserver
 
     private Subject _flowSubject;
     private TMP_Text _text;
-    private List<MessageEnvelope> _messages;
+    private InteractionEvent _interactionEvent;
     private float _timeSinceLastLetter;
     private int _shownCharacterIndex;
-    private int _messageIndex;
+    private int _eventStepIndex;
     private PromptController _promptController;
 
     public void Setup(Subject flowSubject)
@@ -25,20 +25,25 @@ public class MessageBoxController : MonoBehaviour, IObserver
         _promptController.Setup(flowSubject, this);
     }
 
-    public void Reload(MessageEnvelope message)
+    public void Reload()
     {
-        RenderMessage(message);
+        RenderMessage();
         _text.alpha = 1;
     }
 
-    public MessageEnvelope CurrentMessage()
+    public EventStep CurrentMessage()
     {
-        return (_messages[_messageIndex]);
+        return (_interactionEvent.EventSteps[_eventStepIndex]);
+    }
+    
+    public InteractionEvent InteractionEvent()
+    {
+        return (_interactionEvent);
     }
 
     public bool HasMessages()
     {
-        return _messages != null;
+        return _interactionEvent.EventSteps.Any();
     }
 
     public bool AtEndOfCurrentMessage()
@@ -96,40 +101,44 @@ public class MessageBoxController : MonoBehaviour, IObserver
         switch (parameters)
         {
             case InteractionResponseEvent interactionResponseEvent:
-                PlayMessages(interactionResponseEvent.Responses);
+                PlayMessages(interactionResponseEvent.InteractionEvent);
                 break;
         }
     }
 
 
-    private void PlayMessages(List<MessageEnvelope> messages)
+    private void PlayMessages(InteractionEvent interactionEvent)
     {
-        _messageIndex = 0;
-        _messages = messages;
-        Show(CurrentMessage());
+        _eventStepIndex = 0;
+        _interactionEvent = interactionEvent;
+        Show();
     }
 
-    private void Show(MessageEnvelope message)
+    private void Show()
     {
         transform.localScale = Vector3.one;
-        _promptController.ResetPrompts(message.Prompts);
+        _promptController.ResetPrompts(_interactionEvent.Prompts);
 
-        RenderMessage(message);
+        RenderMessage();
 
         _text.alpha = 0;
         _shownCharacterIndex = 0;
     }
 
-    private void RenderMessage(MessageEnvelope message)
+    private void RenderMessage()
     {
-        _text.text = message.Message;
+        var message = CurrentMessage();
         
-        if (message.Item != null)
+        if (message.Type == EventStep.Types.ItemExchange)
         {
-            _text.text += $"Received {message.Item}";
+            _text.text = $"Received {message.Message}";
+        }
+        else
+        {
+            _text.text = message.Message;
         }
 
-        if (message.Prompts.Any())
+        if (_eventStepIndex == _interactionEvent.EventSteps.Count - 1)
         {
             _text.text += _promptController.PromptContent();
         }
@@ -162,11 +171,11 @@ public class MessageBoxController : MonoBehaviour, IObserver
 
     private void AdvanceMessage()
     {
-        if (_messageIndex >= _messages.Count - 1)
+        if (_eventStepIndex >= _interactionEvent.EventSteps.Count - 1)
         {
-            var currentMessage = CurrentMessage();
+            // var currentMessage = CurrentMessage();
             
-            if (CurrentMessage().Item != null)
+            if (CurrentMessage().Type == EventStep.Types.ItemExchange)
             {
                 /*
                  * TODO: this feels like the wrong place for broadcasting that the player received an item,
@@ -174,10 +183,10 @@ public class MessageBoxController : MonoBehaviour, IObserver
                  * receive items from other sources, such as shops.
                  */
                
-                _flowSubject.Notify(new ReceiveItemEvent(CurrentMessage().Item));
+                _flowSubject.Notify(new ReceiveItemEvent(CurrentMessage().Message));
             }
             
-            if (currentMessage.Prompts.Any())
+            if (_interactionEvent.Prompts.Any())
             {
                 var selectedPrompt = _promptController.SelectedPrompt();
                 _flowSubject.Notify(
@@ -191,8 +200,8 @@ public class MessageBoxController : MonoBehaviour, IObserver
         }
         else
         {
-            _messageIndex++;
-            Show(CurrentMessage());
+            _eventStepIndex++;
+            Show();
         }
     }
 }

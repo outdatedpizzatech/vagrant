@@ -20,7 +20,7 @@ public class TreasureController : MonoBehaviour, IInteractable
         SetPosition((int)currentPosition.x, (int)currentPosition.y);
     }
     
-    public List<MessageEnvelope> ReceiveInteraction(Enums.Direction direction)
+    public InteractionEvent ReceiveInteraction(Enums.Direction direction)
     {
         if (_open)
         {
@@ -30,26 +30,17 @@ public class TreasureController : MonoBehaviour, IInteractable
         _open = true;
         _spriteRenderer.sprite = closedSprite;
 
-        var response1 = new MessageEnvelope
-        {
-            Message = "There's some old socks inside!"
-        };
+        var response = new InteractionEvent();
         
-        var response2 = new MessageEnvelope
-        {
-            Item = "Old Socks"
-        };
-
-        return new List<MessageEnvelope>
-        {
-            response1,
-            response2
-        };
+        response.AddMessage("There's some old socks inside!");
+        response.AddItem("Old Socks");
+        
+        return response;
     }
 
-    public List<MessageEnvelope> ReceiveInteraction(object promptId)
+    public InteractionEvent ReceiveInteraction(object promptId)
     {
-        return new List<MessageEnvelope>();
+        return null;
     }
 
     public void SetPosition(int x, int y)

@@ -7,25 +7,21 @@ namespace NPC_Scripts
     {
         private static readonly int FacingDirection = Animator.StringToHash("facingDirection");
 
-        public List<MessageEnvelope> ReceiveInteraction(Enums.Direction direction)
+        public InteractionEvent ReceiveInteraction(Enums.Direction direction)
         {
             var animator = GetComponent<Animator>();
             animator.SetInteger(FacingDirection, (int)direction);
 
-            var response1 = new MessageEnvelope
-            {
-                Message = "Be sure to visit the treasure vault on your way out."
-            };
+            var response = new InteractionEvent();
 
-            return new List<MessageEnvelope>
-            {
-                response1
-            };
+            response.AddMessage("Be sure to visit the treasure vault on your way out.");
+
+            return response;
         }
 
-        public List<MessageEnvelope> ReceiveInteraction(object promptId)
+        public InteractionEvent ReceiveInteraction(object promptId)
         {
-            return new List<MessageEnvelope>();
+            return null;
         }
     }
 }

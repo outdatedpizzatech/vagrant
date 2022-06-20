@@ -72,8 +72,8 @@ public class PromptController : MonoBehaviour, IObserver
     {
         void ChangePromptAnswer()
         {
-            var currentMessage = _messageBoxController.CurrentMessage();
-            var promptCount = currentMessage.Prompts.Count();
+            var currentEvent = _messageBoxController.InteractionEvent();
+            var promptCount = currentEvent.Prompts.Count();
 
             if (promptCount <= 0 || !_messageBoxController.AtEndOfCurrentMessage()) return;
 
@@ -89,7 +89,7 @@ public class PromptController : MonoBehaviour, IObserver
 
             _selectedPromptIndex = Mathf.Abs(_selectedPromptIndex % promptCount);
 
-            _messageBoxController.Reload(currentMessage);
+            _messageBoxController.Reload();
         }
 
         Utilities.Debounce(ref _timeSinceLastPromptChange, 0.25f, ChangePromptAnswer);

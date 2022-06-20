@@ -36,12 +36,12 @@ public class PromptResponseEvent
 
 public class InteractionResponseEvent
 {
-    public InteractionResponseEvent(List<MessageEnvelope> responses)
+    public InteractionResponseEvent(InteractionEvent interactionEvent)
     {
-        Responses = responses;
+        InteractionEvent = interactionEvent;
     }
 
-    public List<MessageEnvelope> Responses { get; }
+    public InteractionEvent InteractionEvent { get; }
 }
 
 public class MenuNavigation
