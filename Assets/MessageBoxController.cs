@@ -117,9 +117,14 @@ public class MessageBoxController : MonoBehaviour, IObserver
     {
         var eventStep = _interactionEvent.EventSteps[_eventStepIndex];
 
-        _text.text = eventStep.Type == EventStep.Types.ItemExchange
-            ? $"Received {eventStep.Message}"
-            : eventStep.Message;
+        if (eventStep.Information is Item item)
+        {
+            _text.text = $"Received {item.itemName}";
+        }
+        else if(eventStep.Information is string message)
+        {
+            _text.text = message;
+        }
 
         if (_eventStepIndex == _interactionEvent.EventSteps.Count - 1)
         {

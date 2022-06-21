@@ -60,9 +60,9 @@ public class FlowController : MonoBehaviour, IObserver
         {
             var currentMessage = CurrentMessage();
             
-            if (currentMessage.Type == EventStep.Types.ItemExchange)
+            if (currentMessage.Information is Item item)
             {
-                _flowSubject.Notify(new ReceiveItemEvent(CurrentMessage().Message));
+                _flowSubject.Notify(new ReceiveItemEvent(item));
             }
             
             if (_interactionEvent.Prompts.Any())

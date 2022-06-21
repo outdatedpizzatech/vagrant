@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour, IObserver
 {
-    public List<string> _items = new();
+    private List<Item> _items = new();
     
     public void Setup(Subject warpAndWipeSubject, InputAction inputAction, Subject occupiedSpacesSubject,
         PositionGrid positionGrid, Subject interactionSubject, Subject flowSubject)
@@ -19,12 +19,12 @@ public class PlayerController : MonoBehaviour, IObserver
         flowSubject.AddObserver(this);
     }
 
-    public void AddItem(string item)
+    public void AddItem(Item item)
     {
         _items.Add(item);
     }
 
-    public List<string> Items()
+    public List<Item> Items()
     {
         return _items;
     }

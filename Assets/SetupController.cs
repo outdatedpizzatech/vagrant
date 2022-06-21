@@ -21,7 +21,8 @@ public class SetupController : MonoBehaviour, IObserver
         var messageBoxController = GameObject.Find("WorldSpaceCanvas/MessageBox").GetComponent<MessageBoxController>();
         var inventoryBoxController = GameObject.Find("WorldSpaceCanvas/InventoryBox").GetComponent<InventoryBoxController>();
         var flowController = GameObject.Find("Controllers/FlowController").GetComponent<FlowController>();
-        var treasure = GameObject.Find("Objects/Treasure").GetComponent<TreasureController>();
+        var treasureA = GameObject.Find("Objects/TreasureA").GetComponent<TreasureController>();
+        var treasureB = GameObject.Find("Objects/TreasureB").GetComponent<TreasureController>();
         
         wiperController.Setup(warpingAndWiping);
         player.Setup(warpingAndWiping, inputController.InputAction, occupiedSpacesSubject, positionController.PositionGrid, interactionSubject, flowSubject);
@@ -32,7 +33,8 @@ public class SetupController : MonoBehaviour, IObserver
         messageBoxController.Setup(flowSubject);
         flowController.Setup(flowSubject);
         inventoryBoxController.Setup(flowSubject);
-        treasure.Setup(occupiedSpacesSubject);
+        treasureA.Setup(occupiedSpacesSubject);
+        treasureB.Setup(occupiedSpacesSubject);
         
         /*
          * DEBUG

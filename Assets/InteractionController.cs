@@ -3,16 +3,11 @@ using UnityEngine;
 
 public class InteractionController : MonoBehaviour, IObserver
 {
-    private enum State
-    {
-        Free,
-        InEvent,
-        InMenu
-    }
-
+    private bool _inMenu;
+    private bool _inEvent;
+    private bool _halted;
     private Subject _interactionSubject;
     private Subject _flowSubject;
-    private State _state = State.Free;
     private PositionGrid _positionGrid;
     private InputAction _inputAction;
     private float _timeSinceLastDirectionalInput;
@@ -24,15 +19,32 @@ public class InteractionController : MonoBehaviour, IObserver
         _timeSinceLastDirectionalInput += Time.deltaTime;
         _timeSinceLastSecondaryAction += Time.deltaTime;
 
-        void NotifyDialogueInputs()
+        if (!_halted)
         {
-            if (_state == State.InEvent && _inputAction.InputDirections.Any())
+            if (_inMenu || _inEvent)
+            {
+                _flowSubject.Notify(SubjectMessage.StartHaltedContextEvent);
+                _halted = true;
+            }
+        }
+        else
+        {
+            if (!_inMenu && !_inEvent)
+            {
+                _flowSubject.Notify(SubjectMessage.EndHaltedContextEvent);
+                _halted = false;
+            }
+        }
+
+        void NotifyMenuInputs()
+        {
+            if ((_inEvent || _inMenu) && _inputAction.InputDirections.Any())
             {
                 _flowSubject.Notify(new MenuNavigation(_inputAction.InputDirections.Last()));
             }
         }
 
-        Utilities.Debounce(ref _timeSinceLastDirectionalInput, 0.05f, NotifyDialogueInputs);
+        Utilities.Debounce(ref _timeSinceLastDirectionalInput, 0.05f, NotifyMenuInputs);
     }
 
     public void Setup(Subject interactionSubject, PositionGrid positionGrid, Subject flowSubject,
@@ -53,16 +65,16 @@ public class InteractionController : MonoBehaviour, IObserver
         {
             case SubjectMessage.EndEventSequenceEvent:
                 _interactable = null;
-                _state = State.Free;
+                _inEvent = false;
                 break;
             case SubjectMessage.PlayerRequestsSecondaryActionEvent:
-                if (_state == State.Free)
+                if (!_inEvent && !_inMenu)
                 {
                     _flowSubject.Notify(SubjectMessage.OpenMenuEvent);
-                    _state = State.InMenu;
-                } else if (_state == State.InMenu)
+                    _inMenu = true;
+                } else if (_inMenu)
                 {
-                    _state = State.Free;
+                    _inMenu = false;
                     _flowSubject.Notify(SubjectMessage.CloseMenuEvent);
                 }
 
@@ -74,7 +86,7 @@ public class InteractionController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case PlayerRequestsPrimaryActionEvent playerActionEvent when _state == State.Free:
+            case PlayerRequestsPrimaryActionEvent playerActionEvent when !_inEvent && !_inMenu:
             {
                 var position = new[] { playerActionEvent.X, playerActionEvent.Y };
 
@@ -114,15 +126,18 @@ public class InteractionController : MonoBehaviour, IObserver
             }
             case PlayerRequestsPrimaryActionEvent:
             {
-                if (_state == State.InEvent)
+                if (_inEvent)
                 {
                     _flowSubject.Notify(SubjectMessage.AdvanceEvent);
+                } else if(_inMenu)
+                {
+                    _flowSubject.Notify(SubjectMessage.SelectMenuItem);
                 }
 
                 break;
             }
             case InteractionResponseEvent:
-                _state = State.InEvent;
+                _inEvent = true;
                 break;
             case PromptResponseEvent promptResponseEvent:
                 _flowSubject.Notify(

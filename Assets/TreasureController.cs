@@ -1,11 +1,11 @@
-using System.Collections.Generic;
-using JetBrains.Annotations;
 using UnityEngine;
 
 public class TreasureController : MonoBehaviour, IInteractable
 {
-    private Subject _occupiedSpacesSubject;
     public Sprite closedSprite;
+    public Item heldItem;
+    
+    private Subject _occupiedSpacesSubject;
     private SpriteRenderer _spriteRenderer;
     private bool _open;
 
@@ -32,8 +32,7 @@ public class TreasureController : MonoBehaviour, IInteractable
 
         var response = new InteractionEvent();
         
-        response.AddMessage("There's some old socks inside!");
-        response.AddItem("Old Socks");
+        response.AddItem(heldItem);
         
         return response;
     }

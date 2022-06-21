@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -9,13 +10,20 @@ public class InventoryBoxController : MonoBehaviour, IObserver
     public float positionOffset = 8;
     public PlayerController playerController;
     
+    private int _selectedPromptIndex;
     private TMP_Text _text;
     private Subject _flowSubject;
+    private float _timeSinceLastPromptChange;
     
     public void Setup(Subject flowSubject)
     {
         _flowSubject = flowSubject;
         _flowSubject.AddObserver(this);
+    }
+
+    private void Update()
+    {
+        _timeSinceLastPromptChange += Time.deltaTime;
     }
 
     private void Awake()
@@ -37,12 +45,29 @@ public class InventoryBoxController : MonoBehaviour, IObserver
     {
         transform.localScale = Vector3.one;
         
-        _text.text = "";
+        Refresh();
+    }
+    
+    private void Refresh()
+    {
+        var promptIndex = 0;
+        var text = "\n";
         
-        playerController.Items().ForEach((item) =>
+        foreach (var prompt in playerController.Items().Select((i) => i.itemName))
         {
-            _text.text += $"\n{item}";
-        });
+            if (promptIndex == _selectedPromptIndex)
+            {
+                text += $"\n> {prompt}";
+            }
+            else
+            {
+                text += $"\n  {prompt}";
+            }
+
+            promptIndex++;
+        }
+        
+        _text.text = text;
     }
 
     // Update is called once per frame
@@ -55,6 +80,12 @@ public class InventoryBoxController : MonoBehaviour, IObserver
     
     public void OnNotify<T>(T parameters)
     {
+        switch (parameters)
+        {
+            case MenuNavigation menuNavigation:
+                UpdatePromptSelection(menuNavigation);
+                break;
+        }
     }
 
     public void OnNotify(SubjectMessage message)
@@ -69,6 +100,42 @@ public class InventoryBoxController : MonoBehaviour, IObserver
                 Hide();
 
                 break;
+            case SubjectMessage.SelectMenuItem:
+                var selectedItem = playerController.Items()[_selectedPromptIndex];
+                var response = new InteractionEvent();
+                response.AddMessage(selectedItem.description);
+                _flowSubject.Notify(new InteractionResponseEvent(response));
+                _flowSubject.Notify(SubjectMessage.StartEventSequenceEvent);
+
+                break;
         }
+    }
+    private void UpdatePromptSelection(MenuNavigation menuNavigation)
+    {
+        void ChangePromptAnswer()
+        {
+            var promptCount = playerController.Items().Count;
+
+            if (promptCount == 0)
+            {
+                return;
+            }
+
+            switch (menuNavigation.Direction)
+            {
+                case Enums.Direction.Down:
+                    _selectedPromptIndex++;
+                    break;
+                case Enums.Direction.Up:
+                    _selectedPromptIndex--;
+                    break;
+            }
+
+            _selectedPromptIndex = Mathf.Abs(_selectedPromptIndex % promptCount);
+
+            Refresh();
+        }
+
+        Utilities.Debounce(ref _timeSinceLastPromptChange, 0.25f, ChangePromptAnswer);
     }
 }

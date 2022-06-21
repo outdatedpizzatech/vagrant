@@ -13,16 +13,19 @@ public enum SubjectMessage
     OpenMenuEvent,
     CloseMenuEvent,
     ReachedEndOfMessageEvent,
+    SelectMenuItem,
+    StartHaltedContextEvent,
+    EndHaltedContextEvent,
 }
 
 public class ReceiveItemEvent
 {
-    public ReceiveItemEvent(string item)
+    public ReceiveItemEvent(Item item)
     {
         Item = item;
     }
 
-    public string Item { get; }
+    public Item Item { get; }
 }
 
 public class PromptResponseEvent
