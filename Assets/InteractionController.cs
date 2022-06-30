@@ -13,11 +13,24 @@ public class InteractionController : MonoBehaviour, IObserver
     private float _timeSinceLastDirectionalInput;
     private float _timeSinceLastSecondaryAction;
     private IInteractable _interactable;
+    private ControlContext currentControlContext;
+
+    private enum ControlContext
+    {
+        Event,
+        Menu,
+        None
+    }
 
     private void Update()
     {
         _timeSinceLastDirectionalInput += Time.deltaTime;
         _timeSinceLastSecondaryAction += Time.deltaTime;
+
+        if (!_inEvent && !_inMenu)
+        {
+            currentControlContext = ControlContext.None;
+        }
 
         if (!_halted)
         {
@@ -67,11 +80,20 @@ public class InteractionController : MonoBehaviour, IObserver
                 _interactable = null;
                 _inEvent = false;
                 break;
+            case SubjectMessage.RequestFollowUpEvent:
+                _inMenu = true;
+                currentControlContext = ControlContext.Menu;
+                break;
+            case SubjectMessage.EndFollowUpEvent:
+                _inMenu = false;
+                break;
             case SubjectMessage.PlayerRequestsSecondaryActionEvent:
                 if (!_inEvent && !_inMenu)
                 {
                     _flowSubject.Notify(SubjectMessage.OpenMenuEvent);
                     _inMenu = true;
+                    currentControlContext = ControlContext.Menu;
+
                 } else if (_inMenu)
                 {
                     _inMenu = false;
@@ -126,10 +148,10 @@ public class InteractionController : MonoBehaviour, IObserver
             }
             case PlayerRequestsPrimaryActionEvent:
             {
-                if (_inEvent)
+                if (currentControlContext == ControlContext.Event)
                 {
                     _flowSubject.Notify(SubjectMessage.AdvanceEvent);
-                } else if(_inMenu)
+                } else if(currentControlContext == ControlContext.Menu)
                 {
                     _flowSubject.Notify(SubjectMessage.SelectMenuItem);
                 }
@@ -138,6 +160,7 @@ public class InteractionController : MonoBehaviour, IObserver
             }
             case InteractionResponseEvent:
                 _inEvent = true;
+                currentControlContext = ControlContext.Event;
                 break;
             case PromptResponseEvent promptResponseEvent:
                 _flowSubject.Notify(

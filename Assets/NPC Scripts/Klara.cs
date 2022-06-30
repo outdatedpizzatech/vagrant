@@ -15,6 +15,8 @@ namespace NPC_Scripts
             var response = new InteractionEvent();
 
             response.AddMessage("Be sure to visit the treasure vault on your way out.");
+            
+            response.CanFollowUp = true;
 
             return response;
         }

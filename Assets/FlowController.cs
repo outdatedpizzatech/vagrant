@@ -9,6 +9,16 @@ public class FlowController : MonoBehaviour, IObserver
     private InteractionEvent _interactionEvent;
     private int _eventStepIndex;
     private bool _atEndOfMessage;
+    private bool _requestedFollowUp;
+
+    public void Update()
+    {
+        if (_interactionEvent != null && !_requestedFollowUp && _atEndOfMessage && _eventStepIndex >= _interactionEvent.EventSteps.Count - 1 && !_interactionEvent.Prompts.Any() && _interactionEvent.CanFollowUp)
+        {
+            _requestedFollowUp = true;
+            _flowSubject.Notify(SubjectMessage.RequestFollowUpEvent);
+        }
+    }
     
     public void Setup(Subject flowSubject)
     {
@@ -30,6 +40,13 @@ public class FlowController : MonoBehaviour, IObserver
             
             case SubjectMessage.ReachedEndOfMessageEvent:
                 _atEndOfMessage = true;
+
+                break;
+            
+            case SubjectMessage.EndFollowUpEvent:
+                _flowSubject.Notify(SubjectMessage.EndEventSequenceEvent);
+                _interactionEvent = null;
+                _requestedFollowUp = false;
 
                 break;
         }
@@ -73,7 +90,10 @@ public class FlowController : MonoBehaviour, IObserver
             }
             else
             {
-                _flowSubject.Notify(SubjectMessage.EndEventSequenceEvent);
+                if (!_interactionEvent.CanFollowUp)
+                {
+                    _flowSubject.Notify(SubjectMessage.EndEventSequenceEvent);
+                }
             }
         }
         else

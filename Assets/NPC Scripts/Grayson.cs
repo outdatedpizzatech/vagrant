@@ -27,6 +27,8 @@ namespace NPC_Scripts
             response.Prompts.Add(new Prompt(PromptKeys.SeeCollection, "Yes"));
             response.Prompts.Add(new Prompt(PromptKeys.DontSeeCollection, "No"));
 
+            response.CanFollowUp = true;
+
             return response;
         }
 

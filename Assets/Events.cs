@@ -16,6 +16,8 @@ public enum SubjectMessage
     SelectMenuItem,
     StartHaltedContextEvent,
     EndHaltedContextEvent,
+    RequestFollowUpEvent,
+    EndFollowUpEvent,
 }
 
 public class ReceiveItemEvent

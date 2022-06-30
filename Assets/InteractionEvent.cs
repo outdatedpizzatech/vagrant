@@ -14,6 +14,7 @@ public class InteractionEvent
 {
     public readonly List<EventStep> EventSteps = new();
     public readonly List<Prompt> Prompts = new();
+    public bool CanFollowUp = false;
 
     public void AddMessage(string message)
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 
-public class InventoryBoxController : MonoBehaviour, IObserver
+public class InteractionBoxController : MonoBehaviour, IObserver
 {
     public PersonMovement playerMovement;
     public float positionOffset = 8;
@@ -14,6 +14,7 @@ public class InventoryBoxController : MonoBehaviour, IObserver
     private TMP_Text _text;
     private Subject _flowSubject;
     private float _timeSinceLastPromptChange;
+    private List<string> _prompts = new() { "End", "Give" };
     private bool _active;
     
     public void Setup(Subject flowSubject)
@@ -57,8 +58,8 @@ public class InventoryBoxController : MonoBehaviour, IObserver
     {
         var promptIndex = 0;
         var text = "\n";
-        
-        foreach (var prompt in playerController.Items().Select((i) => i.itemName))
+
+        foreach (var prompt in _prompts)
         {
             if (promptIndex == _selectedPromptIndex)
             {
@@ -85,11 +86,6 @@ public class InventoryBoxController : MonoBehaviour, IObserver
     
     public void OnNotify<T>(T parameters)
     {
-        if (!_active)
-        {
-            return;
-        }
-        
         switch (parameters)
         {
             case MenuNavigation menuNavigation when _active:
@@ -102,20 +98,22 @@ public class InventoryBoxController : MonoBehaviour, IObserver
     {
         switch (message)
         {
-            case SubjectMessage.OpenMenuEvent:
+            case SubjectMessage.RequestFollowUpEvent:
                 Show();
 
                 break;
-            case SubjectMessage.CloseMenuEvent:
+            case SubjectMessage.EndFollowUpEvent when _active:
                 Hide();
 
                 break;
             case SubjectMessage.SelectMenuItem when _active:
-                var selectedItem = playerController.Items()[_selectedPromptIndex];
-                var response = new InteractionEvent();
-                response.AddMessage(selectedItem.description);
-                _flowSubject.Notify(new InteractionResponseEvent(response));
-                _flowSubject.Notify(SubjectMessage.StartEventSequenceEvent);
+                if (_selectedPromptIndex == 0)
+                {
+                    _flowSubject.Notify(SubjectMessage.EndFollowUpEvent);
+                } else if (_selectedPromptIndex == 1)
+                {
+                    _flowSubject.Notify(SubjectMessage.OpenMenuEvent);
+                }
 
                 break;
         }
@@ -124,7 +122,7 @@ public class InventoryBoxController : MonoBehaviour, IObserver
     {
         void ChangePromptAnswer()
         {
-            var promptCount = playerController.Items().Count;
+            var promptCount = _prompts.Count;
 
             if (promptCount == 0)
             {
