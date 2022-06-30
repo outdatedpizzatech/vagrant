@@ -123,3 +123,13 @@ public class StartEventStepEvent
 
     public int EventStepIndex { get; }
 }
+
+public class SelectInventoryItemEvent
+{
+    public SelectInventoryItemEvent(Item item)
+    {
+        Item = item;
+    }
+
+    public Item Item { get; }
+}

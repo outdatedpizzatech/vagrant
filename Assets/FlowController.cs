@@ -59,6 +59,14 @@ public class FlowController : MonoBehaviour, IObserver
             case InteractionResponseEvent interactionResponseEvent:
                 ProcessEvent(interactionResponseEvent.InteractionEvent);
                 break;
+            
+            case SelectInventoryItemEvent selectInventoryItemEvent:
+                var response = new InteractionEvent();
+                response.AddMessage(selectInventoryItemEvent.Item.description);
+                _flowSubject.Notify(new InteractionResponseEvent(response));
+                _flowSubject.Notify(SubjectMessage.StartEventSequenceEvent);
+
+                break;
         }
     }
 
