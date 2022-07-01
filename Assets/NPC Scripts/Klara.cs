@@ -15,7 +15,7 @@ namespace NPC_Scripts
             var response = new InteractionEvent();
 
             response.AddMessage("Be sure to visit the treasure vault on your way out.");
-            
+
             response.CanFollowUp = true;
 
             return response;
@@ -23,6 +23,22 @@ namespace NPC_Scripts
 
         public InteractionEvent ReceiveInteraction(object promptId)
         {
+            switch (promptId)
+            {
+                case Item item:
+                {
+                    if (item.itemName == "Hamburger")
+                    {
+                        var response = new InteractionEvent();
+                        response.AddMessage("Oh, yummy! You shouldn't have!");
+                        response.CanFollowUp = true;
+                        return response;
+                    }
+                }
+
+                    break;
+            }
+
             return null;
         }
     }

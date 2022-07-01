@@ -10,6 +10,7 @@ public class FlowController : MonoBehaviour, IObserver
     private int _eventStepIndex;
     private bool _atEndOfMessage;
     private bool _requestedFollowUp;
+    private IInteractable _interactable;
 
     public void Update()
     {
@@ -30,6 +31,9 @@ public class FlowController : MonoBehaviour, IObserver
     {
         switch (message)
         {
+            case SubjectMessage.EndEventSequenceEvent:
+                _interactable = null;
+                break;
             case SubjectMessage.AdvanceEvent:
                 if (_atEndOfMessage)
                 {
@@ -40,13 +44,13 @@ public class FlowController : MonoBehaviour, IObserver
             
             case SubjectMessage.ReachedEndOfMessageEvent:
                 _atEndOfMessage = true;
+                _requestedFollowUp = false;
 
                 break;
             
             case SubjectMessage.EndFollowUpEvent:
                 _flowSubject.Notify(SubjectMessage.EndEventSequenceEvent);
                 _interactionEvent = null;
-                _requestedFollowUp = false;
 
                 break;
         }
@@ -61,11 +65,41 @@ public class FlowController : MonoBehaviour, IObserver
                 break;
             
             case SelectInventoryItemEvent selectInventoryItemEvent:
-                var response = new InteractionEvent();
-                response.AddMessage(selectInventoryItemEvent.Item.description);
-                _flowSubject.Notify(new InteractionResponseEvent(response));
-                _flowSubject.Notify(SubjectMessage.StartEventSequenceEvent);
+                if (_interactable == null)
+                {
+                    var response = new InteractionEvent();
+                    response.AddMessage(selectInventoryItemEvent.Item.description);
+                    _flowSubject.Notify(new InteractionResponseEvent(response));
+                    _flowSubject.Notify(SubjectMessage.StartEventSequenceEvent);
+                }
+                else
+                {
+                    var interactionResponse1 = _interactable.ReceiveInteraction(selectInventoryItemEvent.Item);
+                    if (interactionResponse1 != null)
+                    {
+                        _flowSubject.Notify(new InteractionResponseEvent(interactionResponse1));
+                    }
+                    _flowSubject.Notify(SubjectMessage.CloseMenuEvent);
+                }
 
+                break;
+            
+            case InteractWithEvent interactWithEvent:
+                _interactable = interactWithEvent.Interactable;
+                int newDirection = ((int)interactWithEvent.Direction + 2) % 4;
+                Enums.Direction receivedFromDirection = (Enums.Direction)newDirection;
+                var interactionResponse = _interactable.ReceiveInteraction(receivedFromDirection);
+                if (interactionResponse != null)
+                {
+                    _flowSubject.Notify(new InteractionResponseEvent(interactionResponse));
+                    _flowSubject.Notify(SubjectMessage.StartEventSequenceEvent);
+                }
+
+                break;
+            
+            case PromptResponseEvent promptResponseEvent:
+                _flowSubject.Notify(
+                    new InteractionResponseEvent(_interactable.ReceiveInteraction(promptResponseEvent.PromptResponse)));
                 break;
         }
     }

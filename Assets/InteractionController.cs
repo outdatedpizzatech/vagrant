@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class InteractionController : MonoBehaviour, IObserver
 {
+    public ContextController contextController;
+
     private bool _inMenu;
     private bool _inEvent;
     private bool _halted;
@@ -12,24 +14,27 @@ public class InteractionController : MonoBehaviour, IObserver
     private InputAction _inputAction;
     private float _timeSinceLastDirectionalInput;
     private float _timeSinceLastSecondaryAction;
-    private IInteractable _interactable;
-    private ControlContext currentControlContext;
-
-    private enum ControlContext
-    {
-        Event,
-        Menu,
-        None
-    }
 
     private void Update()
     {
         _timeSinceLastDirectionalInput += Time.deltaTime;
         _timeSinceLastSecondaryAction += Time.deltaTime;
 
-        if (!_inEvent && !_inMenu)
+        if (contextController.activeContexts.Any((x) => x == ContextController.ControlContext.FollowUpMenu || x == ContextController.ControlContext.InventoryMenu))
         {
-            currentControlContext = ControlContext.None;
+            _inMenu = true;
+        }
+        else
+        {
+            _inMenu = false;
+        }
+        if (contextController.activeContexts.Any((x) => x == ContextController.ControlContext.Event))
+        {
+            _inEvent = true;
+        }
+        else
+        {
+            _inEvent = false;
         }
 
         if (!_halted)
@@ -53,11 +58,18 @@ public class InteractionController : MonoBehaviour, IObserver
         {
             if ((_inEvent || _inMenu) && _inputAction.InputDirections.Any())
             {
-                _flowSubject.Notify(new MenuNavigation(_inputAction.InputDirections.Last()));
+                if (_currentControlContext() == ContextController.ControlContext.FollowUpMenu)
+                {
+                    _flowSubject.Notify(new FollowUpMenuNavigation(_inputAction.InputDirections.Last()));
+                }
+                else
+                {
+                    _flowSubject.Notify(new MenuNavigation(_inputAction.InputDirections.Last()));
+                }
             }
         }
 
-        Utilities.Debounce(ref _timeSinceLastDirectionalInput, 0.05f, NotifyMenuInputs);
+        Utilities.Debounce(ref _timeSinceLastDirectionalInput, 0.25f, NotifyMenuInputs);
     }
 
     public void Setup(Subject interactionSubject, PositionGrid positionGrid, Subject flowSubject,
@@ -70,6 +82,8 @@ public class InteractionController : MonoBehaviour, IObserver
 
         _interactionSubject.AddObserver(this);
         _flowSubject.AddObserver(this);
+        
+        contextController.Setup(flowSubject);
     }
 
     public void OnNotify(SubjectMessage subjectMessage)
@@ -77,24 +91,23 @@ public class InteractionController : MonoBehaviour, IObserver
         switch (subjectMessage)
         {
             case SubjectMessage.EndEventSequenceEvent:
-                _interactable = null;
                 _inEvent = false;
                 break;
             case SubjectMessage.RequestFollowUpEvent:
                 _inMenu = true;
-                currentControlContext = ControlContext.Menu;
                 break;
             case SubjectMessage.EndFollowUpEvent:
                 _inMenu = false;
+                break;
+            case SubjectMessage.OpenMenuEvent:
                 break;
             case SubjectMessage.PlayerRequestsSecondaryActionEvent:
                 if (!_inEvent && !_inMenu)
                 {
                     _flowSubject.Notify(SubjectMessage.OpenMenuEvent);
                     _inMenu = true;
-                    currentControlContext = ControlContext.Menu;
-
-                } else if (_inMenu)
+                }
+                else if (_inMenu)
                 {
                     _inMenu = false;
                     _flowSubject.Notify(SubjectMessage.CloseMenuEvent);
@@ -130,17 +143,12 @@ public class InteractionController : MonoBehaviour, IObserver
 
                 if (_positionGrid.Has(position[0], position[1]))
                 {
-                    _interactable = _positionGrid.Get(position[0], position[1]).GetComponent<IInteractable>();
+                    var interactable = _positionGrid.Get(position[0], position[1]).GetComponent<IInteractable>();
 
-                    if (_interactable != null)
+                    if (interactable != null)
                     {
-                        var receivedFromDirection = (Enums.Direction)(((int)playerActionEvent.Direction + 2) % 4);
-                        var interactionResponse = _interactable.ReceiveInteraction(receivedFromDirection);
-                        if (interactionResponse != null)
-                        {
-                            _flowSubject.Notify(new InteractionResponseEvent(interactionResponse));
-                            _flowSubject.Notify(SubjectMessage.StartEventSequenceEvent);
-                        }
+                        var interactWithEvent = new InteractWithEvent(interactable, playerActionEvent.Direction);
+                        _flowSubject.Notify(interactWithEvent);
                     }
                 }
 
@@ -148,24 +156,31 @@ public class InteractionController : MonoBehaviour, IObserver
             }
             case PlayerRequestsPrimaryActionEvent:
             {
-                if (currentControlContext == ControlContext.Event)
+                if (_currentControlContext() == ContextController.ControlContext.Event)
                 {
                     _flowSubject.Notify(SubjectMessage.AdvanceEvent);
-                } else if(currentControlContext == ControlContext.Menu)
+                }
+                else if (_currentControlContext() == ContextController.ControlContext.FollowUpMenu)
                 {
-                    _flowSubject.Notify(SubjectMessage.SelectMenuItem);
+                    _flowSubject.Notify(SubjectMessage.SelectFollowUpMenuItem);
+                }
+                else if (_currentControlContext() == ContextController.ControlContext.InventoryMenu)
+                {
+                    _flowSubject.Notify(SubjectMessage.SelectInventoryMenuItem);
                 }
 
                 break;
             }
-            case InteractionResponseEvent:
-                _inEvent = true;
-                currentControlContext = ControlContext.Event;
-                break;
-            case PromptResponseEvent promptResponseEvent:
-                _flowSubject.Notify(
-                    new InteractionResponseEvent(_interactable.ReceiveInteraction(promptResponseEvent.PromptResponse)));
-                break;
         }
+    }
+
+    private ContextController.ControlContext _currentControlContext()
+    {
+        if (contextController.activeContexts.Count == 0)
+        {
+            return ContextController.ControlContext.None;
+        }
+
+        return (contextController.activeContexts.Last());
     }
 }

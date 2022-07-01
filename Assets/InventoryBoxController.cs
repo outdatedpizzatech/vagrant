@@ -110,7 +110,7 @@ public class InventoryBoxController : MonoBehaviour, IObserver
                 Hide();
 
                 break;
-            case SubjectMessage.SelectMenuItem when _active:
+            case SubjectMessage.SelectInventoryMenuItem when _active:
                 var selectedItem = playerController.Items()[_selectedPromptIndex];
                 var selectInventoryItemEvent = new SelectInventoryItemEvent(selectedItem);
                 _flowSubject.Notify(selectInventoryItemEvent);

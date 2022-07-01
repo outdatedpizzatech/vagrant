@@ -16,6 +16,7 @@ public class InteractionBoxController : MonoBehaviour, IObserver
     private float _timeSinceLastPromptChange;
     private List<string> _prompts = new() { "End", "Give" };
     private bool _active;
+    private bool _visible;
     
     public void Setup(Subject flowSubject)
     {
@@ -41,6 +42,7 @@ public class InteractionBoxController : MonoBehaviour, IObserver
     private void Hide()
     {
         _active = false;
+        _visible = false;
         
         transform.localScale = Vector3.zero;
     }
@@ -48,6 +50,8 @@ public class InteractionBoxController : MonoBehaviour, IObserver
     private void Show()
     {
         _active = true;
+        _visible = true;
+        _selectedPromptIndex = 0;
         
         transform.localScale = Vector3.one;
         
@@ -88,7 +92,7 @@ public class InteractionBoxController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case MenuNavigation menuNavigation when _active:
+            case FollowUpMenuNavigation menuNavigation when _active:
                 UpdatePromptSelection(menuNavigation);
                 break;
         }
@@ -106,7 +110,11 @@ public class InteractionBoxController : MonoBehaviour, IObserver
                 Hide();
 
                 break;
-            case SubjectMessage.SelectMenuItem when _active:
+            case SubjectMessage.OpenMenuEvent when _active:
+                _active = false;
+
+                break;
+            case SubjectMessage.SelectFollowUpMenuItem when _active:
                 if (_selectedPromptIndex == 0)
                 {
                     _flowSubject.Notify(SubjectMessage.EndFollowUpEvent);
@@ -118,7 +126,7 @@ public class InteractionBoxController : MonoBehaviour, IObserver
                 break;
         }
     }
-    private void UpdatePromptSelection(MenuNavigation menuNavigation)
+    private void UpdatePromptSelection(FollowUpMenuNavigation menuNavigation)
     {
         void ChangePromptAnswer()
         {

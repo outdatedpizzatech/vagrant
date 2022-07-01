@@ -13,7 +13,8 @@ public enum SubjectMessage
     OpenMenuEvent,
     CloseMenuEvent,
     ReachedEndOfMessageEvent,
-    SelectMenuItem,
+    SelectFollowUpMenuItem,
+    SelectInventoryMenuItem,
     StartHaltedContextEvent,
     EndHaltedContextEvent,
     RequestFollowUpEvent,
@@ -53,6 +54,16 @@ public class InteractionResponseEvent
 public class MenuNavigation
 {
     public MenuNavigation(Enums.Direction direction)
+    {
+        Direction = direction;
+    }
+
+    public Enums.Direction Direction { get; }
+}
+
+public class FollowUpMenuNavigation
+{
+    public FollowUpMenuNavigation(Enums.Direction direction)
     {
         Direction = direction;
     }
@@ -132,4 +143,16 @@ public class SelectInventoryItemEvent
     }
 
     public Item Item { get; }
+}
+
+public class InteractWithEvent
+{
+    public InteractWithEvent(IInteractable interactable, Enums.Direction direction)
+    {
+        Interactable = interactable;
+        Direction = direction;
+    }
+
+    public IInteractable Interactable { get; }
+    public Enums.Direction Direction { get; }
 }
