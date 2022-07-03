@@ -58,14 +58,7 @@ public class InteractionController : MonoBehaviour, IObserver
         void NotifyMenuInputs()
         {
             if (!_inEvent && !_aMenuIsOpen || !_inputAction.InputDirections.Any()) return;
-            if (_interactionMenuFocused)
-            {
-                _flowSubject.Notify(new InteractionMenuNavigation(_inputAction.InputDirections.Last()));
-            }
-            else
-            {
-                _flowSubject.Notify(new InventoryMenuNavigation(_inputAction.InputDirections.Last()));
-            }
+            _flowSubject.Notify(new MenuNavigation(_inputAction.InputDirections.Last()));
         }
 
         Utilities.Debounce(ref _timeSinceLastDirectionalInput, 0.25f, NotifyMenuInputs);
@@ -151,11 +144,11 @@ public class InteractionController : MonoBehaviour, IObserver
                 }
                 else if (_interactionMenuFocused)
                 {
-                    _flowSubject.Notify(SubjectMessage.SelectInteractionMenuItem);
+                    _flowSubject.Notify(SubjectMessage.MenuSelection);
                 }
                 else if (_inventoryMenuFocused)
                 {
-                    _flowSubject.Notify(SubjectMessage.SelectInventoryMenuItem);
+                    _flowSubject.Notify(SubjectMessage.MenuSelection);
                 }
 
                 break;

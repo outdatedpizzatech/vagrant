@@ -12,8 +12,7 @@ public enum SubjectMessage
     OpenInventoryMenu,
     CloseInventoryMenu,
     ReachedEndOfMessage,
-    SelectInteractionMenuItem,
-    SelectInventoryMenuItem,
+    MenuSelection,
     TimeShouldFreeze,
     TimeShouldFlow,
     OpenInteractionMenu,
@@ -52,19 +51,9 @@ public class InteractionResponseEvent
     public InteractionEvent InteractionEvent { get; }
 }
 
-public class InventoryMenuNavigation
+public class MenuNavigation
 {
-    public InventoryMenuNavigation(Enums.Direction direction)
-    {
-        Direction = direction;
-    }
-
-    public Enums.Direction Direction { get; }
-}
-
-public class InteractionMenuNavigation
-{
-    public InteractionMenuNavigation(Enums.Direction direction)
+    public MenuNavigation(Enums.Direction direction)
     {
         Direction = direction;
     }

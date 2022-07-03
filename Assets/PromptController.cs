@@ -35,7 +35,7 @@ public class PromptController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case InventoryMenuNavigation menuNavigation:
+            case MenuNavigation menuNavigation:
                 UpdatePromptSelection(menuNavigation);
                 break;
         }
@@ -68,7 +68,7 @@ public class PromptController : MonoBehaviour, IObserver
         return _prompts[_selectedPromptIndex];
     }
 
-    private void UpdatePromptSelection(InventoryMenuNavigation menuNavigation)
+    private void UpdatePromptSelection(MenuNavigation menuNavigation)
     {
         void ChangePromptAnswer()
         {

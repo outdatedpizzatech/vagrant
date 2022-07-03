@@ -85,7 +85,7 @@ public class InteractionBoxController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case InteractionMenuNavigation menuNavigation when _active:
+            case MenuNavigation menuNavigation when _active:
                 UpdatePromptSelection(menuNavigation);
                 break;
         }
@@ -111,7 +111,7 @@ public class InteractionBoxController : MonoBehaviour, IObserver
                 _active = true;
 
                 break;
-            case SubjectMessage.SelectInteractionMenuItem when _active:
+            case SubjectMessage.MenuSelection when _active:
                 switch (_selectedPromptIndex)
                 {
                     case 0:
@@ -125,7 +125,7 @@ public class InteractionBoxController : MonoBehaviour, IObserver
                 break;
         }
     }
-    private void UpdatePromptSelection(InteractionMenuNavigation menuNavigation)
+    private void UpdatePromptSelection(MenuNavigation menuNavigation)
     {
         void ChangePromptAnswer()
         {

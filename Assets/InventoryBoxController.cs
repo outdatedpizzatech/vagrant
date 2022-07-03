@@ -92,7 +92,7 @@ public class InventoryBoxController : MonoBehaviour, IObserver
         
         switch (parameters)
         {
-            case InventoryMenuNavigation menuNavigation when _active:
+            case MenuNavigation menuNavigation when _active:
                 UpdatePromptSelection(menuNavigation);
                 break;
         }
@@ -110,7 +110,7 @@ public class InventoryBoxController : MonoBehaviour, IObserver
                 Hide();
 
                 break;
-            case SubjectMessage.SelectInventoryMenuItem when _active:
+            case SubjectMessage.MenuSelection when _active:
                 var selectedItem = playerController.Items()[_selectedPromptIndex];
                 var selectInventoryItemEvent = new SelectInventoryItemEvent(selectedItem);
                 _flowSubject.Notify(selectInventoryItemEvent);
@@ -118,7 +118,7 @@ public class InventoryBoxController : MonoBehaviour, IObserver
                 break;
         }
     }
-    private void UpdatePromptSelection(InventoryMenuNavigation menuNavigation)
+    private void UpdatePromptSelection(MenuNavigation menuNavigation)
     {
         void ChangePromptAnswer()
         {
