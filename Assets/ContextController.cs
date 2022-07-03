@@ -1,12 +1,12 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
-public partial class ContextController : MonoBehaviour, IObserver
+public class ContextController : MonoBehaviour, IObserver
 {
     private Subject _flowSubject;
 
-    public List<Enums.ControlContext> activeContexts = new ();
+    private readonly List<Enums.ControlContext> _activeContexts = new ();
 
     public void Setup(Subject flowSubject)
     {
@@ -51,14 +51,27 @@ public partial class ContextController : MonoBehaviour, IObserver
         }
     }
 
+    public bool InHistory(Enums.ControlContext controlContext)
+    {
+        return (_activeContexts.Any((x) =>
+            x == controlContext));
+    }
+
+    public Enums.ControlContext Current()
+    {
+        return _activeContexts.Count == 0
+            ? Enums.ControlContext.None
+            : _activeContexts.Last();
+    }
+
     private void AddContext(Enums.ControlContext context)
     {
-        activeContexts.Remove(context);
-        activeContexts.Add(context);
+        _activeContexts.Remove(context);
+        _activeContexts.Add(context);
     }
 
     private void RemoveContext(Enums.ControlContext context)
     {
-        activeContexts.Remove(context);
+        _activeContexts.Remove(context);
     }
 }

@@ -47,7 +47,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
             case InteractionResponseEvent interactionResponseEvent:
                 _interactionEvent = interactionResponseEvent.InteractionEvent;
                 break;
-            case StartEventStepEvent startEventStepEvent:
+            case StartEventStep startEventStepEvent:
                 _eventStepIndex = startEventStepEvent.EventStepIndex;
                 Show();
                 break;

@@ -5,26 +5,37 @@ public class InteractionController : MonoBehaviour, IObserver
 {
     public ContextController contextController;
 
-    private bool _inMenu;
     private bool _inEvent;
+    private bool _aMenuIsOpen;
     private bool _halted;
     private Subject _interactionSubject;
     private Subject _flowSubject;
     private PositionGrid _positionGrid;
     private InputAction _inputAction;
     private float _timeSinceLastDirectionalInput;
+    private bool _inventoryMenuFocused;
+    private bool _messageBoxFocused;
+    private bool _interactionMenuFocused;
 
     private void Update()
     {
         _timeSinceLastDirectionalInput += Time.deltaTime;
 
-        _inMenu = contextController.activeContexts.Any((x) =>
-            x is Enums.ControlContext.InteractionMenu or Enums.ControlContext.InventoryMenu);
-        _inEvent = contextController.activeContexts.Any((x) => x == Enums.ControlContext.Event);
+        var currentControlContext = contextController.Current();
+
+        _interactionMenuFocused = currentControlContext == Enums.ControlContext.InteractionMenu;
+        _inventoryMenuFocused = currentControlContext == Enums.ControlContext.InventoryMenu;
+        _messageBoxFocused = currentControlContext == Enums.ControlContext.Event;
+        
+        var interactionMenuOpen = _interactionMenuFocused || contextController.InHistory(Enums.ControlContext.InteractionMenu);
+        var inventoryMenuOpen = _inventoryMenuFocused || contextController.InHistory(Enums.ControlContext.InventoryMenu);
+        
+        _aMenuIsOpen = interactionMenuOpen || inventoryMenuOpen;
+        _inEvent = _messageBoxFocused || contextController.InHistory(Enums.ControlContext.Event);
 
         if (!_halted)
         {
-            if (_inMenu || _inEvent)
+            if (_aMenuIsOpen || _inEvent)
             {
                 _flowSubject.Notify(SubjectMessage.TimeShouldFreeze);
                 _halted = true;
@@ -32,22 +43,22 @@ public class InteractionController : MonoBehaviour, IObserver
         }
         else
         {
-            if (!_inMenu && !_inEvent)
+            if (!_aMenuIsOpen && !_inEvent)
             {
                 _flowSubject.Notify(SubjectMessage.TimeShouldFlow);
                 _halted = false;
             }
         }
 
-        if (contextController.activeContexts.Last() == Enums.ControlContext.InteractionMenu)
+        if (_interactionMenuFocused)
         {
             _flowSubject.Notify(SubjectMessage.GiveContextToInteractionMenu);
         }
 
         void NotifyMenuInputs()
         {
-            if (!_inEvent && !_inMenu || !_inputAction.InputDirections.Any()) return;
-            if (_currentControlContext() == Enums.ControlContext.InteractionMenu)
+            if (!_inEvent && !_aMenuIsOpen || !_inputAction.InputDirections.Any()) return;
+            if (_interactionMenuFocused)
             {
                 _flowSubject.Notify(new InteractionMenuNavigation(_inputAction.InputDirections.Last()));
             }
@@ -79,13 +90,13 @@ public class InteractionController : MonoBehaviour, IObserver
         switch (subjectMessage)
         {
             case SubjectMessage.PlayerRequestsSecondaryActionEvent:
-                if (!_inEvent && !_inMenu)
+                if (!_inEvent && !_aMenuIsOpen)
                 {
                     _flowSubject.Notify(SubjectMessage.OpenInventoryMenu);
                 }
-                else if (_inMenu)
+                else if (_aMenuIsOpen)
                 {
-                    if (contextController.activeContexts.Last() == Enums.ControlContext.InventoryMenu)
+                    if (_inventoryMenuFocused)
                     {
                         _flowSubject.Notify(SubjectMessage.CloseInventoryMenu);
                     }
@@ -99,7 +110,7 @@ public class InteractionController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case PlayerRequestsPrimaryActionEvent playerActionEvent when !_inEvent && !_inMenu:
+            case PlayerRequestsPrimaryActionEvent playerActionEvent when !_inEvent && !_aMenuIsOpen:
             {
                 var position = new[] { playerActionEvent.X, playerActionEvent.Y };
 
@@ -134,15 +145,15 @@ public class InteractionController : MonoBehaviour, IObserver
             }
             case PlayerRequestsPrimaryActionEvent:
             {
-                if (_currentControlContext() == Enums.ControlContext.Event)
+                if (_messageBoxFocused)
                 {
                     _flowSubject.Notify(SubjectMessage.AdvanceEvent);
                 }
-                else if (_currentControlContext() == Enums.ControlContext.InteractionMenu)
+                else if (_interactionMenuFocused)
                 {
                     _flowSubject.Notify(SubjectMessage.SelectInteractionMenuItem);
                 }
-                else if (_currentControlContext() == Enums.ControlContext.InventoryMenu)
+                else if (_inventoryMenuFocused)
                 {
                     _flowSubject.Notify(SubjectMessage.SelectInventoryMenuItem);
                 }
@@ -150,12 +161,5 @@ public class InteractionController : MonoBehaviour, IObserver
                 break;
             }
         }
-    }
-
-    private Enums.ControlContext _currentControlContext()
-    {
-        return contextController.activeContexts.Count == 0
-            ? Enums.ControlContext.None
-            : contextController.activeContexts.Last();
     }
 }

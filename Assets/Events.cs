@@ -8,7 +8,6 @@ public enum SubjectMessage
     ScreenFinishedWipeIn,
     AdvanceEvent,
     EndEventSequence,
-    StartEventSequenceEvent,
     PlayerRequestsSecondaryActionEvent,
     OpenInventoryMenu,
     CloseInventoryMenu,
@@ -127,9 +126,9 @@ public class LeftPositionEvent
     public int Y { get; }
 }
 
-public class StartEventStepEvent
+public class StartEventStep
 {
-    public StartEventStepEvent(int eventStepIndex)
+    public StartEventStep(int eventStepIndex)
     {
         EventStepIndex = eventStepIndex;
     }

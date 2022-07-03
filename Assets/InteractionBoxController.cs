@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -8,15 +6,13 @@ public class InteractionBoxController : MonoBehaviour, IObserver
 {
     public PersonMovement playerMovement;
     public float positionOffset = 8;
-    public PlayerController playerController;
     
     private int _selectedPromptIndex;
     private TMP_Text _text;
     private Subject _flowSubject;
     private float _timeSinceLastPromptChange;
-    private List<string> _prompts = new() { "End", "Give" };
+    private readonly List<string> _prompts = new() { "End", "Give" };
     private bool _active;
-    private bool _visible;
     
     public void Setup(Subject flowSubject)
     {
@@ -42,7 +38,6 @@ public class InteractionBoxController : MonoBehaviour, IObserver
     private void Hide()
     {
         _active = false;
-        _visible = false;
         
         transform.localScale = Vector3.zero;
     }
@@ -50,7 +45,6 @@ public class InteractionBoxController : MonoBehaviour, IObserver
     private void Show()
     {
         _active = true;
-        _visible = true;
         _selectedPromptIndex = 0;
         
         transform.localScale = Vector3.one;
@@ -80,8 +74,7 @@ public class InteractionBoxController : MonoBehaviour, IObserver
         _text.text = text;
     }
 
-    // Update is called once per frame
-    void LateUpdate()
+    private void LateUpdate()
     {
         var playerPosition = playerMovement.transform.position;
         var newPosition = new Vector2(playerPosition.x + positionOffset, playerPosition.y);
@@ -119,12 +112,14 @@ public class InteractionBoxController : MonoBehaviour, IObserver
 
                 break;
             case SubjectMessage.SelectInteractionMenuItem when _active:
-                if (_selectedPromptIndex == 0)
+                switch (_selectedPromptIndex)
                 {
-                    _flowSubject.Notify(SubjectMessage.EndInteraction);
-                } else if (_selectedPromptIndex == 1)
-                {
-                    _flowSubject.Notify(SubjectMessage.OpenInventoryMenu);
+                    case 0:
+                        _flowSubject.Notify(SubjectMessage.EndInteraction);
+                        break;
+                    case 1:
+                        _flowSubject.Notify(SubjectMessage.OpenInventoryMenu);
+                        break;
                 }
 
                 break;

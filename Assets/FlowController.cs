@@ -9,13 +9,13 @@ public class FlowController : MonoBehaviour, IObserver
     private InteractionEvent _interactionEvent;
     private int _eventStepIndex;
     private bool _atEndOfMessage;
-    private bool _startedInteractionMenu;
+    private bool _shownInteractionMenu;
     private IInteractable _interactable;
 
     public void Update()
     {
         if (!ShouldShowInteractionMenu()) return;
-        _startedInteractionMenu = true;
+        _shownInteractionMenu = true;
         _flowSubject.Notify(SubjectMessage.OpenInteractionMenu);
     }
 
@@ -35,11 +35,10 @@ public class FlowController : MonoBehaviour, IObserver
             case SubjectMessage.AdvanceEvent:
                 if (_atEndOfMessage)
                 {
-                    AdvanceEventSequenceEvent();
+                    AdvanceEventSequence();
                 }
 
                 break;
-
             case SubjectMessage.ReachedEndOfMessage:
                 var currentMessage = CurrentMessage();
 
@@ -49,14 +48,14 @@ public class FlowController : MonoBehaviour, IObserver
                 }
 
                 _atEndOfMessage = true;
-                _startedInteractionMenu = false;
+                _shownInteractionMenu = false;
 
                 break;
 
             case SubjectMessage.EndInteraction:
                 _flowSubject.Notify(SubjectMessage.CloseInteractionMenu);
                 _flowSubject.Notify(SubjectMessage.EndEventSequence);
-                
+
                 _interactionEvent = null;
 
                 break;
@@ -72,19 +71,19 @@ public class FlowController : MonoBehaviour, IObserver
                 break;
 
             case SelectInventoryItemEvent selectInventoryItemEvent:
+            {
                 if (_interactable == null)
                 {
                     var response = new InteractionEvent();
                     response.AddMessage(selectInventoryItemEvent.Item.description);
                     _flowSubject.Notify(new InteractionResponseEvent(response));
-                    _flowSubject.Notify(SubjectMessage.StartEventSequenceEvent);
                 }
                 else
                 {
-                    var interactionResponse1 = _interactable.ReceiveInteraction(selectInventoryItemEvent.Item);
-                    if (interactionResponse1 != null)
+                    var interactionResponse = _interactable.ReceiveInteraction(selectInventoryItemEvent.Item);
+                    if (interactionResponse != null)
                     {
-                        _flowSubject.Notify(new InteractionResponseEvent(interactionResponse1));
+                        _flowSubject.Notify(new InteractionResponseEvent(interactionResponse));
                     }
 
                     _flowSubject.Notify(SubjectMessage.CloseInventoryMenu);
@@ -92,8 +91,10 @@ public class FlowController : MonoBehaviour, IObserver
                 }
 
                 break;
+            }
 
             case InteractWith interactWithEvent:
+            {
                 _interactable = interactWithEvent.Interactable;
                 var newDirection = ((int)interactWithEvent.Direction + 2) % 4;
                 Enums.Direction receivedFromDirection = (Enums.Direction)newDirection;
@@ -101,10 +102,10 @@ public class FlowController : MonoBehaviour, IObserver
                 if (interactionResponse != null)
                 {
                     _flowSubject.Notify(new InteractionResponseEvent(interactionResponse));
-                    _flowSubject.Notify(SubjectMessage.StartEventSequenceEvent);
                 }
 
                 break;
+            }
 
             case PromptResponseEvent promptResponseEvent:
                 _flowSubject.Notify(
@@ -119,12 +120,12 @@ public class FlowController : MonoBehaviour, IObserver
         _eventStepIndex = 0;
         _interactionEvent = interactionEvent;
         _atEndOfMessage = false;
-        _flowSubject.Notify(new StartEventStepEvent(_eventStepIndex));
+        _flowSubject.Notify(new StartEventStep(_eventStepIndex));
     }
 
-    private void AdvanceEventSequenceEvent()
+    private void AdvanceEventSequence()
     {
-        if (_eventStepIndex >= _interactionEvent.EventSteps.Count - 1)
+        if (AtEndOfEvent())
         {
             if (_interactionEvent.Prompts.Any())
             {
@@ -140,7 +141,7 @@ public class FlowController : MonoBehaviour, IObserver
         else
         {
             _eventStepIndex++;
-            _flowSubject.Notify(new StartEventStepEvent(_eventStepIndex));
+            _flowSubject.Notify(new StartEventStep(_eventStepIndex));
         }
     }
 
@@ -151,7 +152,12 @@ public class FlowController : MonoBehaviour, IObserver
 
     private bool ShouldShowInteractionMenu()
     {
-        return _interactionEvent != null && !_startedInteractionMenu && _atEndOfMessage &&
-               _eventStepIndex >= _interactionEvent.EventSteps.Count - 1 && !_interactionEvent.Prompts.Any() && _interactionEvent.CanFollowUp;
+        return _interactionEvent != null && !_shownInteractionMenu && _atEndOfMessage &&
+               AtEndOfEvent() && !_interactionEvent.Prompts.Any() && _interactionEvent.CanFollowUp;
+    }
+
+    private bool AtEndOfEvent()
+    {
+        return _eventStepIndex >= _interactionEvent.EventSteps.Count - 1;
     }
 }
