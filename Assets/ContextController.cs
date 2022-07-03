@@ -2,20 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ContextController : MonoBehaviour, IObserver
+public partial class ContextController : MonoBehaviour, IObserver
 {
     private Subject _flowSubject;
-    
-    public enum ControlContext
-    {
-        Event,
-        FollowUpMenu,
-        InventoryMenu,
-        PromptMenu,
-        None
-    }
-    
-    public List<ControlContext> activeContexts = new ();
+
+    public List<Enums.ControlContext> activeContexts = new ();
 
     public void Setup(Subject flowSubject)
     {
@@ -28,24 +19,24 @@ public class ContextController : MonoBehaviour, IObserver
     {
         switch (subjectMessage)
         {
-            case SubjectMessage.RequestFollowUpEvent:
-                AddContext(ControlContext.FollowUpMenu);
+            case SubjectMessage.OpenInteractionMenu:
+                AddContext(Enums.ControlContext.InteractionMenu);
                 break;
-            case SubjectMessage.OpenMenuEvent:
-                AddContext(ControlContext.InventoryMenu);
+            case SubjectMessage.OpenInventoryMenu:
+                AddContext(Enums.ControlContext.InventoryMenu);
                 break;
             case SubjectMessage.AdvanceEvent:
-                RemoveContext(ControlContext.Event);
-                AddContext(ControlContext.Event);
+                RemoveContext(Enums.ControlContext.Event);
+                AddContext(Enums.ControlContext.Event);
                 break;
-            case SubjectMessage.CloseMenuEvent:
-                RemoveContext(ControlContext.InventoryMenu);
+            case SubjectMessage.CloseInventoryMenu:
+                RemoveContext(Enums.ControlContext.InventoryMenu);
                 break;
-            case SubjectMessage.EndFollowUpEvent:
-                RemoveContext(ControlContext.FollowUpMenu);
+            case SubjectMessage.CloseInteractionMenu:
+                RemoveContext(Enums.ControlContext.InteractionMenu);
                 break;
-            case SubjectMessage.EndEventSequenceEvent:
-                RemoveContext(ControlContext.Event);
+            case SubjectMessage.EndEventSequence:
+                RemoveContext(Enums.ControlContext.Event);
                 break;
         }
     }
@@ -55,18 +46,18 @@ public class ContextController : MonoBehaviour, IObserver
         switch (parameters)
         {
             case InteractionResponseEvent:
-                AddContext(ControlContext.Event);
+                AddContext(Enums.ControlContext.Event);
                 break;
         }
     }
 
-    private void AddContext(ControlContext context)
+    private void AddContext(Enums.ControlContext context)
     {
         activeContexts.Remove(context);
         activeContexts.Add(context);
     }
 
-    private void RemoveContext(ControlContext context)
+    private void RemoveContext(Enums.ControlContext context)
     {
         activeContexts.Remove(context);
     }

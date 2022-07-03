@@ -34,9 +34,14 @@ namespace NPC_Scripts
                         response.CanFollowUp = true;
                         return response;
                     }
+                    else
+                    {
+                        var response = new InteractionEvent();
+                        response.AddMessage("Thanks, but no thanks.");
+                        response.CanFollowUp = true;
+                        return response;
+                    }
                 }
-
-                    break;
             }
 
             return null;

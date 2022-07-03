@@ -25,11 +25,11 @@ public class PersonMovement : MonoBehaviour, IObserver
     {
         switch (message)
         {
-            case SubjectMessage.EndHaltedContextEvent:
+            case SubjectMessage.TimeShouldFlow:
                 canMakeAnotherMove = true;
                 _animator.speed = _tempAnimationSpeed;
                 break;
-            case SubjectMessage.StartHaltedContextEvent:
+            case SubjectMessage.TimeShouldFreeze:
                 canMakeAnotherMove = false;
                 _tempAnimationSpeed = _animator.speed;
                 _animator.speed = 0;

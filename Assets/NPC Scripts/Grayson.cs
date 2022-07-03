@@ -46,6 +46,7 @@ namespace NPC_Scripts
                 {
                     var response = new InteractionEvent();
                     response.AddMessage("Oh, well... next time, perhaps.");
+                    response.CanFollowUp = true;
                     return response;
                 }
                 case PromptKeys.TryingToGetOnGoodSide:
@@ -59,6 +60,23 @@ namespace NPC_Scripts
                     var response = new InteractionEvent();
                     response.AddMessage("Now, now... you're starting to embarrass yourself.");
                     return response;
+                }
+                case Item item:
+                {
+                    if (item.itemName == "Old Socks")
+                    {
+                        var response = new InteractionEvent();
+                        response.AddMessage("I thought I left those somewhere!");
+                        response.CanFollowUp = true;
+                        return response;
+                    }
+                    else
+                    {
+                        var response = new InteractionEvent();
+                        response.AddMessage("What is it? I can't see so well, y'know.");
+                        response.CanFollowUp = true;
+                        return response;
+                    }
                 }
             }
 

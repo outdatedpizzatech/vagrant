@@ -92,7 +92,7 @@ public class InteractionBoxController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case FollowUpMenuNavigation menuNavigation when _active:
+            case InteractionMenuNavigation menuNavigation when _active:
                 UpdatePromptSelection(menuNavigation);
                 break;
         }
@@ -102,31 +102,31 @@ public class InteractionBoxController : MonoBehaviour, IObserver
     {
         switch (message)
         {
-            case SubjectMessage.RequestFollowUpEvent:
+            case SubjectMessage.OpenInteractionMenu:
                 Show();
 
                 break;
-            case SubjectMessage.EndFollowUpEvent when _active:
+            case SubjectMessage.CloseInteractionMenu:
                 Hide();
 
                 break;
-            case SubjectMessage.OpenMenuEvent when _active:
+            case SubjectMessage.OpenInventoryMenu when _active:
                 _active = false;
 
                 break;
-            case SubjectMessage.SelectFollowUpMenuItem when _active:
+            case SubjectMessage.SelectInteractionMenuItem when _active:
                 if (_selectedPromptIndex == 0)
                 {
-                    _flowSubject.Notify(SubjectMessage.EndFollowUpEvent);
+                    _flowSubject.Notify(SubjectMessage.EndInteraction);
                 } else if (_selectedPromptIndex == 1)
                 {
-                    _flowSubject.Notify(SubjectMessage.OpenMenuEvent);
+                    _flowSubject.Notify(SubjectMessage.OpenInventoryMenu);
                 }
 
                 break;
         }
     }
-    private void UpdatePromptSelection(FollowUpMenuNavigation menuNavigation)
+    private void UpdatePromptSelection(InteractionMenuNavigation menuNavigation)
     {
         void ChangePromptAnswer()
         {

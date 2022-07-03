@@ -7,18 +7,19 @@ public enum SubjectMessage
     ScreenFinishedWipeOut,
     ScreenFinishedWipeIn,
     AdvanceEvent,
-    EndEventSequenceEvent,
+    EndEventSequence,
     StartEventSequenceEvent,
     PlayerRequestsSecondaryActionEvent,
-    OpenMenuEvent,
-    CloseMenuEvent,
-    ReachedEndOfMessageEvent,
-    SelectFollowUpMenuItem,
+    OpenInventoryMenu,
+    CloseInventoryMenu,
+    ReachedEndOfMessage,
+    SelectInteractionMenuItem,
     SelectInventoryMenuItem,
-    StartHaltedContextEvent,
-    EndHaltedContextEvent,
-    RequestFollowUpEvent,
-    EndFollowUpEvent,
+    TimeShouldFreeze,
+    TimeShouldFlow,
+    OpenInteractionMenu,
+    CloseInteractionMenu,
+    EndInteraction,
 }
 
 public class ReceiveItemEvent
@@ -51,9 +52,9 @@ public class InteractionResponseEvent
     public InteractionEvent InteractionEvent { get; }
 }
 
-public class MenuNavigation
+public class InventoryMenuNavigation
 {
-    public MenuNavigation(Enums.Direction direction)
+    public InventoryMenuNavigation(Enums.Direction direction)
     {
         Direction = direction;
     }
@@ -61,9 +62,9 @@ public class MenuNavigation
     public Enums.Direction Direction { get; }
 }
 
-public class FollowUpMenuNavigation
+public class InteractionMenuNavigation
 {
-    public FollowUpMenuNavigation(Enums.Direction direction)
+    public InteractionMenuNavigation(Enums.Direction direction)
     {
         Direction = direction;
     }
@@ -145,9 +146,9 @@ public class SelectInventoryItemEvent
     public Item Item { get; }
 }
 
-public class InteractWithEvent
+public class InteractWith
 {
-    public InteractWithEvent(IInteractable interactable, Enums.Direction direction)
+    public InteractWith(IInteractable interactable, Enums.Direction direction)
     {
         Interactable = interactable;
         Direction = direction;

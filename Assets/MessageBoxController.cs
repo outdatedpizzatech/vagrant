@@ -14,6 +14,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
     private int _eventStepIndex;
     private EventStep _eventStep;
     private PromptController _promptController;
+    private bool _active;
 
     private bool _atEndOfMessage;
 
@@ -33,7 +34,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
 
     public void OnNotify(SubjectMessage message)
     {
-        if (message == SubjectMessage.EndEventSequenceEvent)
+        if (message == SubjectMessage.EndEventSequence)
         {
             Hide();
         }
@@ -76,12 +77,16 @@ public class MessageBoxController : MonoBehaviour, IObserver
     {
         _timeSinceLastLetter += Time.deltaTime;
 
+        if (!_active)
+        {
+            return;
+        }
 
         if (AtEndOfCurrentMessage())
         {
             if (_atEndOfMessage) return;
             _atEndOfMessage = true;
-            _flowSubject.Notify(SubjectMessage.ReachedEndOfMessageEvent);
+            _flowSubject.Notify(SubjectMessage.ReachedEndOfMessage);
 
             return;
         }
@@ -103,6 +108,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
 
     private void Show()
     {
+        _active = true;
         _atEndOfMessage = false;
         transform.localScale = Vector3.one;
         _promptController.ResetPrompts(_interactionEvent.Prompts);
@@ -154,6 +160,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
 
     private void Hide()
     {
+        _active = false;
         transform.localScale = Vector3.zero;
     }
 

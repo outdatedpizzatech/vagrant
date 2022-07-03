@@ -92,7 +92,7 @@ public class InventoryBoxController : MonoBehaviour, IObserver
         
         switch (parameters)
         {
-            case MenuNavigation menuNavigation when _active:
+            case InventoryMenuNavigation menuNavigation when _active:
                 UpdatePromptSelection(menuNavigation);
                 break;
         }
@@ -102,11 +102,11 @@ public class InventoryBoxController : MonoBehaviour, IObserver
     {
         switch (message)
         {
-            case SubjectMessage.OpenMenuEvent:
+            case SubjectMessage.OpenInventoryMenu:
                 Show();
 
                 break;
-            case SubjectMessage.CloseMenuEvent:
+            case SubjectMessage.CloseInventoryMenu:
                 Hide();
 
                 break;
@@ -118,7 +118,7 @@ public class InventoryBoxController : MonoBehaviour, IObserver
                 break;
         }
     }
-    private void UpdatePromptSelection(MenuNavigation menuNavigation)
+    private void UpdatePromptSelection(InventoryMenuNavigation menuNavigation)
     {
         void ChangePromptAnswer()
         {
