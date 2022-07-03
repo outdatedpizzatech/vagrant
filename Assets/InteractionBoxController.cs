@@ -114,6 +114,10 @@ public class InteractionBoxController : MonoBehaviour, IObserver
                 _active = false;
 
                 break;
+            case SubjectMessage.GiveContextToInteractionMenu:
+                _active = true;
+
+                break;
             case SubjectMessage.SelectInteractionMenuItem when _active:
                 if (_selectedPromptIndex == 0)
                 {

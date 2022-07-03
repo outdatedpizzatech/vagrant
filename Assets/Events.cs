@@ -20,6 +20,7 @@ public enum SubjectMessage
     OpenInteractionMenu,
     CloseInteractionMenu,
     EndInteraction,
+    GiveContextToInteractionMenu
 }
 
 public class ReceiveItemEvent

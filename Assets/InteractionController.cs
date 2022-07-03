@@ -39,6 +39,11 @@ public class InteractionController : MonoBehaviour, IObserver
             }
         }
 
+        if (contextController.activeContexts.Last() == Enums.ControlContext.InteractionMenu)
+        {
+            _flowSubject.Notify(SubjectMessage.GiveContextToInteractionMenu);
+        }
+
         void NotifyMenuInputs()
         {
             if (!_inEvent && !_inMenu || !_inputAction.InputDirections.Any()) return;
@@ -80,7 +85,10 @@ public class InteractionController : MonoBehaviour, IObserver
                 }
                 else if (_inMenu)
                 {
-                    _flowSubject.Notify(SubjectMessage.CloseInventoryMenu);
+                    if (contextController.activeContexts.Last() == Enums.ControlContext.InventoryMenu)
+                    {
+                        _flowSubject.Notify(SubjectMessage.CloseInventoryMenu);
+                    }
                 }
 
                 break;
