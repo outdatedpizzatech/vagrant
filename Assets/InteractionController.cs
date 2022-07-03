@@ -125,7 +125,7 @@ public class InteractionController : MonoBehaviour, IObserver
 
                 if (_positionGrid.Has(position[0], position[1]))
                 {
-                    var interactable = _positionGrid.Get(position[0], position[1]).GetComponent<IInteractable>();
+                    var interactable = _positionGrid.Get(position[0], position[1]).GetComponent<Interactable>();
 
                     if (interactable != null)
                     {

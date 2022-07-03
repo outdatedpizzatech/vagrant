@@ -24,6 +24,11 @@ public class PlayerController : MonoBehaviour, IObserver
         _items.Add(item);
     }
 
+    public void RemoveItem(Item item)
+    {
+        _items.Remove(item);
+    }
+
     public List<Item> Items()
     {
         return _items;
@@ -33,8 +38,12 @@ public class PlayerController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case ReceiveItemEvent receiveItemEvent:
+            case ReceiveItem receiveItemEvent:
                 AddItem(receiveItemEvent.Item);
+
+                break;
+            case LoseItem loseItemEvent:
+                RemoveItem(loseItemEvent.Item);
 
                 break;
         }

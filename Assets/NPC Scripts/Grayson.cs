@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace NPC_Scripts
 {
-    public class Grayson : MonoBehaviour, IInteractable
+    public class Grayson : Interactable
     {
         private static readonly int FacingDirection = Animator.StringToHash("facingDirection");
 
@@ -15,7 +15,7 @@ namespace NPC_Scripts
             NotTryingToGetOnGoodSide,
         }
 
-        public InteractionEvent ReceiveInteraction(Enums.Direction direction)
+        public override InteractionEvent ReceiveInteraction(Enums.Direction direction)
         {
             var animator = GetComponent<Animator>();
             animator.SetInteger(FacingDirection, (int)direction);
@@ -30,7 +30,7 @@ namespace NPC_Scripts
             return response;
         }
 
-        public InteractionEvent ReceiveInteraction(object promptId)
+        public override InteractionEvent ReceiveInteraction(object promptId)
         {
             switch (promptId)
             {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TreasureController : MonoBehaviour, IInteractable
+public class TreasureController : Interactable
 {
     public Sprite closedSprite;
     public Item heldItem;
@@ -20,7 +20,7 @@ public class TreasureController : MonoBehaviour, IInteractable
         SetPosition((int)currentPosition.x, (int)currentPosition.y);
     }
     
-    public InteractionEvent ReceiveInteraction(Enums.Direction direction)
+    public override InteractionEvent ReceiveInteraction(Enums.Direction direction)
     {
         if (_open)
         {
@@ -35,11 +35,6 @@ public class TreasureController : MonoBehaviour, IInteractable
         response.AddItem(heldItem);
         
         return response;
-    }
-
-    public InteractionEvent ReceiveInteraction(object promptId)
-    {
-        return null;
     }
 
     public void SetPosition(int x, int y)

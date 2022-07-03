@@ -21,9 +21,29 @@ public enum SubjectMessage
     GiveContextToInteractionMenu
 }
 
-public class ReceiveItemEvent
+public class GiveItemEvent
 {
-    public ReceiveItemEvent(Item item)
+    public GiveItemEvent(Item item)
+    {
+        Item = item;
+    }
+
+    public Item Item { get; }
+}
+
+public class ReceiveItem
+{
+    public ReceiveItem(Item item)
+    {
+        Item = item;
+    }
+
+    public Item Item { get; }
+}
+
+public class LoseItem
+{
+    public LoseItem(Item item)
     {
         Item = item;
     }
@@ -137,12 +157,12 @@ public class SelectInventoryItemEvent
 
 public class InteractWith
 {
-    public InteractWith(IInteractable interactable, Enums.Direction direction)
+    public InteractWith(Interactable interactable, Enums.Direction direction)
     {
         Interactable = interactable;
         Direction = direction;
     }
 
-    public IInteractable Interactable { get; }
+    public Interactable Interactable { get; }
     public Enums.Direction Direction { get; }
 }

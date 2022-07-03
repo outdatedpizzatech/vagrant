@@ -10,7 +10,7 @@ public class FlowController : MonoBehaviour, IObserver
     private int _eventStepIndex;
     private bool _atEndOfMessage;
     private bool _shownInteractionMenu;
-    private IInteractable _interactable;
+    private Interactable _interactable;
 
     public void Update()
     {
@@ -44,7 +44,7 @@ public class FlowController : MonoBehaviour, IObserver
 
                 if (currentMessage.Information is Item item)
                 {
-                    _flowSubject.Notify(new ReceiveItemEvent(item));
+                    _flowSubject.Notify(new ReceiveItem(item));
                 }
 
                 _atEndOfMessage = true;
@@ -80,9 +80,10 @@ public class FlowController : MonoBehaviour, IObserver
                 }
                 else
                 {
-                    var interactionResponse = _interactable.ReceiveInteraction(selectInventoryItemEvent.Item);
+                    var interactionResponse = _interactable.ReceiveItem(selectInventoryItemEvent.Item);
                     if (interactionResponse != null)
                     {
+                        _flowSubject.Notify(new LoseItem(selectInventoryItemEvent.Item));
                         _flowSubject.Notify(new InteractionResponseEvent(interactionResponse));
                     }
 

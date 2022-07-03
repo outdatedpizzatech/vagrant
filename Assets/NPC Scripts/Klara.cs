@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace NPC_Scripts
 {
-    public class Klara : MonoBehaviour, IInteractable
+    public class Klara : Interactable
     {
         private static readonly int FacingDirection = Animator.StringToHash("facingDirection");
 
-        public InteractionEvent ReceiveInteraction(Enums.Direction direction)
+        public override InteractionEvent ReceiveInteraction(Enums.Direction direction)
         {
             var animator = GetComponent<Animator>();
             animator.SetInteger(FacingDirection, (int)direction);
@@ -21,7 +21,7 @@ namespace NPC_Scripts
             return response;
         }
 
-        public InteractionEvent ReceiveInteraction(object promptId)
+        public override InteractionEvent ReceiveInteraction(object promptId)
         {
             switch (promptId)
             {
