@@ -5,6 +5,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
 {
     public PersonMovement playerMovement;
     public float positionOffset = 4;
+    public CursorSelection cursorSelection;
 
     private InteractionEvent _interactionEvent;
     private Subject _flowSubject;
@@ -131,7 +132,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
         {
             _text.text = message;
         }
-
+        
         if (_eventStepIndex == _interactionEvent.EventSteps.Count - 1)
         {
             _text.text += _promptController.PromptContent();

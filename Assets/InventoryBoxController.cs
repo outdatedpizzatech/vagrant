@@ -7,7 +7,8 @@ using UnityEngine;
 public class InventoryBoxController : MonoBehaviour, IObserver
 {
     public PersonMovement playerMovement;
-    public float positionOffset = 8;
+    public float positionOffsetX;
+    public float positionOffsetY;
     public PlayerController playerController;
     
     private int _selectedPromptIndex;
@@ -56,17 +57,17 @@ public class InventoryBoxController : MonoBehaviour, IObserver
     private void Refresh()
     {
         var promptIndex = 0;
-        var text = "\n";
+        var text = "";
         
         foreach (var prompt in playerController.Items().Select((i) => i.itemName))
         {
             if (promptIndex == _selectedPromptIndex)
             {
-                text += $"\n> {prompt}";
+                text += $"\n<sprite anim='0,1,4'> {prompt}";
             }
             else
             {
-                text += $"\n  {prompt}";
+                text += $"\n<sprite=1> {prompt}";
             }
 
             promptIndex++;
@@ -79,7 +80,7 @@ public class InventoryBoxController : MonoBehaviour, IObserver
     void LateUpdate()
     {
         var playerPosition = playerMovement.transform.position;
-        var newPosition = new Vector2(playerPosition.x + positionOffset, playerPosition.y);
+        var newPosition = new Vector2(playerPosition.x + positionOffsetX, playerPosition.y + positionOffsetY);
         transform.position = newPosition;
     }
     

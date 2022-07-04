@@ -50,11 +50,11 @@ public class PromptController : MonoBehaviour, IObserver
         {
             if (promptIndex == _selectedPromptIndex)
             {
-                text += $"\n> {prompt.Text}";
+                text += $"\n<sprite anim='0,1,4'> {prompt.Text}";
             }
             else
             {
-                text += $"\n  {prompt.Text}";
+                text += $"\n<sprite=1> {prompt.Text}";
             }
 
             promptIndex++;

@@ -56,17 +56,17 @@ public class InteractionBoxController : MonoBehaviour, IObserver
     private void Refresh()
     {
         var promptIndex = 0;
-        var text = "\n";
+        var text = "";
 
         foreach (var prompt in _prompts)
         {
             if (promptIndex == _selectedPromptIndex)
             {
-                text += $"\n> {prompt}";
+                text += $"\n<sprite anim='0,1,4'> {prompt}";
             }
             else
             {
-                text += $"\n  {prompt}";
+                text += $"\n<sprite=1> {prompt}";
             }
 
             promptIndex++;
