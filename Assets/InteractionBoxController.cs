@@ -5,13 +5,14 @@ using UnityEngine;
 public class InteractionBoxController : MonoBehaviour, IObserver
 {
     public PersonMovement playerMovement;
-    public float positionOffset = 8;
+    public float positionOffsetX;
+    public float positionOffsetY;
     
     private int _selectedPromptIndex;
     private TMP_Text _text;
     private Subject _flowSubject;
     private float _timeSinceLastPromptChange;
-    private readonly List<string> _prompts = new() { "End", "Give" };
+    private readonly List<string> _prompts = new() { "END", "GIVE" };
     private bool _active;
     
     public void Setup(Subject flowSubject)
@@ -77,7 +78,7 @@ public class InteractionBoxController : MonoBehaviour, IObserver
     private void LateUpdate()
     {
         var playerPosition = playerMovement.transform.position;
-        var newPosition = new Vector2(playerPosition.x + positionOffset, playerPosition.y);
+        var newPosition = new Vector2(playerPosition.x + positionOffsetX, playerPosition.y + positionOffsetY);
         transform.position = newPosition;
     }
     
