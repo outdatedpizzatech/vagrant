@@ -67,6 +67,11 @@ public class MessageBoxController : MonoBehaviour, IObserver
         return (_shownCharacterIndex >= _text.textInfo.characterCount);
     }
 
+    public Prompt SelectedPrompt()
+    {
+        return _promptController.SelectedPrompt();
+    }
+
     private void LateUpdate()
     {
         var playerPosition = playerMovement.transform.position;
@@ -114,10 +119,19 @@ public class MessageBoxController : MonoBehaviour, IObserver
         transform.localScale = Vector3.one;
         _promptController.ResetPrompts(_interactionEvent.Prompts);
 
+        BringToFront();
         RenderMessage();
 
         _text.alpha = 0;
         _shownCharacterIndex = 0;
+    }
+
+    private void BringToFront()
+    {
+        var currentParent = transform.parent;
+        var emptyParent = GameObject.Find("Empty").transform;
+        transform.SetParent(emptyParent, true);
+        transform.SetParent(currentParent, true);
     }
 
     private void RenderMessage()
@@ -163,10 +177,5 @@ public class MessageBoxController : MonoBehaviour, IObserver
     {
         _active = false;
         transform.localScale = Vector3.zero;
-    }
-
-    public Prompt SelectedPrompt()
-    {
-        return _promptController.SelectedPrompt();
     }
 }
