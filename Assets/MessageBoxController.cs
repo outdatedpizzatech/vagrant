@@ -3,10 +3,6 @@ using UnityEngine;
 
 public class MessageBoxController : MonoBehaviour, IObserver
 {
-    public PersonMovement playerMovement;
-    public float positionOffset = 4;
-    public CursorSelection cursorSelection;
-
     private InteractionEvent _interactionEvent;
     private Subject _flowSubject;
     private TMP_Text _text;
@@ -15,7 +11,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
     private int _eventStepIndex;
     private EventStep _eventStep;
     private PromptController _promptController;
-    private bool _active;
+    private Window _window;
 
     private bool _atEndOfMessage;
 
@@ -37,7 +33,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
     {
         if (message == SubjectMessage.EndEventSequence)
         {
-            Hide();
+            _window.Hide();
         }
     }
 
@@ -56,7 +52,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
     }
 
 
-    public void Reload()
+    public void RenderText()
     {
         RenderMessage();
         _text.alpha = 1;
@@ -72,18 +68,11 @@ public class MessageBoxController : MonoBehaviour, IObserver
         return _promptController.SelectedPrompt();
     }
 
-    private void LateUpdate()
-    {
-        var playerPosition = playerMovement.transform.position;
-        var newPosition = new Vector2(playerPosition.x, playerPosition.y - positionOffset);
-        transform.position = newPosition;
-    }
-
     private void Update()
     {
         _timeSinceLastLetter += Time.deltaTime;
 
-        if (!_active)
+        if (!_window.IsFocused())
         {
             return;
         }
@@ -105,48 +94,32 @@ public class MessageBoxController : MonoBehaviour, IObserver
     private void Awake()
     {
         _text = transform.Find("Text").GetComponent<TMP_Text>();
-    }
-
-    private void Start()
-    {
-        Hide();
+        _window = GetComponent<Window>();
     }
 
     private void Show()
     {
-        _active = true;
+        _window.Show();
         _atEndOfMessage = false;
-        transform.localScale = Vector3.one;
         _promptController.ResetPrompts(_interactionEvent.Prompts);
 
-        BringToFront();
         RenderMessage();
 
         _text.alpha = 0;
         _shownCharacterIndex = 0;
     }
 
-    private void BringToFront()
-    {
-        var currentParent = transform.parent;
-        var emptyParent = GameObject.Find("Empty").transform;
-        transform.SetParent(emptyParent, true);
-        transform.SetParent(currentParent, true);
-    }
-
     private void RenderMessage()
     {
         var eventStep = _interactionEvent.EventSteps[_eventStepIndex];
 
-        if (eventStep.Information is Item item)
+        _text.text = eventStep.Information switch
         {
-            _text.text = $"Received {item.itemName}";
-        }
-        else if(eventStep.Information is string message)
-        {
-            _text.text = message;
-        }
-        
+            Item item => $"Received {item.itemName}",
+            string message => message,
+            _ => _text.text
+        };
+
         if (_eventStepIndex == _interactionEvent.EventSteps.Count - 1)
         {
             _text.text += _promptController.PromptContent();
@@ -171,11 +144,5 @@ public class MessageBoxController : MonoBehaviour, IObserver
         }
 
         _text.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
-    }
-
-    private void Hide()
-    {
-        _active = false;
-        transform.localScale = Vector3.zero;
     }
 }

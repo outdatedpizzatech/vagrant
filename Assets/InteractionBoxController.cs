@@ -4,16 +4,12 @@ using UnityEngine;
 
 public class InteractionBoxController : MonoBehaviour, IObserver
 {
-    public PersonMovement playerMovement;
-    public float positionOffsetX;
-    public float positionOffsetY;
-    
     private int _selectedPromptIndex;
     private TMP_Text _text;
     private Subject _flowSubject;
     private float _timeSinceLastPromptChange;
     private readonly List<string> _prompts = new() { "END", "GIVE" };
-    private bool _active;
+    private Window _window;
     
     public void Setup(Subject flowSubject)
     {
@@ -28,32 +24,18 @@ public class InteractionBoxController : MonoBehaviour, IObserver
 
     private void Awake()
     {
+        _window = GetComponent<Window>();
         _text = transform.Find("Text").GetComponent<TMP_Text>();
-    }
-
-    private void Start()
-    {
-        Hide();
-    }
-
-    private void Hide()
-    {
-        _active = false;
-        
-        transform.localScale = Vector3.zero;
     }
     
     private void Show()
     {
-        _active = true;
+        _window.Show();
         _selectedPromptIndex = 0;
-        
-        transform.localScale = Vector3.one;
-        
-        Refresh();
+        RenderText();
     }
     
-    private void Refresh()
+    private void RenderText()
     {
         var promptIndex = 0;
         var text = "";
@@ -74,19 +56,12 @@ public class InteractionBoxController : MonoBehaviour, IObserver
         
         _text.text = text;
     }
-
-    private void LateUpdate()
-    {
-        var playerPosition = playerMovement.transform.position;
-        var newPosition = new Vector2(playerPosition.x + positionOffsetX, playerPosition.y + positionOffsetY);
-        transform.position = newPosition;
-    }
     
     public void OnNotify<T>(T parameters)
     {
         switch (parameters)
         {
-            case MenuNavigation menuNavigation when _active:
+            case MenuNavigation menuNavigation when _window.IsFocused():
                 UpdatePromptSelection(menuNavigation);
                 break;
         }
@@ -101,18 +76,18 @@ public class InteractionBoxController : MonoBehaviour, IObserver
 
                 break;
             case SubjectMessage.CloseInteractionMenu:
-                Hide();
+                _window.Hide();
 
                 break;
-            case SubjectMessage.OpenInventoryMenu when _active:
-                _active = false;
+            case SubjectMessage.OpenInventoryMenu when _window.IsFocused():
+                _window.LoseFocus();
 
                 break;
             case SubjectMessage.GiveContextToInteractionMenu:
-                _active = true;
+                _window.Show();
 
                 break;
-            case SubjectMessage.MenuSelection when _active:
+            case SubjectMessage.MenuSelection when _window.IsFocused():
                 switch (_selectedPromptIndex)
                 {
                     case 0:
@@ -149,7 +124,7 @@ public class InteractionBoxController : MonoBehaviour, IObserver
 
             _selectedPromptIndex = Mathf.Abs(_selectedPromptIndex % promptCount);
 
-            Refresh();
+            RenderText();
         }
 
         Utilities.Debounce(ref _timeSinceLastPromptChange, 0.25f, ChangePromptAnswer);

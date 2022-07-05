@@ -6,16 +6,13 @@ using UnityEngine;
 
 public class InventoryBoxController : MonoBehaviour, IObserver
 {
-    public PersonMovement playerMovement;
-    public float positionOffsetX;
-    public float positionOffsetY;
     public PlayerController playerController;
     
     private int _selectedPromptIndex;
     private TMP_Text _text;
     private Subject _flowSubject;
     private float _timeSinceLastPromptChange;
-    private bool _active;
+    private Window _window;
     
     public void Setup(Subject flowSubject)
     {
@@ -30,31 +27,18 @@ public class InventoryBoxController : MonoBehaviour, IObserver
 
     private void Awake()
     {
+        _window = GetComponent<Window>();
         _text = transform.Find("Text").GetComponent<TMP_Text>();
-    }
-
-    private void Start()
-    {
-        Hide();
-    }
-
-    private void Hide()
-    {
-        _active = false;
-        
-        transform.localScale = Vector3.zero;
     }
     
     private void Show()
     {
-        _active = true;
+        _window.Show();
         
-        transform.localScale = Vector3.one;
-        
-        Refresh();
+        RenderText();
     }
     
-    private void Refresh()
+    private void RenderText()
     {
         var promptIndex = 0;
         var text = "";
@@ -75,25 +59,17 @@ public class InventoryBoxController : MonoBehaviour, IObserver
         
         _text.text = text;
     }
-
-    // Update is called once per frame
-    void LateUpdate()
-    {
-        var playerPosition = playerMovement.transform.position;
-        var newPosition = new Vector2(playerPosition.x + positionOffsetX, playerPosition.y + positionOffsetY);
-        transform.position = newPosition;
-    }
     
     public void OnNotify<T>(T parameters)
     {
-        if (!_active)
+        if (!_window.IsFocused())
         {
             return;
         }
         
         switch (parameters)
         {
-            case MenuNavigation menuNavigation when _active:
+            case MenuNavigation menuNavigation when _window.IsFocused():
                 UpdatePromptSelection(menuNavigation);
                 break;
         }
@@ -108,10 +84,10 @@ public class InventoryBoxController : MonoBehaviour, IObserver
 
                 break;
             case SubjectMessage.CloseInventoryMenu:
-                Hide();
+                _window.Hide();
 
                 break;
-            case SubjectMessage.MenuSelection when _active:
+            case SubjectMessage.MenuSelection when _window.IsFocused():
                 var selectedItem = playerController.Items()[_selectedPromptIndex];
                 var selectInventoryItemEvent = new SelectInventoryItemEvent(selectedItem);
                 _flowSubject.Notify(selectInventoryItemEvent);
@@ -142,7 +118,7 @@ public class InventoryBoxController : MonoBehaviour, IObserver
 
             _selectedPromptIndex = Mathf.Abs(_selectedPromptIndex % promptCount);
 
-            Refresh();
+            RenderText();
         }
 
         Utilities.Debounce(ref _timeSinceLastPromptChange, 0.25f, ChangePromptAnswer);

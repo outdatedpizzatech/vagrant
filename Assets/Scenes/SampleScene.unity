@@ -29225,6 +29225,7 @@ GameObject:
   - component: {fileID: 939078278}
   - component: {fileID: 939078277}
   - component: {fileID: 939078276}
+  - component: {fileID: 939078279}
   m_Layer: 5
   m_Name: InteractionBox
   m_TagString: Untagged
@@ -29266,9 +29267,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49e10db5280574edb9b8f0580ffefc74, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerMovement: {fileID: 561308866}
-  positionOffsetX: 5
-  positionOffsetY: 0
 --- !u!114 &939078277
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29307,6 +29305,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 939078274}
   m_CullTransparentMesh: 1
+--- !u!114 &939078279
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 939078274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 071cad2203ffd4e9fb7e681b478c0202, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerMovement: {fileID: 561308866}
+  positionOffsetX: 5
+  positionOffsetY: 0
 --- !u!1 &998122487
 GameObject:
   m_ObjectHideFlags: 0
@@ -29320,6 +29333,7 @@ GameObject:
   - component: {fileID: 998122490}
   - component: {fileID: 998122489}
   - component: {fileID: 998122492}
+  - component: {fileID: 998122493}
   m_Layer: 5
   m_Name: MessageBox
   m_TagString: Untagged
@@ -29360,9 +29374,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4aaa652024d445dc8594797ed2ae7ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerMovement: {fileID: 561308866}
-  positionOffset: 4
-  cursorSelection: {fileID: -6598911716576114042, guid: aebaab511295b43178a3587f697581ac, type: 3}
 --- !u!114 &998122490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29413,6 +29424,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81815a78ac59f4694ab9c1519a230b6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &998122493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 998122487}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 071cad2203ffd4e9fb7e681b478c0202, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerMovement: {fileID: 561308866}
+  positionOffsetX: 0
+  positionOffsetY: -4
 --- !u!1 &1097817240
 GameObject:
   m_ObjectHideFlags: 0
@@ -29749,6 +29775,7 @@ GameObject:
   - component: {fileID: 1380753665}
   - component: {fileID: 1380753664}
   - component: {fileID: 1380753666}
+  - component: {fileID: 1380753667}
   m_Layer: 5
   m_Name: InventoryBox
   m_TagString: Untagged
@@ -29828,10 +29855,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82f0f325f7d26436498495b8082c3bb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerController: {fileID: 561308867}
+--- !u!114 &1380753667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1380753662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 071cad2203ffd4e9fb7e681b478c0202, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   playerMovement: {fileID: 561308866}
   positionOffsetX: 3
-  positionOffsetY: -4
-  playerController: {fileID: 561308867}
+  positionOffsetY: -5
 --- !u!1001 &1401118540
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -89,7 +89,7 @@ public class PromptController : MonoBehaviour, IObserver
 
             _selectedPromptIndex = Mathf.Abs(_selectedPromptIndex % promptCount);
 
-            _messageBoxController.Reload();
+            _messageBoxController.RenderText();
         }
 
         Utilities.Debounce(ref _timeSinceLastPromptChange, 0.25f, ChangePromptAnswer);
