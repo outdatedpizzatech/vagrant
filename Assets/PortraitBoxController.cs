@@ -24,10 +24,9 @@ public class PortraitBoxController : MonoBehaviour, IObserver
 
         if (eventStep.Information is Message message)
         {
-            if (message.Expression != null)
+            if (message.SpeakingAnimation != null)
             {
-                print("playing animation..." + message.Expression.name);
-                _image.GetComponent<Animator>().Play(message.Expression.name);
+                _image.GetComponent<Animator>().Play(message.SpeakingAnimation.name);
                 _window.Show();
                 return;
             }
@@ -46,6 +45,19 @@ public class PortraitBoxController : MonoBehaviour, IObserver
         if (message == SubjectMessage.EndEventSequence)
         {
             _window.Hide();
+        }
+
+        if (message == SubjectMessage.ReachedEndOfMessage)
+        {
+            var eventStep = _interactionEvent.EventSteps[_eventStepIndex];
+
+            if (eventStep.Information is Message messageFromInteraction)
+            {
+                if (messageFromInteraction.IdleAnimation != null)
+                {
+                    _image.GetComponent<Animator>().Play(messageFromInteraction.IdleAnimation.name);
+                }
+            }
         }
     }
 

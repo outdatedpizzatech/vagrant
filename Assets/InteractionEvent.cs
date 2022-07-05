@@ -3,10 +3,11 @@ using UnityEngine;
 
 public class Message
 {
-    public Message(string content, AnimationClip expression)
+    public Message(string content, AnimationClip speakingAnimation, AnimationClip idleAnimation)
     {
         Content = content;
-        Expression = expression;
+        SpeakingAnimation = speakingAnimation;
+        IdleAnimation = idleAnimation;
     }
 
     public Message(string content)
@@ -15,7 +16,8 @@ public class Message
     }
 
     public string Content { get; }
-    public AnimationClip Expression { get; }
+    public AnimationClip SpeakingAnimation { get; }
+    public AnimationClip IdleAnimation { get; }
 }
 
 public class EventStep
@@ -39,9 +41,9 @@ public class InteractionEvent
         EventSteps.Add(new EventStep(new Message(message)));
     }
 
-    public void AddMessage(string message, AnimationClip expression)
+    public void AddMessage(string message, AnimationClip speakingAnimation, AnimationClip idleAnimation)
     {
-        EventSteps.Add(new EventStep(new Message(message, expression)));
+        EventSteps.Add(new EventStep(new Message(message, speakingAnimation, idleAnimation)));
     }
 
     public void AddItem(Item item)
