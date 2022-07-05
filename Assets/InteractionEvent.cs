@@ -1,4 +1,22 @@
 using System.Collections.Generic;
+using UnityEngine;
+
+public class Message
+{
+    public Message(string content, Sprite expression)
+    {
+        Content = content;
+        Expression = expression;
+    }
+
+    public Message(string content)
+    {
+        Content = content;
+    }
+
+    public string Content { get; }
+    public Sprite Expression { get; }
+}
 
 public class EventStep
 {
@@ -6,7 +24,7 @@ public class EventStep
     {
         Information = information;
     }
-    
+
     public object Information { get; }
 }
 
@@ -18,7 +36,12 @@ public class InteractionEvent
 
     public void AddMessage(string message)
     {
-        EventSteps.Add(new EventStep(message));
+        EventSteps.Add(new EventStep(new Message(message)));
+    }
+
+    public void AddMessage(string message, Sprite expression)
+    {
+        EventSteps.Add(new EventStep(new Message(message, expression)));
     }
 
     public void AddItem(Item item)

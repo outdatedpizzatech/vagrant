@@ -116,7 +116,7 @@ public class MessageBoxController : MonoBehaviour, IObserver
         _text.text = eventStep.Information switch
         {
             Item item => $"Received {item.itemName}",
-            string message => message,
+            Message message => message.Content,
             _ => _text.text
         };
 

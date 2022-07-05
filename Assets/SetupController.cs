@@ -21,6 +21,7 @@ public class SetupController : MonoBehaviour, IObserver
         var messageBoxController = GameObject.Find("WorldSpaceCanvas/MessageBox").GetComponent<MessageBoxController>();
         var inventoryBoxController = GameObject.Find("WorldSpaceCanvas/InventoryBox").GetComponent<InventoryBoxController>();
         var interactionBoxController = GameObject.Find("WorldSpaceCanvas/InteractionBox").GetComponent<InteractionBoxController>();
+        var portraitBoxController = GameObject.Find("WorldSpaceCanvas/PortraitBox").GetComponent<PortraitBoxController>();
         var flowController = GameObject.Find("Controllers/FlowController").GetComponent<FlowController>();
         var treasureA = GameObject.Find("Objects/TreasureA").GetComponent<TreasureController>();
         var treasureB = GameObject.Find("Objects/TreasureB").GetComponent<TreasureController>();
@@ -32,6 +33,7 @@ public class SetupController : MonoBehaviour, IObserver
         positionController.Setup(occupiedSpacesSubject);
         interactionController.Setup(interactionSubject, positionController.PositionGrid, flowSubject, inputController.InputAction);
         messageBoxController.Setup(flowSubject);
+        portraitBoxController.Setup(flowSubject);
         flowController.Setup(flowSubject);
         inventoryBoxController.Setup(flowSubject);
         interactionBoxController.Setup(flowSubject);

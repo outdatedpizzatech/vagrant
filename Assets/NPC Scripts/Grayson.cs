@@ -5,6 +5,7 @@ namespace NPC_Scripts
 {
     public class Grayson : Interactable
     {
+        public Sprite expression;
         private static readonly int FacingDirection = Animator.StringToHash("facingDirection");
 
         private enum PromptKeys
@@ -21,8 +22,8 @@ namespace NPC_Scripts
             animator.SetInteger(FacingDirection, (int)direction);
 
             var response = new InteractionEvent();
-            response.AddMessage("I'm Grayson. As you can see, I'm pretty much just an old man.");
-            response.AddMessage("Would you like to see my collection of antique cards?");
+            response.AddMessage("I'm Grayson. As you can see, I'm pretty much just an old man.", expression);
+            response.AddMessage("Would you like to see my collection of antique cards?", expression);
 
             response.Prompts.Add(new Prompt(PromptKeys.SeeCollection, "Yes"));
             response.Prompts.Add(new Prompt(PromptKeys.DontSeeCollection, "No"));
@@ -37,7 +38,7 @@ namespace NPC_Scripts
                 case PromptKeys.SeeCollection:
                 {
                     var response = new InteractionEvent();
-                    response.AddMessage("Trying to get on my good side, eh?");
+                    response.AddMessage("Trying to get on my good side, eh?", expression);
                     response.Prompts.Add(new Prompt(PromptKeys.TryingToGetOnGoodSide, "You got me"));
                     response.Prompts.Add(new Prompt(PromptKeys.NotTryingToGetOnGoodSide, "Of course not!"));
                     return response;
@@ -45,20 +46,20 @@ namespace NPC_Scripts
                 case PromptKeys.DontSeeCollection:
                 {
                     var response = new InteractionEvent();
-                    response.AddMessage("Oh, well... next time, perhaps.");
+                    response.AddMessage("Oh, well... next time, perhaps.", expression);
                     response.CanFollowUp = true;
                     return response;
                 }
                 case PromptKeys.TryingToGetOnGoodSide:
                 {
                     var response = new InteractionEvent();
-                    response.AddMessage("Hah! I may be old, but I'm still sharp!");
+                    response.AddMessage("Hah! I may be old, but I'm still sharp!", expression);
                     return response;
                 }
                 case PromptKeys.NotTryingToGetOnGoodSide:
                 {
                     var response = new InteractionEvent();
-                    response.AddMessage("Now, now... you're starting to embarrass yourself.");
+                    response.AddMessage("Now, now... you're starting to embarrass yourself.", expression);
                     return response;
                 }
                 case Item item:
@@ -66,14 +67,14 @@ namespace NPC_Scripts
                     if (item.itemName == "Old Socks")
                     {
                         var response = new InteractionEvent();
-                        response.AddMessage("I thought I left those somewhere!");
+                        response.AddMessage("I thought I left those somewhere!", expression);
                         response.CanFollowUp = true;
                         return response;
                     }
                     else
                     {
                         var response = new InteractionEvent();
-                        response.AddMessage("What is it? I can't see so well, y'know.");
+                        response.AddMessage("What is it? I can't see so well, y'know.", expression);
                         response.CanFollowUp = true;
                         return response;
                     }

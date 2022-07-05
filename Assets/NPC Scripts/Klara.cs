@@ -5,6 +5,7 @@ namespace NPC_Scripts
 {
     public class Klara : Interactable
     {
+        public Sprite expression;
         private static readonly int FacingDirection = Animator.StringToHash("facingDirection");
 
         public override InteractionEvent ReceiveInteraction(Enums.Direction direction)
@@ -14,10 +15,10 @@ namespace NPC_Scripts
 
             var response = new InteractionEvent();
 
-            response.AddMessage("Be sure to visit the treasure vault on your way out.");
+            response.AddMessage("Be sure to visit the treasure vault on your way out.", expression);
 
             response.CanFollowUp = true;
-
+            
             return response;
         }
 
@@ -30,14 +31,14 @@ namespace NPC_Scripts
                     if (item.itemName == "Hamburger")
                     {
                         var response = new InteractionEvent();
-                        response.AddMessage("Oh, yummy! You shouldn't have!");
+                        response.AddMessage("Oh, yummy! You shouldn't have!", expression);
                         response.CanFollowUp = true;
                         return response;
                     }
                     else
                     {
                         var response = new InteractionEvent();
-                        response.AddMessage("Thanks, but no thanks.");
+                        response.AddMessage("Thanks, but no thanks.", expression);
                         response.CanFollowUp = true;
                         return response;
                     }
