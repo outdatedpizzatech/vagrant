@@ -5,7 +5,7 @@ namespace NPC_Scripts
 {
     public class Grayson : Interactable
     {
-        public Sprite expression;
+        public AnimationClip expression;
         private static readonly int FacingDirection = Animator.StringToHash("facingDirection");
 
         private enum PromptKeys

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Message
 {
-    public Message(string content, Sprite expression)
+    public Message(string content, AnimationClip expression)
     {
         Content = content;
         Expression = expression;
@@ -15,7 +15,7 @@ public class Message
     }
 
     public string Content { get; }
-    public Sprite Expression { get; }
+    public AnimationClip Expression { get; }
 }
 
 public class EventStep
@@ -39,7 +39,7 @@ public class InteractionEvent
         EventSteps.Add(new EventStep(new Message(message)));
     }
 
-    public void AddMessage(string message, Sprite expression)
+    public void AddMessage(string message, AnimationClip expression)
     {
         EventSteps.Add(new EventStep(new Message(message, expression)));
     }

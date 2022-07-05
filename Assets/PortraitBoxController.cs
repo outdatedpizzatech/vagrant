@@ -26,7 +26,8 @@ public class PortraitBoxController : MonoBehaviour, IObserver
         {
             if (message.Expression != null)
             {
-                _image.sprite = message.Expression;
+                print("playing animation..." + message.Expression.name);
+                _image.GetComponent<Animator>().Play(message.Expression.name);
                 _window.Show();
                 return;
             }
