@@ -11,7 +11,7 @@ public class FlowController : MonoBehaviour, IObserver
     private int _eventStepIndex;
     private bool _atEndOfMessage;
     private bool _shownInteractionMenu;
-    private bool _encounterHasStarted;
+    private bool _encounterIsEqueued;
     private Interactable _interactable;
 
     public void Update()
@@ -23,9 +23,7 @@ public class FlowController : MonoBehaviour, IObserver
         }
         else if (ShouldStartEncounter())
         {
-            _encounterHasStarted = true;
-            _flowSubject.Notify(SubjectMessage.EndEventSequence);
-            _flowSubject.Notify(SubjectMessage.StartEncounter);
+            _encounterIsEqueued = true;
         }
     }
 
@@ -41,6 +39,13 @@ public class FlowController : MonoBehaviour, IObserver
         {
             case SubjectMessage.EndEventSequence:
                 _interactable = null;
+                _interactionEvent = null;
+
+                if (_encounterIsEqueued)
+                {
+                    _encounterIsEqueued = false;
+                    _flowSubject.Notify(SubjectMessage.StartEncounter);
+                }
                 break;
             case SubjectMessage.AdvanceEvent:
                 if (_atEndOfMessage)
@@ -65,8 +70,6 @@ public class FlowController : MonoBehaviour, IObserver
             case SubjectMessage.EndInteraction:
                 _flowSubject.Notify(SubjectMessage.CloseInteractionMenu);
                 _flowSubject.Notify(SubjectMessage.EndEventSequence);
-
-                _interactionEvent = null;
 
                 break;
         }
@@ -169,7 +172,7 @@ public class FlowController : MonoBehaviour, IObserver
 
     private bool ShouldStartEncounter()
     {
-        return _interactionEvent != null && !_encounterHasStarted && _atEndOfMessage &&
+        return _interactionEvent != null && !_encounterIsEqueued && _atEndOfMessage &&
                AtEndOfEvent() && _interactionEvent.Information is PostEvent.TriggersEncounter;
     }
 
