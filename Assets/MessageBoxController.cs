@@ -68,11 +68,16 @@ public class MessageBoxController : MonoBehaviour, IObserver
         return _promptController.SelectedPrompt();
     }
 
+    public bool IsFocused()
+    {
+        return _window.IsFocused();
+    }
+
     private void Update()
     {
         _timeSinceLastLetter += Time.deltaTime;
 
-        if (!_window.IsFocused())
+        if (!IsFocused())
         {
             return;
         }
