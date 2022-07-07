@@ -20,6 +20,7 @@ public enum SubjectMessage
     EndInteraction,
     GiveContextToInteractionMenu,
     StartEncounter,
+    EndEncounter,
 }
 
 public class GiveItemEvent

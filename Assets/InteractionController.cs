@@ -109,6 +109,9 @@ public class InteractionController : MonoBehaviour, IObserver
             case SubjectMessage.StartEncounter:
                 _inEncounter = true;
                 break;
+            case SubjectMessage.EndEncounter:
+                _inEncounter = false;
+                break;
         }
     }
 
@@ -155,11 +158,7 @@ public class InteractionController : MonoBehaviour, IObserver
                 {
                     _flowSubject.Notify(SubjectMessage.AdvanceEvent);
                 }
-                else if (_interactionMenuFocused)
-                {
-                    _flowSubject.Notify(SubjectMessage.MenuSelection);
-                }
-                else if (_inventoryMenuFocused)
+                else
                 {
                     _flowSubject.Notify(SubjectMessage.MenuSelection);
                 }
