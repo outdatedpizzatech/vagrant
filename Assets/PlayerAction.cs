@@ -27,7 +27,7 @@ public class PlayerAction : MonoBehaviour
         
         if (_inputAction.SecondaryActing)
         {
-            _actionSubject.Notify(SubjectMessage.PlayerRequestsSecondaryActionEvent);
+            _actionSubject.Notify(SubjectMessage.PlayerRequestsSecondaryAction);
         }
     }
 }

@@ -8,7 +8,7 @@ public enum SubjectMessage
     ScreenFinishedWipeIn,
     AdvanceEvent,
     EndEventSequence,
-    PlayerRequestsSecondaryActionEvent,
+    PlayerRequestsSecondaryAction,
     OpenInventoryMenu,
     CloseInventoryMenu,
     ReachedEndOfMessage,

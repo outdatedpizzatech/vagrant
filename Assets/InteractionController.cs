@@ -38,7 +38,7 @@ public class InteractionController : MonoBehaviour, IObserver
 
         if (!_halted)
         {
-            if (_aMenuIsOpen || _inEvent || _inEncounter)
+            if (!IsFreeRoaming())
             {
                 _flowSubject.Notify(SubjectMessage.TimeShouldFreeze);
                 _halted = true;
@@ -46,7 +46,7 @@ public class InteractionController : MonoBehaviour, IObserver
         }
         else
         {
-            if (!_aMenuIsOpen && !_inEvent && !_inEncounter)
+            if (IsFreeRoaming())
             {
                 _flowSubject.Notify(SubjectMessage.TimeShouldFlow);
                 _halted = false;
@@ -85,8 +85,8 @@ public class InteractionController : MonoBehaviour, IObserver
     {
         switch (subjectMessage)
         {
-            case SubjectMessage.PlayerRequestsSecondaryActionEvent:
-                if (!_inEvent && !_aMenuIsOpen)
+            case SubjectMessage.PlayerRequestsSecondaryAction:
+                if (IsFreeRoaming())
                 {
                     _flowSubject.Notify(SubjectMessage.OpenInventoryMenu);
                 }
@@ -109,7 +109,7 @@ public class InteractionController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case PlayerRequestsPrimaryActionEvent playerActionEvent when !_inEvent && !_aMenuIsOpen:
+            case PlayerRequestsPrimaryActionEvent playerActionEvent when IsFreeRoaming():
             {
                 var position = new[] { playerActionEvent.X, playerActionEvent.Y };
 
@@ -160,5 +160,10 @@ public class InteractionController : MonoBehaviour, IObserver
                 break;
             }
         }
+    }
+
+    private bool IsFreeRoaming()
+    {
+        return !_inEvent && !_aMenuIsOpen && !_inEncounter;
     }
 }
