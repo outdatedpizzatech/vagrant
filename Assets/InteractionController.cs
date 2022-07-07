@@ -4,6 +4,7 @@ using UnityEngine;
 public class InteractionController : MonoBehaviour, IObserver
 {
     public ContextController contextController;
+    public float menuDirectionalDebounceTiming;
 
     private bool _inEvent;
     private bool _inEncounter;
@@ -17,6 +18,7 @@ public class InteractionController : MonoBehaviour, IObserver
     private bool _inventoryMenuFocused;
     private bool _messageBoxFocused;
     private bool _interactionMenuFocused;
+    private bool _requestedInteractionmenuFocus;
 
     private void Update()
     {
@@ -53,18 +55,23 @@ public class InteractionController : MonoBehaviour, IObserver
             }
         }
 
-        if (_interactionMenuFocused)
+        if (_interactionMenuFocused && !_requestedInteractionmenuFocus)
         {
+            _requestedInteractionmenuFocus = true;
             _flowSubject.Notify(SubjectMessage.GiveContextToInteractionMenu);
+        }
+        else if(!_interactionMenuFocused)
+        {
+            _requestedInteractionmenuFocus = false;
         }
 
         void NotifyMenuInputs()
         {
-            if (!_inEvent && !_aMenuIsOpen || !_inputAction.InputDirections.Any()) return;
+            if (IsFreeRoaming() || !_inputAction.InputDirections.Any()) return;
             _flowSubject.Notify(new MenuNavigation(_inputAction.InputDirections.Last()));
         }
 
-        Utilities.Debounce(ref _timeSinceLastDirectionalInput, 0.25f, NotifyMenuInputs);
+        Utilities.Debounce(ref _timeSinceLastDirectionalInput, menuDirectionalDebounceTiming, NotifyMenuInputs);
     }
 
     public void Setup(Subject interactionSubject, PositionGrid positionGrid, Subject flowSubject,

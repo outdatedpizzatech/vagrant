@@ -7,19 +7,13 @@ public class InteractionBoxController : MonoBehaviour, IObserver
     private int _selectedPromptIndex;
     private TMP_Text _text;
     private Subject _flowSubject;
-    private float _timeSinceLastPromptChange;
     private readonly List<string> _prompts = new() { "END", "GIVE" };
     private Window _window;
-    
+
     public void Setup(Subject flowSubject)
     {
         _flowSubject = flowSubject;
         _flowSubject.AddObserver(this);
-    }
-
-    private void Update()
-    {
-        _timeSinceLastPromptChange += Time.deltaTime;
     }
 
     private void Awake()
@@ -27,14 +21,14 @@ public class InteractionBoxController : MonoBehaviour, IObserver
         _window = GetComponent<Window>();
         _text = transform.Find("Text").GetComponent<TMP_Text>();
     }
-    
+
     private void Show()
     {
         _window.Show();
         _selectedPromptIndex = 0;
         RenderText();
     }
-    
+
     private void RenderText()
     {
         var promptIndex = 0;
@@ -53,10 +47,10 @@ public class InteractionBoxController : MonoBehaviour, IObserver
 
             promptIndex++;
         }
-        
+
         _text.text = text;
     }
-    
+
     public void OnNotify<T>(T parameters)
     {
         switch (parameters)
@@ -101,32 +95,28 @@ public class InteractionBoxController : MonoBehaviour, IObserver
                 break;
         }
     }
+
     private void UpdatePromptSelection(MenuNavigation menuNavigation)
     {
-        void ChangePromptAnswer()
+        var promptCount = _prompts.Count;
+
+        if (promptCount == 0)
         {
-            var promptCount = _prompts.Count;
-
-            if (promptCount == 0)
-            {
-                return;
-            }
-
-            switch (menuNavigation.Direction)
-            {
-                case Enums.Direction.Down:
-                    _selectedPromptIndex++;
-                    break;
-                case Enums.Direction.Up:
-                    _selectedPromptIndex--;
-                    break;
-            }
-
-            _selectedPromptIndex = Mathf.Abs(_selectedPromptIndex % promptCount);
-
-            RenderText();
+            return;
         }
 
-        Utilities.Debounce(ref _timeSinceLastPromptChange, 0.25f, ChangePromptAnswer);
+        switch (menuNavigation.Direction)
+        {
+            case Enums.Direction.Down:
+                _selectedPromptIndex++;
+                break;
+            case Enums.Direction.Up:
+                _selectedPromptIndex--;
+                break;
+        }
+
+        _selectedPromptIndex = Mathf.Abs(_selectedPromptIndex % promptCount);
+
+        RenderText();
     }
 }

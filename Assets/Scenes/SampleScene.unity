@@ -29129,6 +29129,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   contextController: {fileID: 916460096}
+  menuDirectionalDebounceTiming: 0.2
 --- !u!4 &757502589
 Transform:
   m_ObjectHideFlags: 0
