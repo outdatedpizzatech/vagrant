@@ -27,6 +27,10 @@ public class EncounterBoxController : MonoBehaviour, IObserver
         {
             WipeIn();
         }
+        if (message == SubjectMessage.EncounterStartWipeOut)
+        {
+            _animation.Play("EncounterWipeOut");
+        }
         if (message == SubjectMessage.EndEncounter)
         {
             _window.Hide();
@@ -40,6 +44,11 @@ public class EncounterBoxController : MonoBehaviour, IObserver
     public void FinishWipeIn()
     {
         _flowSubject.Notify(SubjectMessage.EncounterFinishedWipeIn);
+    }
+    
+    public void FinishWipeOut()
+    {
+        _flowSubject.Notify(SubjectMessage.EndEncounter);
     }
 
     public void OnNotify<T>(T parameters)

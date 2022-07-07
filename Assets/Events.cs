@@ -22,6 +22,7 @@ public enum SubjectMessage
     StartEncounter,
     EndEncounter,
     EncounterFinishedWipeIn,
+    EncounterStartWipeOut,
 }
 
 public class GiveItemEvent

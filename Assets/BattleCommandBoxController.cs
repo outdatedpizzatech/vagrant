@@ -35,14 +35,14 @@ public class BattleCommandBoxController : MonoBehaviour, IObserver
             Show();
         }
 
-        if (message == SubjectMessage.EndEncounter)
+        if (message == SubjectMessage.EncounterStartWipeOut)
         {
             _window.Hide();
         }
 
         if (message == SubjectMessage.MenuSelection && _window.IsFocused())
         {
-            _flowSubject.Notify(SubjectMessage.EndEncounter);
+            _flowSubject.Notify(SubjectMessage.EncounterStartWipeOut);
         }
     }
 
