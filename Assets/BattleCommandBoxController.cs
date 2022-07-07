@@ -30,7 +30,7 @@ public class BattleCommandBoxController : MonoBehaviour, IObserver
 
     public void OnNotify(SubjectMessage message)
     {
-        if (message == SubjectMessage.StartEncounter)
+        if (message == SubjectMessage.EncounterFinishedWipeIn)
         {
             Show();
         }

@@ -4,11 +4,13 @@ using UnityEngine;
 
 public class EncounterBoxController : MonoBehaviour, IObserver
 {
+    private Animation _animation;
     private Window _window;
     private Subject _flowSubject;
     
     private void Awake()
     {
+        _animation = GetComponent<Animation>();
         _window = GetComponent<Window>();
     }
 
@@ -23,15 +25,29 @@ public class EncounterBoxController : MonoBehaviour, IObserver
     {
         if (message == SubjectMessage.StartEncounter)
         {
-            _window.Show();
+            WipeIn();
         }
         if (message == SubjectMessage.EndEncounter)
         {
             _window.Hide();
         }
+        if (message == SubjectMessage.EncounterFinishedWipeIn)
+        {
+            _window.Show();
+        }
+    }
+    
+    public void FinishWipeIn()
+    {
+        _flowSubject.Notify(SubjectMessage.EncounterFinishedWipeIn);
     }
 
     public void OnNotify<T>(T parameters)
     {
+    }
+    
+    private void WipeIn()
+    {
+        _animation.Play("EncounterWipeIn");
     }
 }
