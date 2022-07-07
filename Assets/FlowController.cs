@@ -10,13 +10,21 @@ public class FlowController : MonoBehaviour, IObserver
     private int _eventStepIndex;
     private bool _atEndOfMessage;
     private bool _shownInteractionMenu;
+    private bool _encounterHasStarted;
     private Interactable _interactable;
 
     public void Update()
     {
-        if (!ShouldShowInteractionMenu()) return;
-        _shownInteractionMenu = true;
-        _flowSubject.Notify(SubjectMessage.OpenInteractionMenu);
+        if (ShouldShowInteractionMenu())
+        {
+            _shownInteractionMenu = true;
+            _flowSubject.Notify(SubjectMessage.OpenInteractionMenu);
+        } else if (ShouldStartEncounter())
+        {
+            _encounterHasStarted = true;
+            _flowSubject.Notify(SubjectMessage.EndEventSequence);
+            _flowSubject.Notify(SubjectMessage.StartEncounter);
+        }
     }
 
     public void Setup(Subject flowSubject)
@@ -156,6 +164,12 @@ public class FlowController : MonoBehaviour, IObserver
     {
         return _interactionEvent != null && !_shownInteractionMenu && _atEndOfMessage &&
                AtEndOfEvent() && !_interactionEvent.Prompts.Any() && _interactionEvent.CanFollowUp;
+    }
+    
+    private bool ShouldStartEncounter()
+    {
+        return _interactionEvent != null && !_encounterHasStarted && _atEndOfMessage &&
+               AtEndOfEvent() && !_interactionEvent.Prompts.Any() && _interactionEvent.TriggersEncounter;
     }
 
     private bool AtEndOfEvent()

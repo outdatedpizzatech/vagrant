@@ -18,7 +18,8 @@ public enum SubjectMessage
     OpenInteractionMenu,
     CloseInteractionMenu,
     EndInteraction,
-    GiveContextToInteractionMenu
+    GiveContextToInteractionMenu,
+    StartEncounter,
 }
 
 public class GiveItemEvent

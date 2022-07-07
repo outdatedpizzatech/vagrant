@@ -6556,6 +6556,7 @@ MonoBehaviour:
   canMakeAnotherMove: 1
   position: 0000000000000000
   facingDirection: 2
+  marchingInPlace: 0
 --- !u!114 &561308867
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29039,6 +29040,7 @@ MonoBehaviour:
   canMakeAnotherMove: 1
   position: 0000000000000000
   facingDirection: 2
+  marchingInPlace: 0
 --- !u!114 &661720492
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29051,6 +29053,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f16d5316ac84595a8b8bb7c669f3f93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  autoMove: 1
 --- !u!114 &661720493
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29821,6 +29824,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f16d5316ac84595a8b8bb7c669f3f93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  autoMove: 1
 --- !u!114 &1182582587
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29837,6 +29841,7 @@ MonoBehaviour:
   canMakeAnotherMove: 1
   position: 0000000000000000
   facingDirection: 2
+  marchingInPlace: 0
 --- !u!95 &1182582588
 Animator:
   serializedVersion: 4
@@ -30080,7 +30085,7 @@ GameObject:
   - component: {fileID: 1285117307}
   - component: {fileID: 1285117306}
   - component: {fileID: 1285117305}
-  - component: {fileID: 1285117304}
+  - component: {fileID: 1285117311}
   m_Layer: 0
   m_Name: Keever
   m_TagString: Untagged
@@ -30103,20 +30108,6 @@ Transform:
   m_Father: {fileID: 1097817241}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1285117304
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1285117302}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c31df8133c964964864eeec6bbae848, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  neutralSpeakingAnimation: {fileID: 7400000, guid: 41f0da0415e7e44c4955e5aa31f090f2, type: 2}
-  neutralIdleAnimation: {fileID: 7400000, guid: 97236e1964895451c819acd0025e81c9, type: 2}
 --- !u!114 &1285117305
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30129,6 +30120,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f16d5316ac84595a8b8bb7c669f3f93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  autoMove: 0
 --- !u!114 &1285117306
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30145,6 +30137,7 @@ MonoBehaviour:
   canMakeAnotherMove: 1
   position: 0000000000000000
   facingDirection: 2
+  marchingInPlace: 1
 --- !u!95 &1285117307
 Animator:
   serializedVersion: 4
@@ -30264,6 +30257,20 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
+--- !u!114 &1285117311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1285117302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c050e31fa78e47aca27e6d47c5609db5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  neutralSpeakingAnimation: {fileID: 0}
+  neutralIdleAnimation: {fileID: 0}
 --- !u!1 &1363967367
 GameObject:
   m_ObjectHideFlags: 0

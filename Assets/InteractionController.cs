@@ -6,6 +6,7 @@ public class InteractionController : MonoBehaviour, IObserver
     public ContextController contextController;
 
     private bool _inEvent;
+    private bool _inEncounter;
     private bool _aMenuIsOpen;
     private bool _halted;
     private Subject _interactionSubject;
@@ -26,16 +27,18 @@ public class InteractionController : MonoBehaviour, IObserver
         _interactionMenuFocused = currentControlContext == Enums.ControlContext.InteractionMenu;
         _inventoryMenuFocused = currentControlContext == Enums.ControlContext.InventoryMenu;
         _messageBoxFocused = currentControlContext == Enums.ControlContext.Event;
-        
-        var interactionMenuOpen = _interactionMenuFocused || contextController.InHistory(Enums.ControlContext.InteractionMenu);
-        var inventoryMenuOpen = _inventoryMenuFocused || contextController.InHistory(Enums.ControlContext.InventoryMenu);
-        
+
+        var interactionMenuOpen =
+            _interactionMenuFocused || contextController.InHistory(Enums.ControlContext.InteractionMenu);
+        var inventoryMenuOpen =
+            _inventoryMenuFocused || contextController.InHistory(Enums.ControlContext.InventoryMenu);
+
         _aMenuIsOpen = interactionMenuOpen || inventoryMenuOpen;
         _inEvent = _messageBoxFocused || contextController.InHistory(Enums.ControlContext.Event);
 
         if (!_halted)
         {
-            if (_aMenuIsOpen || _inEvent)
+            if (_aMenuIsOpen || _inEvent || _inEncounter)
             {
                 _flowSubject.Notify(SubjectMessage.TimeShouldFreeze);
                 _halted = true;
@@ -43,7 +46,7 @@ public class InteractionController : MonoBehaviour, IObserver
         }
         else
         {
-            if (!_aMenuIsOpen && !_inEvent)
+            if (!_aMenuIsOpen && !_inEvent && !_inEncounter)
             {
                 _flowSubject.Notify(SubjectMessage.TimeShouldFlow);
                 _halted = false;
@@ -95,6 +98,9 @@ public class InteractionController : MonoBehaviour, IObserver
                     }
                 }
 
+                break;
+            case SubjectMessage.StartEncounter:
+                _inEncounter = true;
                 break;
         }
     }

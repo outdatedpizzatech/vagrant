@@ -38,7 +38,8 @@ namespace NPC_Scripts
                 case PromptKeys.Yes:
                 {
                     var response = new InteractionEvent();
-                    response.AddMessage("Very well.");
+                    response.AddMessage("Very well. Prepare yourselves!");
+                    response.TriggersEncounter = true;
                     return response;
                 }
                 case PromptKeys.No:
