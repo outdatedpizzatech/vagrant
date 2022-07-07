@@ -65,7 +65,13 @@ public class PromptController : MonoBehaviour, IObserver
     private void UpdatePromptSelection(MenuNavigation menuNavigation)
     {
         var currentEvent = _messageBoxController.InteractionEvent();
-        var promptCount = currentEvent.Prompts.Count();
+
+        var promptCount = 0;
+
+        if (currentEvent.Information is List<Prompt> prompts)
+        {
+            promptCount = prompts.Count();
+        }
 
         if (promptCount <= 0 || !_messageBoxController.AtEndOfCurrentMessage()) return;
 

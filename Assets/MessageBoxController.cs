@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -106,7 +107,13 @@ public class MessageBoxController : MonoBehaviour, IObserver
     {
         _window.Show();
         _atEndOfMessage = false;
-        _promptController.ResetPrompts(_interactionEvent.Prompts);
+
+        if (_interactionEvent.Information is List<Prompt> prompts)
+        {
+            _promptController.ResetPrompts(prompts);
+        }else {
+            _promptController.ResetPrompts(new List<Prompt>());
+        }
 
         RenderMessage();
 

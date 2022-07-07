@@ -15,12 +15,10 @@ namespace NPC_Scripts
             var animator = GetComponent<Animator>();
             animator.SetInteger(FacingDirection, (int)direction);
 
-            var response = new InteractionEvent();
+            var response = new InteractionEvent(PostEvent.CanFollowUp);
 
             response.AddMessage("Be sure to visit the treasure vault on your way out.", neutralSpeakingAnimation, neutralIdleAnimation);
             response.AddMessage("Doot doot doot doot doot doot doot doot doot doot.", neutralSpeakingAnimation, neutralIdleAnimation);
-
-            response.CanFollowUp = true;
             
             return response;
         }
@@ -33,16 +31,14 @@ namespace NPC_Scripts
                 {
                     if (item.itemName == "Hamburger")
                     {
-                        var response = new InteractionEvent();
+                        var response = new InteractionEvent(PostEvent.CanFollowUp);
                         response.AddMessage("Oh, yummy! You shouldn't have!", neutralSpeakingAnimation, neutralIdleAnimation);
-                        response.CanFollowUp = true;
                         return response;
                     }
                     else
                     {
-                        var response = new InteractionEvent();
+                        var response = new InteractionEvent(PostEvent.CanFollowUp);
                         response.AddMessage("Thanks, but no thanks.", neutralSpeakingAnimation, neutralIdleAnimation);
-                        response.CanFollowUp = true;
                         return response;
                     }
                 }

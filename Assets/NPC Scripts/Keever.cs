@@ -21,12 +21,15 @@ namespace NPC_Scripts
             var animator = GetComponent<Animator>();
             animator.SetInteger(FacingDirection, (int)direction);
 
-            var response = new InteractionEvent();
+            var prompts = new List<Prompt>
+            {
+                new(PromptKeys.No, "No"),
+                new(PromptKeys.Yes, "Yes")
+            };
+
+            var response = new InteractionEvent(prompts);
 
             response.AddMessage("Are you prepared for the kind of death that you've earned?");
-
-            response.Prompts.Add(new Prompt(PromptKeys.No, "No"));
-            response.Prompts.Add(new Prompt(PromptKeys.Yes, "Yes"));
             
             return response;
         }
@@ -37,9 +40,8 @@ namespace NPC_Scripts
             {
                 case PromptKeys.Yes:
                 {
-                    var response = new InteractionEvent();
+                    var response = new InteractionEvent(PostEvent.TriggersEncounter);
                     response.AddMessage("Very well. Prepare yourselves!");
-                    response.TriggersEncounter = true;
                     return response;
                 }
                 case PromptKeys.No:

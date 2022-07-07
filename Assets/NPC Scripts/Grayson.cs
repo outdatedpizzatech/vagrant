@@ -21,12 +21,17 @@ namespace NPC_Scripts
             var animator = GetComponent<Animator>();
             animator.SetInteger(FacingDirection, (int)direction);
 
-            var response = new InteractionEvent();
+            var prompts = new List<Prompt>
+            {
+                new(PromptKeys.SeeCollection, "Yes"),
+                new(PromptKeys.DontSeeCollection, "No")
+            };
+
+            var response = new InteractionEvent(prompts);
+            
             response.AddMessage("I'm Grayson. As you can see, I'm pretty much just an old man.", neutralIdleAnimation, neutralIdleAnimation);
             response.AddMessage("Would you like to see my collection of antique cards?", neutralIdleAnimation, neutralIdleAnimation);
 
-            response.Prompts.Add(new Prompt(PromptKeys.SeeCollection, "Yes"));
-            response.Prompts.Add(new Prompt(PromptKeys.DontSeeCollection, "No"));
 
             return response;
         }
@@ -37,17 +42,19 @@ namespace NPC_Scripts
             {
                 case PromptKeys.SeeCollection:
                 {
-                    var response = new InteractionEvent();
+                    var prompts = new List<Prompt>
+                    {
+                        new(PromptKeys.TryingToGetOnGoodSide, "You got me"),
+                        new(PromptKeys.NotTryingToGetOnGoodSide, "Of course not!")
+                    };
+                    var response = new InteractionEvent(prompts);
                     response.AddMessage("Trying to get on my good side, eh?", neutralIdleAnimation, neutralIdleAnimation);
-                    response.Prompts.Add(new Prompt(PromptKeys.TryingToGetOnGoodSide, "You got me"));
-                    response.Prompts.Add(new Prompt(PromptKeys.NotTryingToGetOnGoodSide, "Of course not!"));
                     return response;
                 }
                 case PromptKeys.DontSeeCollection:
                 {
-                    var response = new InteractionEvent();
+                    var response = new InteractionEvent(PostEvent.CanFollowUp);
                     response.AddMessage("Oh, well... next time, perhaps.", neutralIdleAnimation, neutralIdleAnimation);
-                    response.CanFollowUp = true;
                     return response;
                 }
                 case PromptKeys.TryingToGetOnGoodSide:
@@ -66,16 +73,14 @@ namespace NPC_Scripts
                 {
                     if (item.itemName == "Old Socks")
                     {
-                        var response = new InteractionEvent();
+                        var response = new InteractionEvent(PostEvent.CanFollowUp);
                         response.AddMessage("I thought I left those somewhere!", neutralIdleAnimation, neutralIdleAnimation);
-                        response.CanFollowUp = true;
                         return response;
                     }
                     else
                     {
-                        var response = new InteractionEvent();
+                        var response = new InteractionEvent(PostEvent.CanFollowUp);
                         response.AddMessage("What is it? I can't see so well, y'know.", neutralIdleAnimation, neutralIdleAnimation);
-                        response.CanFollowUp = true;
                         return response;
                     }
                 }

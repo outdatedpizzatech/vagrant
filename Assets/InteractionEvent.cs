@@ -1,6 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum PostEvent
+{
+    CanFollowUp,
+    TriggersEncounter,
+}
+
 public class Message
 {
     public Message(string content, AnimationClip speakingAnimation, AnimationClip idleAnimation)
@@ -33,10 +39,21 @@ public class EventStep
 public class InteractionEvent
 {
     public readonly List<EventStep> EventSteps = new();
-    public readonly List<Prompt> Prompts = new();
-    
-    public bool TriggersEncounter = false;
-    public bool CanFollowUp = false;
+    public object Information { get; }
+
+    public InteractionEvent()
+    {
+    }
+
+    public InteractionEvent(List<Prompt> prompts)
+    {
+        Information = prompts;
+    }
+
+    public InteractionEvent(PostEvent postEvent)
+    {
+        Information = postEvent;
+    }
 
     public void AddMessage(string message)
     {

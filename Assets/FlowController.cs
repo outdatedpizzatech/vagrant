@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -19,7 +20,8 @@ public class FlowController : MonoBehaviour, IObserver
         {
             _shownInteractionMenu = true;
             _flowSubject.Notify(SubjectMessage.OpenInteractionMenu);
-        } else if (ShouldStartEncounter())
+        }
+        else if (ShouldStartEncounter())
         {
             _encounterHasStarted = true;
             _flowSubject.Notify(SubjectMessage.EndEventSequence);
@@ -136,16 +138,15 @@ public class FlowController : MonoBehaviour, IObserver
     {
         if (AtEndOfEvent())
         {
-            if (_interactionEvent.Prompts.Any())
+            if (_interactionEvent.Information is List<Prompt> prompts && prompts.Any())
             {
                 var selectedPrompt = messageBoxController.SelectedPrompt();
                 _flowSubject.Notify(
                     new PromptResponseEvent(selectedPrompt.ID));
+                return;
             }
-            else
-            {
-                _flowSubject.Notify(SubjectMessage.EndEventSequence);
-            }
+
+            _flowSubject.Notify(SubjectMessage.EndEventSequence);
         }
         else
         {
@@ -163,13 +164,13 @@ public class FlowController : MonoBehaviour, IObserver
     private bool ShouldShowInteractionMenu()
     {
         return _interactionEvent != null && !_shownInteractionMenu && _atEndOfMessage &&
-               AtEndOfEvent() && !_interactionEvent.Prompts.Any() && _interactionEvent.CanFollowUp;
+               AtEndOfEvent() && _interactionEvent.Information is PostEvent.CanFollowUp;
     }
-    
+
     private bool ShouldStartEncounter()
     {
         return _interactionEvent != null && !_encounterHasStarted && _atEndOfMessage &&
-               AtEndOfEvent() && !_interactionEvent.Prompts.Any() && _interactionEvent.TriggersEncounter;
+               AtEndOfEvent() && _interactionEvent.Information is PostEvent.TriggersEncounter;
     }
 
     private bool AtEndOfEvent()
