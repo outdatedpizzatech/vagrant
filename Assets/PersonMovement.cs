@@ -8,6 +8,7 @@ public class PersonMovement : MonoBehaviour, IObserver
     public bool canMakeAnotherMove = true;
     public int[] position = { 0, 0 };
     public Enums.Direction facingDirection = Enums.Direction.Down;
+    public bool marchingInPlace;
     
     private Collider2D _myCollider;
     private InputAction _inputAction;
@@ -102,9 +103,15 @@ public class PersonMovement : MonoBehaviour, IObserver
             switch (_isMoving)
             {
                 case false:
-                    _animator.SetBool(IsMoving, false);
+                    _animator.SetBool(IsMoving, marchingInPlace);
+                    if (marchingInPlace)
+                    {
+                        _animator.speed = 0.5f;
+                    }
                     break;
                 case true:
+                    _animator.speed = 1;
+                    
                     switch (facingDirection)
                     {
                         case Enums.Direction.Down:

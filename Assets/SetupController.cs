@@ -14,6 +14,7 @@ public class SetupController : MonoBehaviour, IObserver
         var player = GameObject.Find("Player").GetComponent<PlayerController>();
         var klara = GameObject.Find("NPCs/Klara").GetComponent<NpcController>();
         var grayson = GameObject.Find("NPCs/Grayson").GetComponent<NpcController>();
+        var keever = GameObject.Find("NPCs/Keever").GetComponent<NpcController>();
         var wiperController = GameObject.Find("Canvas/Wiper").GetComponent<WiperController>();
         var inputController = GameObject.Find("Controllers/InputController").GetComponent<InputController>();
         var positionController = GameObject.Find("Controllers/PositionController").GetComponent<PositionController>();
@@ -29,6 +30,7 @@ public class SetupController : MonoBehaviour, IObserver
         wiperController.Setup(warpingAndWiping);
         player.Setup(warpingAndWiping, inputController.InputAction, occupiedSpacesSubject, positionController.PositionGrid, interactionSubject, flowSubject);
         klara.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
+        keever.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         grayson.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         positionController.Setup(occupiedSpacesSubject);
         interactionController.Setup(interactionSubject, positionController.PositionGrid, flowSubject, inputController.InputAction);

@@ -4,6 +4,7 @@ public class NpcController : MonoBehaviour
 {
     private readonly InputAction _inputAction = new();
     private float _timeTilNextMove;
+    public bool autoMove;
 
     public void Setup(Subject occupiedSpaces, PositionGrid positionGrid, Subject flowSubject)
     {
@@ -13,6 +14,11 @@ public class NpcController : MonoBehaviour
 
     private void Update()
     {
+        if (!autoMove)
+        {
+            return;
+        }
+        
         _timeTilNextMove -= Time.deltaTime;
 
         if (!(_timeTilNextMove < 0)) return;
