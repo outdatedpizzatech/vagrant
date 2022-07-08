@@ -109,7 +109,7 @@ public class InventoryBoxController : MonoBehaviour, IObserver
                 break;
         }
 
-        _selectedPromptIndex = Mathf.Abs(_selectedPromptIndex % promptCount);
+        _selectedPromptIndex = _selectedPromptIndex < 0 ? promptCount - 1 : _selectedPromptIndex % promptCount;
 
         RenderText();
     }

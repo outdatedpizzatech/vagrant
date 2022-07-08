@@ -23,6 +23,9 @@ public enum SubjectMessage
     EndEncounter,
     EncounterFinishedWipeIn,
     EncounterStartWipeOut,
+    PickedAttack,
+    Cancel,
+    OpenMainMenu
 }
 
 public class GiveItemEvent

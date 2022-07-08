@@ -10,6 +10,7 @@ public class SetupController : MonoBehaviour, IObserver
         var occupiedSpacesSubject = new Subject("occupied spaces");
         var interactionSubject = new Subject("interactions from the player");
         var flowSubject = new Subject("the flow of things");
+        var encounterSubject = new Subject("all things related to being in an encounter");
         
         var player = GameObject.Find("Player").GetComponent<PlayerController>();
         var klara = GameObject.Find("NPCs/Klara").GetComponent<NpcController>();
@@ -26,6 +27,7 @@ public class SetupController : MonoBehaviour, IObserver
         var encounterBoxController = GameObject.Find("WorldSpaceCanvas/EncounterBox").GetComponent<EncounterBoxController>();
         var battleCommandBoxController = GameObject.Find("WorldSpaceCanvas/EncounterBox/BattleCommandBox").GetComponent<BattleCommandBoxController>();
         var flowController = GameObject.Find("Controllers/FlowController").GetComponent<FlowController>();
+        var encounterController = GameObject.Find("Controllers/EncounterController").GetComponent<EncounterController>();
         var treasureA = GameObject.Find("Objects/TreasureA").GetComponent<TreasureController>();
         var treasureB = GameObject.Find("Objects/TreasureB").GetComponent<TreasureController>();
         
@@ -35,12 +37,13 @@ public class SetupController : MonoBehaviour, IObserver
         keever.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         grayson.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         positionController.Setup(occupiedSpacesSubject);
-        interactionController.Setup(interactionSubject, positionController.PositionGrid, flowSubject, inputController.InputAction);
+        interactionController.Setup(interactionSubject, positionController.PositionGrid, flowSubject, inputController.InputAction, encounterSubject);
         messageBoxController.Setup(flowSubject);
         portraitBoxController.Setup(flowSubject);
         encounterBoxController.Setup(flowSubject);
-        battleCommandBoxController.Setup(flowSubject);
+        battleCommandBoxController.Setup(flowSubject, encounterSubject);
         flowController.Setup(flowSubject);
+        encounterController.Setup(encounterSubject);
         inventoryBoxController.Setup(flowSubject);
         interactionBoxController.Setup(flowSubject);
         treasureA.Setup(occupiedSpacesSubject);

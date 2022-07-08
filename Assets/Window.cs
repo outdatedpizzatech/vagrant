@@ -12,9 +12,7 @@ public class Window : MonoBehaviour
 
     public void Show()
     {
-        _focused = true;
-        
-        BringToFront();
+        GainFocus();
         
         transform.localScale = Vector3.one;
     }
@@ -41,7 +39,7 @@ public class Window : MonoBehaviour
     
     public void Hide()
     {
-        _focused = false;
+        LoseFocus();
         
         transform.localScale = Vector3.zero;
     }
@@ -54,5 +52,12 @@ public class Window : MonoBehaviour
     public void LoseFocus()
     {
         _focused = false;
+    }
+
+    public void GainFocus()
+    {
+        _focused = true;
+        
+        BringToFront();
     }
 }

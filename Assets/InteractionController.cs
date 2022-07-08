@@ -12,6 +12,7 @@ public class InteractionController : MonoBehaviour, IObserver
     private bool _halted;
     private Subject _interactionSubject;
     private Subject _flowSubject;
+    private Subject _encounterSubject;
     private PositionGrid _positionGrid;
     private InputAction _inputAction;
     private float _timeSinceLastDirectionalInput;
@@ -60,7 +61,7 @@ public class InteractionController : MonoBehaviour, IObserver
             _requestedInteractionmenuFocus = true;
             _flowSubject.Notify(SubjectMessage.GiveContextToInteractionMenu);
         }
-        else if(!_interactionMenuFocused)
+        else if (!_interactionMenuFocused)
         {
             _requestedInteractionmenuFocus = false;
         }
@@ -68,18 +69,26 @@ public class InteractionController : MonoBehaviour, IObserver
         void NotifyMenuInputs()
         {
             if (IsFreeRoaming() || !_inputAction.InputDirections.Any()) return;
-            _flowSubject.Notify(new MenuNavigation(_inputAction.InputDirections.Last()));
+            if (_inEncounter)
+            {
+                _encounterSubject.Notify(new MenuNavigation(_inputAction.InputDirections.Last()));
+            }
+            else
+            {
+                _flowSubject.Notify(new MenuNavigation(_inputAction.InputDirections.Last()));
+            }
         }
 
         Utilities.Debounce(ref _timeSinceLastDirectionalInput, menuDirectionalDebounceTiming, NotifyMenuInputs);
     }
 
     public void Setup(Subject interactionSubject, PositionGrid positionGrid, Subject flowSubject,
-        InputAction inputAction)
+        InputAction inputAction, Subject encounterSubject)
     {
         _interactionSubject = interactionSubject;
         _positionGrid = positionGrid;
         _flowSubject = flowSubject;
+        _encounterSubject = encounterSubject;
         _inputAction = inputAction;
 
         _interactionSubject.AddObserver(this);
@@ -103,6 +112,10 @@ public class InteractionController : MonoBehaviour, IObserver
                     {
                         _flowSubject.Notify(SubjectMessage.CloseInventoryMenu);
                     }
+                }
+                else if (_inEncounter)
+                {
+                    _encounterSubject.Notify(SubjectMessage.Cancel);
                 }
 
                 break;
