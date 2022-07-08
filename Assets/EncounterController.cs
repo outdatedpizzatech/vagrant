@@ -9,13 +9,26 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         None,
         PickingAttackTarget,
+        InAttackAnimation
     }
 
     private Subject _encounterSubject;
     private State _state;
+    private State _nextState;
+    private bool _atEndOfMessage;
     private int _selectedTargetIndex;
     private List<Blinker> _opponents = new();
+    private Animator _animator;
+    private InteractionEvent _interactionEvent;
+    private int _eventStepIndex;
+    private bool _inDialogue;
 
+    private void Update()
+    {
+        _state = _nextState;
+        print(_state);
+    }
+    
     private void Start()
     {
         foreach (Transform child in GameObject.Find("WorldSpaceCanvas/EncounterBox/Opponents").transform)
@@ -28,21 +41,65 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         _encounterSubject = encounterSubject;
         _encounterSubject.AddObserver(this);
+        _animator = GameObject.Find("WorldSpaceCanvas/EncounterBox/AbilityAnimation").GetComponent<Animator>();
+        _animator.GetComponent<AbilityAnimation>().Setup(_encounterSubject);
     }
 
     public void OnNotify(SubjectMessage message)
     {
-        if (message == SubjectMessage.PickedAttack)
+        switch (message)
         {
-            _state = State.PickingAttackTarget;
-            _opponents[_selectedTargetIndex].shouldBlink = true;
-        }
-        else if (_state == State.PickingAttackTarget && message == SubjectMessage.Cancel)
-        {
-            _opponents[_selectedTargetIndex].shouldBlink = false;
-            GameObject.Find("WorldSpaceCanvas/EncounterBox/Cragman").GetComponent<Blinker>().shouldBlink = false;
-            _state = State.None;
-            _encounterSubject.Notify(SubjectMessage.OpenMainMenu);
+            case SubjectMessage.PickedAttack:
+                SetState(State.PickingAttackTarget);
+                _opponents[_selectedTargetIndex].shouldBlink = true;
+                break;
+            case SubjectMessage.Cancel when _state == State.PickingAttackTarget:
+                _opponents[_selectedTargetIndex].shouldBlink = false;
+                GameObject.Find("WorldSpaceCanvas/EncounterBox/Cragman").GetComponent<Blinker>().shouldBlink = false;
+                SetState(State.None);
+                _encounterSubject.Notify(SubjectMessage.OpenMainMenu);
+                break;
+            case SubjectMessage.MenuSelection when _state == State.PickingAttackTarget && !_inDialogue:
+                _encounterSubject.Notify(SubjectMessage.AttackTarget);
+                break;
+            case SubjectMessage.AttackTarget:
+            {
+                var newEvent = new InteractionEvent();
+                newEvent.AddMessage("So and so attacks!");
+                var response = new InteractionResponseEvent(newEvent);
+                _encounterSubject.Notify(response);
+                break;
+            }
+            case SubjectMessage.MenuSelection when _inDialogue && _atEndOfMessage:
+                AdvanceEventSequence();
+                break;
+            case SubjectMessage.ReachedEndOfMessage:
+                _atEndOfMessage = true;
+                break;
+            case SubjectMessage.EndEventSequence when _state == State.PickingAttackTarget:
+            {
+                _inDialogue = false;
+                _opponents[_selectedTargetIndex].shouldBlink = false;
+                _animator.transform.position = _opponents[_selectedTargetIndex].transform.position;
+                _animator.Play("Base Layer.SwordSlash", -1, 0f);
+                SetState(State.InAttackAnimation);
+                break;
+            }
+            case SubjectMessage.EndEventSequence when _state == State.InAttackAnimation:
+            {
+                _inDialogue = false;
+                SetState(State.None);
+                _encounterSubject.Notify(SubjectMessage.OpenMainMenu);
+                break;
+            }
+            case SubjectMessage.EndAttackAnimation:
+            {
+                var newEvent = new InteractionEvent();
+                newEvent.AddMessage("A critical hit!");
+                var response = new InteractionResponseEvent(newEvent);
+                _encounterSubject.Notify(response);
+                break;
+            }
         }
     }
 
@@ -55,7 +112,19 @@ public class EncounterController : MonoBehaviour, IObserver
             case MenuNavigation menuNavigation when _state == State.PickingAttackTarget:
                 UpdateTargetSelection(menuNavigation);
                 break;
+            case InteractionResponseEvent interactionResponseEvent:
+                ProcessEvent(interactionResponseEvent.InteractionEvent);
+                break;
         }
+    }
+
+    private void ProcessEvent(InteractionEvent interactionEvent)
+    {
+        _eventStepIndex = 0;
+        _inDialogue = true;
+        _interactionEvent = interactionEvent;
+        _atEndOfMessage = false;
+        _encounterSubject.Notify(new StartEventStep(_eventStepIndex));
     }
 
     private void UpdateTargetSelection(MenuNavigation menuNavigation)
@@ -84,5 +153,30 @@ public class EncounterController : MonoBehaviour, IObserver
         _selectedTargetIndex = _selectedTargetIndex < 0 ? targetCount - 1 : _selectedTargetIndex % targetCount;
 
         _opponents[_selectedTargetIndex].shouldBlink = true;
+    }
+
+    // Transition state on next tick to avoid message collision
+    private void SetState(State newState)
+    {
+        _nextState = newState;
+    }
+
+    private void AdvanceEventSequence()
+    {
+        if (AtEndOfEvent())
+        {
+            _encounterSubject.Notify(SubjectMessage.EndEventSequence);
+        }
+        else
+        {
+            _eventStepIndex++;
+            _atEndOfMessage = false;
+            _encounterSubject.Notify(new StartEventStep(_eventStepIndex));
+        }
+    }
+
+    private bool AtEndOfEvent()
+    {
+        return _eventStepIndex >= _interactionEvent.EventSteps.Count - 1;
     }
 }

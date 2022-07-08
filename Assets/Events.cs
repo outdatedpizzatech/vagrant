@@ -25,7 +25,9 @@ public enum SubjectMessage
     EncounterStartWipeOut,
     PickedAttack,
     Cancel,
-    OpenMainMenu
+    OpenMainMenu,
+    AttackTarget,
+    EndAttackAnimation,
 }
 
 public class GiveItemEvent
