@@ -50,10 +50,10 @@ public class EncounterController : MonoBehaviour, IObserver
         {
             case SubjectMessage.PickedAttack:
                 SetState(State.PickingAttackTarget);
-                _opponents[_selectedTargetIndex].shouldBlink = true;
+                SelectedOpponent().shouldBlink = true;
                 break;
             case SubjectMessage.Cancel when _state == State.PickingAttackTarget:
-                _opponents[_selectedTargetIndex].shouldBlink = false;
+                SelectedOpponent().shouldBlink = false;
                 GameObject.Find("WorldSpaceCanvas/EncounterBox/Cragman").GetComponent<Blinker>().shouldBlink = false;
                 SetState(State.None);
                 _encounterSubject.Notify(SubjectMessage.OpenMainMenu);
@@ -77,9 +77,10 @@ public class EncounterController : MonoBehaviour, IObserver
                 break;
             case SubjectMessage.EndEventSequence when _state == State.PickingAttackTarget:
             {
+                var selectedOpponent = SelectedOpponent();
                 _inDialogue = false;
-                _opponents[_selectedTargetIndex].shouldBlink = false;
-                _abilityAnimation.PlaySwordAnimationOn(_opponents[_selectedTargetIndex]);
+                selectedOpponent.shouldBlink = false;
+                _abilityAnimation.PlaySwordAnimationOn(selectedOpponent);
                 
                 SetState(State.InAttackAnimation);
                 break;
@@ -100,6 +101,11 @@ public class EncounterController : MonoBehaviour, IObserver
                 break;
             }
         }
+    }
+
+    private Blinker SelectedOpponent()
+    {
+        return _opponents[_selectedTargetIndex];
     }
 
     public void OnNotify<T>(T parameters)
@@ -133,7 +139,7 @@ public class EncounterController : MonoBehaviour, IObserver
             return;
         }
 
-        _opponents[_selectedTargetIndex].shouldBlink = false;
+        SelectedOpponent().shouldBlink = false;
 
         switch (menuNavigation.Direction)
         {
@@ -147,7 +153,7 @@ public class EncounterController : MonoBehaviour, IObserver
 
         _selectedTargetIndex = _selectedTargetIndex < 0 ? targetCount - 1 : _selectedTargetIndex % targetCount;
 
-        _opponents[_selectedTargetIndex].shouldBlink = true;
+        SelectedOpponent().shouldBlink = true;
     }
 
     // Transition state on next tick to avoid message collision
