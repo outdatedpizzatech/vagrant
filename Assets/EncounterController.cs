@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 public class EncounterController : MonoBehaviour, IObserver
@@ -17,32 +15,33 @@ public class EncounterController : MonoBehaviour, IObserver
     private State _nextState;
     private bool _atEndOfMessage;
     private int _selectedTargetIndex;
-    private List<Blinker> _opponents = new();
+    private readonly List<Blinker> _opponents = new();
     private Animator _animator;
     private InteractionEvent _interactionEvent;
     private int _eventStepIndex;
     private bool _inDialogue;
+    private Transform _opponentsTransform;
 
     private void Update()
     {
         _state = _nextState;
-        print(_state);
     }
     
     private void Start()
     {
-        foreach (Transform child in GameObject.Find("WorldSpaceCanvas/EncounterBox/Opponents").transform)
+        foreach (Transform child in _opponentsTransform)
         {
             _opponents.Add(child.GetComponent<Blinker>());
         }
     }
 
-    public void Setup(Subject encounterSubject)
+    public void Setup(Subject encounterSubject, Transform opponentsTransform)
     {
         _encounterSubject = encounterSubject;
         _encounterSubject.AddObserver(this);
         _animator = GameObject.Find("WorldSpaceCanvas/EncounterBox/AbilityAnimation").GetComponent<Animator>();
         _animator.GetComponent<AbilityAnimation>().Setup(_encounterSubject);
+        _opponentsTransform = opponentsTransform;
     }
 
     public void OnNotify(SubjectMessage message)
@@ -105,8 +104,6 @@ public class EncounterController : MonoBehaviour, IObserver
 
     public void OnNotify<T>(T parameters)
     {
-        print(_state);
-        print(parameters);
         switch (parameters)
         {
             case MenuNavigation menuNavigation when _state == State.PickingAttackTarget:
@@ -137,8 +134,6 @@ public class EncounterController : MonoBehaviour, IObserver
         }
 
         _opponents[_selectedTargetIndex].shouldBlink = false;
-
-        print("advancing... " + menuNavigation.Direction);
 
         switch (menuNavigation.Direction)
         {
