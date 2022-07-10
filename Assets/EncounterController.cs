@@ -54,7 +54,6 @@ public class EncounterController : MonoBehaviour, IObserver
                 break;
             case SubjectMessage.Cancel when _state == State.PickingAttackTarget:
                 SelectedOpponent().shouldBlink = false;
-                GameObject.Find("WorldSpaceCanvas/EncounterBox/Cragman").GetComponent<Blinker>().shouldBlink = false;
                 SetState(State.None);
                 _encounterSubject.Notify(SubjectMessage.OpenMainMenu);
                 break;
