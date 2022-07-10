@@ -35,12 +35,12 @@ public class EncounterController : MonoBehaviour, IObserver
         }
     }
 
-    public void Setup(Subject encounterSubject, Transform opponentsTransform)
+    public void Setup(Subject encounterSubject, Transform opponentsTransform, AbilityAnimation abilityAnimation)
     {
         _encounterSubject = encounterSubject;
         _encounterSubject.AddObserver(this);
-        _animator = GameObject.Find("WorldSpaceCanvas/EncounterBox/AbilityAnimation").GetComponent<Animator>();
-        _animator.GetComponent<AbilityAnimation>().Setup(_encounterSubject);
+        _animator = abilityAnimation.GetComponent<Animator>();
+        abilityAnimation.Setup(_encounterSubject);
         _opponentsTransform = opponentsTransform;
     }
 
