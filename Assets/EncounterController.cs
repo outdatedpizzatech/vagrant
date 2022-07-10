@@ -16,7 +16,7 @@ public class EncounterController : MonoBehaviour, IObserver
     private bool _atEndOfMessage;
     private int _selectedTargetIndex;
     private readonly List<Blinker> _opponents = new();
-    private Animator _animator;
+    private AbilityAnimation _abilityAnimation;
     private InteractionEvent _interactionEvent;
     private int _eventStepIndex;
     private bool _inDialogue;
@@ -39,7 +39,7 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         _encounterSubject = encounterSubject;
         _encounterSubject.AddObserver(this);
-        _animator = abilityAnimation.GetComponent<Animator>();
+        _abilityAnimation = abilityAnimation;
         abilityAnimation.Setup(_encounterSubject);
         _opponentsTransform = opponentsTransform;
     }
@@ -79,8 +79,8 @@ public class EncounterController : MonoBehaviour, IObserver
             {
                 _inDialogue = false;
                 _opponents[_selectedTargetIndex].shouldBlink = false;
-                _animator.transform.position = _opponents[_selectedTargetIndex].transform.position;
-                _animator.Play("Base Layer.SwordSlash", -1, 0f);
+                _abilityAnimation.PlaySwordAnimationOn(_opponents[_selectedTargetIndex]);
+                
                 SetState(State.InAttackAnimation);
                 break;
             }
