@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class InteractionController : MonoBehaviour, IObserver
 {
-    public ContextController contextController;
+    public WindowController windowController;
     public float menuDirectionalDebounceTiming;
 
     private bool _inEncounter;
@@ -53,7 +53,7 @@ public class InteractionController : MonoBehaviour, IObserver
     }
 
     public void Setup(Subject interactionSubject, PositionGrid positionGrid, Subject flowSubject,
-        InputAction inputAction, Subject encounterSubject, Subject contextSubject)
+        InputAction inputAction, Subject encounterSubject, Subject windowSubject)
     {
         _interactionSubject = interactionSubject;
         _positionGrid = positionGrid;
@@ -64,7 +64,7 @@ public class InteractionController : MonoBehaviour, IObserver
         _interactionSubject.AddObserver(this);
         _flowSubject.AddObserver(this);
 
-        contextController.Setup(contextSubject);
+        windowController.Setup(windowSubject);
     }
 
     public void OnNotify(SubjectMessage subjectMessage)
@@ -143,6 +143,6 @@ public class InteractionController : MonoBehaviour, IObserver
 
     private bool IsFreeRoaming()
     {
-        return !contextController.Any() && !_inEncounter;
+        return !windowController.Any() && !_inEncounter;
     }
 }

@@ -10,7 +10,7 @@ public class SetupController : MonoBehaviour, IObserver
         var occupiedSpacesSubject = new Subject("occupied spaces");
         var interactionSubject = new Subject("interactions from the player");
         var flowSubject = new Subject("the flow of things");
-        var contextSubject = new Subject("focusing of windows");
+        var windowSubject = new Subject("focusing of windows");
         var encounterSubject = new Subject("all things related to being in an encounter");
         
         var player = GameObject.Find("Player").GetComponent<PlayerController>();
@@ -41,16 +41,16 @@ public class SetupController : MonoBehaviour, IObserver
         keever.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         grayson.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         positionController.Setup(occupiedSpacesSubject);
-        interactionController.Setup(interactionSubject, positionController.PositionGrid, flowSubject, inputController.InputAction, encounterSubject, contextSubject);
-        messageBoxController.Setup(flowSubject, contextSubject, interactionSubject);
+        interactionController.Setup(interactionSubject, positionController.PositionGrid, flowSubject, inputController.InputAction, encounterSubject, windowSubject);
+        messageBoxController.Setup(flowSubject, windowSubject, interactionSubject);
         encounterMessageBoxController.Setup(encounterSubject);
         portraitBoxController.Setup(flowSubject);
         encounterBoxController.Setup(flowSubject);
         battleCommandBoxController.Setup(flowSubject, encounterSubject, interactionSubject);
         flowController.Setup(flowSubject, interactionSubject);
         encounterController.Setup(encounterSubject, opponentsTransform, abilityAnimation, interactionSubject);
-        inventoryBoxController.Setup(flowSubject, interactionSubject, contextSubject);
-        interactionBoxController.Setup(flowSubject, interactionSubject, contextSubject);
+        inventoryBoxController.Setup(flowSubject, interactionSubject, windowSubject);
+        interactionBoxController.Setup(flowSubject, interactionSubject, windowSubject);
         treasureA.Setup(occupiedSpacesSubject);
         treasureB.Setup(occupiedSpacesSubject);
         
@@ -63,7 +63,7 @@ public class SetupController : MonoBehaviour, IObserver
             flowSubject.AddObserver(this);
             encounterSubject.AddObserver(this);
             interactionSubject.AddObserver(this);
-            contextSubject.AddObserver(this);
+            windowSubject.AddObserver(this);
         }
     }
 
