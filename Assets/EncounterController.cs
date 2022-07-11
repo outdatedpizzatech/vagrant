@@ -16,7 +16,6 @@ public class EncounterController : MonoBehaviour, IObserver
     private int _selectedTargetIndex;
     private readonly List<Blinker> _opponents = new();
     private AbilityAnimation _abilityAnimation;
-    private bool _inDialogue;
     private Transform _opponentsTransform;
     private EventStepMarker _eventStepMarker;
 
@@ -56,7 +55,7 @@ public class EncounterController : MonoBehaviour, IObserver
                 SetState(State.None);
                 _encounterSubject.Notify(SubjectMessage.OpenMainMenu);
                 break;
-            case SubjectMessage.MenuSelection when _state == State.PickingAttackTarget && !_inDialogue:
+            case SubjectMessage.MenuSelection when _state == State.PickingAttackTarget && _eventStepMarker.InteractionEvent() == null:
                 _encounterSubject.Notify(SubjectMessage.AttackTarget);
                 break;
             case SubjectMessage.AttackTarget:
@@ -67,13 +66,13 @@ public class EncounterController : MonoBehaviour, IObserver
                 _encounterSubject.Notify(response);
                 break;
             }
-            case SubjectMessage.MenuSelection when _inDialogue && _eventStepMarker.IsAtEndOfMessage():
+            case SubjectMessage.MenuSelection when _eventStepMarker.InteractionEvent() != null && _eventStepMarker.IsAtEndOfMessage():
                 AdvanceEventSequence();
                 break;
             case SubjectMessage.EndEventSequence when _state == State.PickingAttackTarget:
             {
                 var selectedOpponent = SelectedOpponent();
-                _inDialogue = false;
+                _eventStepMarker.End();
                 selectedOpponent.shouldBlink = false;
                 _abilityAnimation.PlaySwordAnimationOn(selectedOpponent);
                 
@@ -82,7 +81,7 @@ public class EncounterController : MonoBehaviour, IObserver
             }
             case SubjectMessage.EndEventSequence when _state == State.InAttackAnimation:
             {
-                _inDialogue = false;
+                _eventStepMarker.End();
                 SetState(State.None);
                 _encounterSubject.Notify(SubjectMessage.OpenMainMenu);
                 break;
@@ -118,7 +117,6 @@ public class EncounterController : MonoBehaviour, IObserver
 
     private void ProcessEvent()
     {
-        _inDialogue = true;
     }
 
     private void UpdateTargetSelection(MenuNavigation menuNavigation)

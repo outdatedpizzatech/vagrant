@@ -12,14 +12,6 @@ public class EventStepMarker : IObserver
         subject.AddObserver(this);
     }
 
-    private void StartNew(InteractionEvent interactionEvent)
-    {
-        _eventStepIndex = 0;
-        _interactionEvent = interactionEvent;
-        _atEndOfMessage = false;
-        _subject.Notify(new StartEventStep(EventStepIndex()));
-    }
-
     public void StartNextEventStep()
     {
         _eventStepIndex++;
@@ -87,5 +79,13 @@ public class EventStepMarker : IObserver
     private int EventStepIndex()
     {
         return _eventStepIndex;
+    }
+
+    private void StartNew(InteractionEvent interactionEvent)
+    {
+        _eventStepIndex = 0;
+        _interactionEvent = interactionEvent;
+        _atEndOfMessage = false;
+        _subject.Notify(new StartEventStep(EventStepIndex()));
     }
 }
