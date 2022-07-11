@@ -1,9 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class BattleCommandBoxController : MonoBehaviour, IObserver
+public class EncounterCommandWindowController : MonoBehaviour, IObserver
 {
     private int _selectedPromptIndex;
     private Window _window;

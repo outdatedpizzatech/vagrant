@@ -28,7 +28,7 @@ public class SetupController : MonoBehaviour, IObserver
         var encounterBoxController = GameObject.Find("WorldSpaceCanvas/EncounterBox").GetComponent<EncounterBoxController>();
         var opponentsTransform = GameObject.Find("WorldSpaceCanvas/EncounterBox/Opponents").transform;
         var abilityAnimation = GameObject.Find("WorldSpaceCanvas/EncounterBox/AbilityAnimation").GetComponent<AbilityAnimation>();
-        var battleCommandBoxController = GameObject.Find("WorldSpaceCanvas/EncounterBox/BattleCommandBox").GetComponent<BattleCommandBoxController>();
+        var battleCommandBoxController = GameObject.Find("WorldSpaceCanvas/EncounterBox/BattleCommandBox").GetComponent<EncounterCommandWindowController>();
         var encounterMessageBoxController = GameObject.Find("WorldSpaceCanvas/EncounterBox/MessageBox").GetComponent<EncounterMessageBoxController>();
         var flowController = GameObject.Find("Controllers/FlowController").GetComponent<FlowController>();
         var encounterController = GameObject.Find("Controllers/EncounterController").GetComponent<EncounterController>();
