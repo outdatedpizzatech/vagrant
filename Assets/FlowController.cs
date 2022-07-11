@@ -10,7 +10,7 @@ public class FlowController : MonoBehaviour, IObserver
     private bool _shownInteractionMenu;
     private bool _encounterIsEqueued;
     private Interactable _interactable;
-    private EventStepMarker _eventStepMarker = new();
+    private readonly EventStepMarker _eventStepMarker = new();
 
     public void Update()
     {
@@ -130,7 +130,6 @@ public class FlowController : MonoBehaviour, IObserver
 
     private void ProcessEvent(InteractionEvent interactionEvent)
     {
-        _eventStepMarker.StartNew(interactionEvent);
         _eventStepMarker.StartNew(interactionEvent);
         _flowSubject.Notify(new StartEventStep(_eventStepMarker.EventStepIndex()));
     }

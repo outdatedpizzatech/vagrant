@@ -13,14 +13,12 @@ public class EncounterController : MonoBehaviour, IObserver
     private Subject _encounterSubject;
     private State _state;
     private State _nextState;
-    private bool _atEndOfMessage;
     private int _selectedTargetIndex;
     private readonly List<Blinker> _opponents = new();
     private AbilityAnimation _abilityAnimation;
-    private InteractionEvent _interactionEvent;
-    private int _eventStepIndex;
     private bool _inDialogue;
     private Transform _opponentsTransform;
+    private readonly EventStepMarker _eventStepMarker = new();
 
     private void Update()
     {
@@ -68,11 +66,11 @@ public class EncounterController : MonoBehaviour, IObserver
                 _encounterSubject.Notify(response);
                 break;
             }
-            case SubjectMessage.MenuSelection when _inDialogue && _atEndOfMessage:
+            case SubjectMessage.MenuSelection when _inDialogue && _eventStepMarker.IsAtEndOfMessage():
                 AdvanceEventSequence();
                 break;
             case SubjectMessage.ReachedEndOfMessage:
-                _atEndOfMessage = true;
+                _eventStepMarker.ReachedEndOfMessage();
                 break;
             case SubjectMessage.EndEventSequence when _state == State.PickingAttackTarget:
             {
@@ -122,11 +120,9 @@ public class EncounterController : MonoBehaviour, IObserver
 
     private void ProcessEvent(InteractionEvent interactionEvent)
     {
-        _eventStepIndex = 0;
+        _eventStepMarker.StartNew(interactionEvent);
         _inDialogue = true;
-        _interactionEvent = interactionEvent;
-        _atEndOfMessage = false;
-        _encounterSubject.Notify(new StartEventStep(_eventStepIndex));
+        _encounterSubject.Notify(new StartEventStep(_eventStepMarker.EventStepIndex()));
     }
 
     private void UpdateTargetSelection(MenuNavigation menuNavigation)
@@ -169,14 +165,13 @@ public class EncounterController : MonoBehaviour, IObserver
         }
         else
         {
-            _eventStepIndex++;
-            _atEndOfMessage = false;
-            _encounterSubject.Notify(new StartEventStep(_eventStepIndex));
+            _eventStepMarker.StartNextEventStep();
+            _encounterSubject.Notify(new StartEventStep(_eventStepMarker.EventStepIndex()));
         }
     }
 
     private bool AtEndOfEvent()
     {
-        return _eventStepIndex >= _interactionEvent.EventSteps.Count - 1;
+        return _eventStepMarker.AtEndOfEvent();
     }
 }
