@@ -10,10 +10,11 @@ public class InteractionBoxController : MonoBehaviour, IObserver
     private readonly List<string> _prompts = new() { "END", "GIVE" };
     private Window _window;
 
-    public void Setup(Subject flowSubject)
+    public void Setup(Subject flowSubject, Subject interactionSubject)
     {
         _flowSubject = flowSubject;
         _flowSubject.AddObserver(this);
+        interactionSubject.AddObserver(this);
     }
 
     private void Awake()
@@ -57,7 +58,7 @@ public class InteractionBoxController : MonoBehaviour, IObserver
         {
             case MenuNavigation menuNavigation when _window.IsFocused():
                 UpdatePromptSelection(menuNavigation);
-                break;
+                break; 
         }
     }
 

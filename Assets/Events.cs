@@ -19,6 +19,7 @@ public enum SubjectMessage
     CloseInteractionMenu,
     EndInteraction,
     GiveContextToInteractionMenu,
+    GiveContextToInventoryMenu,
     StartEncounter,
     EndEncounter,
     EncounterFinishedWipeIn,

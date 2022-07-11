@@ -25,11 +25,12 @@ public class FlowController : MonoBehaviour, IObserver
         }
     }
 
-    public void Setup(Subject flowSubject)
+    public void Setup(Subject flowSubject, Subject interactionSubject)
     {
         _flowSubject = flowSubject;
         _flowSubject.AddObserver(this);
         _eventStepMarker = new EventStepMarker(flowSubject);
+        interactionSubject.AddObserver(this);
     }
 
     public void OnNotify(SubjectMessage message)

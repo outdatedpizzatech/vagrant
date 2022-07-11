@@ -45,11 +45,11 @@ public class SetupController : MonoBehaviour, IObserver
         encounterMessageBoxController.Setup(encounterSubject);
         portraitBoxController.Setup(flowSubject);
         encounterBoxController.Setup(flowSubject);
-        battleCommandBoxController.Setup(flowSubject, encounterSubject);
-        flowController.Setup(flowSubject);
-        encounterController.Setup(encounterSubject, opponentsTransform, abilityAnimation);
-        inventoryBoxController.Setup(flowSubject);
-        interactionBoxController.Setup(flowSubject);
+        battleCommandBoxController.Setup(flowSubject, encounterSubject, interactionSubject);
+        flowController.Setup(flowSubject, interactionSubject);
+        encounterController.Setup(encounterSubject, opponentsTransform, abilityAnimation, interactionSubject);
+        inventoryBoxController.Setup(flowSubject, interactionSubject);
+        interactionBoxController.Setup(flowSubject, interactionSubject);
         treasureA.Setup(occupiedSpacesSubject);
         treasureB.Setup(occupiedSpacesSubject);
         
@@ -60,7 +60,8 @@ public class SetupController : MonoBehaviour, IObserver
         if (DebugMode)
         {
             // flowSubject.AddObserver(this);
-            encounterSubject.AddObserver(this);
+            // encounterSubject.AddObserver(this);
+            interactionSubject.AddObserver(this);
         }
     }
 

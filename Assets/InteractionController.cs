@@ -19,7 +19,8 @@ public class InteractionController : MonoBehaviour, IObserver
     private bool _inventoryMenuFocused;
     private bool _messageBoxFocused;
     private bool _interactionMenuFocused;
-    private bool _requestedInteractionmenuFocus;
+    private bool _requestedInteractionMenuFocus;
+    private bool _requestedInventoryMenuFocus;
 
     private void Update()
     {
@@ -56,14 +57,24 @@ public class InteractionController : MonoBehaviour, IObserver
             }
         }
 
-        if (_interactionMenuFocused && !_requestedInteractionmenuFocus)
+        if (_interactionMenuFocused && !_requestedInteractionMenuFocus)
         {
-            _requestedInteractionmenuFocus = true;
+            _requestedInteractionMenuFocus = true;
             _flowSubject.Notify(SubjectMessage.GiveContextToInteractionMenu);
         }
         else if (!_interactionMenuFocused)
         {
-            _requestedInteractionmenuFocus = false;
+            _requestedInteractionMenuFocus = false;
+        }
+        
+        if (_inventoryMenuFocused && !_requestedInventoryMenuFocus)
+        {
+            _requestedInventoryMenuFocus = true;
+            _flowSubject.Notify(SubjectMessage.GiveContextToInventoryMenu);
+        }
+        else if (!_inventoryMenuFocused)
+        {
+            _requestedInventoryMenuFocus = false;
         }
 
         void NotifyMenuInputs()
@@ -167,8 +178,7 @@ public class InteractionController : MonoBehaviour, IObserver
             }
             case PlayerRequestsPrimaryActionEvent:
             {
-                _flowSubject.Notify(SubjectMessage.PlayerInputConfirm);
-                _encounterSubject.Notify(SubjectMessage.PlayerInputConfirm);
+                _interactionSubject.Notify(SubjectMessage.PlayerInputConfirm);
                 if (_messageBoxFocused)
                 {
                     _flowSubject.Notify(SubjectMessage.AdvanceEvent);

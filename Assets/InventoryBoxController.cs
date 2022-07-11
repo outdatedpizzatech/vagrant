@@ -13,10 +13,11 @@ public class InventoryBoxController : MonoBehaviour, IObserver
     private Subject _flowSubject;
     private Window _window;
 
-    public void Setup(Subject flowSubject)
+    public void Setup(Subject flowSubject, Subject interactionSubject)
     {
         _flowSubject = flowSubject;
         _flowSubject.AddObserver(this);
+        interactionSubject.AddObserver(this);
     }
 
     private void Awake()
@@ -65,6 +66,9 @@ public class InventoryBoxController : MonoBehaviour, IObserver
         {
             case MenuNavigation menuNavigation when _window.IsFocused():
                 UpdatePromptSelection(menuNavigation);
+                break; 
+            case StartEventStep:
+                _window.LoseFocus();
                 break;
         }
     }
@@ -73,6 +77,10 @@ public class InventoryBoxController : MonoBehaviour, IObserver
     {
         switch (message)
         {
+            case SubjectMessage.GiveContextToInventoryMenu:
+                _window.Show();
+
+                break;
             case SubjectMessage.OpenInventoryMenu:
                 Show();
 

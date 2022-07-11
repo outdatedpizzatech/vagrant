@@ -32,7 +32,7 @@ public class EncounterController : MonoBehaviour, IObserver
         }
     }
 
-    public void Setup(Subject encounterSubject, Transform opponentsTransform, AbilityAnimation abilityAnimation)
+    public void Setup(Subject encounterSubject, Transform opponentsTransform, AbilityAnimation abilityAnimation, Subject interactionSubject)
     {
         _encounterSubject = encounterSubject;
         _encounterSubject.AddObserver(this);
@@ -40,6 +40,7 @@ public class EncounterController : MonoBehaviour, IObserver
         abilityAnimation.Setup(_encounterSubject);
         _opponentsTransform = opponentsTransform;
         _eventStepMarker = new EventStepMarker(encounterSubject);
+        interactionSubject.AddObserver(this);
     }
 
     public void OnNotify(SubjectMessage message)

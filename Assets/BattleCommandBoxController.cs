@@ -25,13 +25,14 @@ public class BattleCommandBoxController : MonoBehaviour, IObserver
         _text = transform.Find("Text").GetComponent<TMP_Text>();
     }
 
-    public void Setup(Subject flowSubject, Subject encounterSubject)
+    public void Setup(Subject flowSubject, Subject encounterSubject, Subject interactionSubject)
     {
         _flowSubject = flowSubject;
         _encounterSubject = encounterSubject;
 
         _flowSubject.AddObserver(this);
         _encounterSubject.AddObserver(this);
+        interactionSubject.AddObserver(this);
     }
 
     public void OnNotify(SubjectMessage message)
