@@ -12,12 +12,19 @@ public class InventoryBoxController : MonoBehaviour, IObserver
     private TMP_Text _text;
     private Subject _flowSubject;
     private Window _window;
+    private bool _readyForInputs;
 
-    public void Setup(Subject flowSubject, Subject interactionSubject)
+    public void Setup(Subject flowSubject, Subject interactionSubject, Subject contextSubject)
     {
         _flowSubject = flowSubject;
         _flowSubject.AddObserver(this);
         interactionSubject.AddObserver(this);
+        _window.Setup(contextSubject);
+    }
+
+    private void Update()
+    {
+        _readyForInputs = _window.IsFocused();
     }
 
     private void Awake()
@@ -66,7 +73,7 @@ public class InventoryBoxController : MonoBehaviour, IObserver
         {
             case MenuNavigation menuNavigation when _window.IsFocused():
                 UpdatePromptSelection(menuNavigation);
-                break; 
+                break;
             case StartEventStep:
                 _window.LoseFocus();
                 break;
@@ -89,10 +96,17 @@ public class InventoryBoxController : MonoBehaviour, IObserver
                 _window.Hide();
 
                 break;
-            case SubjectMessage.PlayerInputConfirm when _window.IsFocused():
-                var selectedItem = playerController.Items()[_selectedPromptIndex];
-                var selectInventoryItemEvent = new SelectInventoryItemEvent(selectedItem);
-                _flowSubject.Notify(selectInventoryItemEvent);
+            case SubjectMessage.PlayerInputConfirm when _readyForInputs:
+                if (playerController.Items().Any())
+                {
+                    var selectedItem = playerController.Items()[_selectedPromptIndex];
+                    var selectInventoryItemEvent = new SelectInventoryItemEvent(selectedItem);
+                    _flowSubject.Notify(selectInventoryItemEvent);
+                }
+
+                break;
+            case SubjectMessage.PlayerRequestsSecondaryAction when _readyForInputs:
+                _window.Hide();
 
                 break;
         }

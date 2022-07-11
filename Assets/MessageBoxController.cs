@@ -21,11 +21,13 @@ public class MessageBoxController : MonoBehaviour, IObserver
         return _interactionEvent;
     }
 
-    public void Setup(Subject flowSubject)
+    public void Setup(Subject flowSubject, Subject contextSubject, Subject interactionSubject)
     {
         _promptController = GetComponent<PromptController>();
-        _promptController.Setup(flowSubject, this);
+        _promptController.Setup(interactionSubject, this);
         _flowSubject = flowSubject;
+        
+        _window.Setup(contextSubject);
 
         _flowSubject.AddObserver(this);
     }

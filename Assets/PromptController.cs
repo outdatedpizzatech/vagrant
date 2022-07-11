@@ -4,14 +4,13 @@ using UnityEngine;
 
 public class PromptController : MonoBehaviour, IObserver
 {
-    private Subject _flowSubject;
     private int _selectedPromptIndex;
     private List<Prompt> _prompts;
     private MessageBoxController _messageBoxController;
 
-    public void Setup(Subject flowSubject, MessageBoxController messageBoxController)
+    public void Setup(Subject subject, MessageBoxController messageBoxController)
     {
-        flowSubject.AddObserver(this);
+        subject.AddObserver(this);
         _messageBoxController = messageBoxController;
     }
 

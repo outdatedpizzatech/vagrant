@@ -29,6 +29,37 @@ public enum SubjectMessage
     OpenMainMenu,
     AttackTarget,
     EndAttackAnimation,
+    LoseInteractionTarget
+}
+
+public class GainFocus
+{
+    public GainFocus(Window window)
+    {
+        Window = window;
+    }
+
+    public Window Window { get; }
+}
+
+public class DismissWindow
+{
+    public DismissWindow(Window window)
+    {
+        Window = window;
+    }
+
+    public Window Window { get; }
+}
+
+public class RegainFocus
+{
+    public RegainFocus(Window window)
+    {
+        Window = window;
+    }
+
+    public Window Window { get; }
 }
 
 public class GiveItemEvent

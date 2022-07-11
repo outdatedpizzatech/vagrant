@@ -38,7 +38,10 @@ public class FlowController : MonoBehaviour, IObserver
         switch (message)
         {
             case SubjectMessage.EndEventSequence:
-                _interactable = null;
+                if (!_shownInteractionMenu)
+                {
+                    _flowSubject.Notify(SubjectMessage.LoseInteractionTarget);
+                }
 
                 if (_encounterIsEqueued)
                 {
@@ -46,6 +49,9 @@ public class FlowController : MonoBehaviour, IObserver
                     _flowSubject.Notify(SubjectMessage.StartEncounter);
                 }
 
+                break;
+            case SubjectMessage.PlayerInputConfirm when messageBoxController.IsFocused():
+                _flowSubject.Notify(SubjectMessage.AdvanceEvent);
                 break;
             case SubjectMessage.AdvanceEvent:
                 if (_eventStepMarker.IsAtEndOfMessage())
@@ -69,6 +75,11 @@ public class FlowController : MonoBehaviour, IObserver
             case SubjectMessage.EndInteraction:
                 _flowSubject.Notify(SubjectMessage.CloseInteractionMenu);
                 _flowSubject.Notify(SubjectMessage.EndEventSequence);
+                _flowSubject.Notify(SubjectMessage.LoseInteractionTarget);
+
+                break;
+            case SubjectMessage.LoseInteractionTarget:
+                _interactable = null;
 
                 break;
         }

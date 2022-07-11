@@ -10,11 +10,12 @@ public class InteractionBoxController : MonoBehaviour, IObserver
     private readonly List<string> _prompts = new() { "END", "GIVE" };
     private Window _window;
 
-    public void Setup(Subject flowSubject, Subject interactionSubject)
+    public void Setup(Subject flowSubject, Subject interactionSubject, Subject contextSubject)
     {
         _flowSubject = flowSubject;
         _flowSubject.AddObserver(this);
         interactionSubject.AddObserver(this);
+        _window.Setup(contextSubject);
     }
 
     private void Awake()

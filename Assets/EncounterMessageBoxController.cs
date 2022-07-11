@@ -38,7 +38,6 @@ public class EncounterMessageBoxController : MonoBehaviour, IObserver
 
     public void OnNotify<T>(T parameters)
     {
-        print("notified... " + parameters);
         switch (parameters)
         {
             case InteractionResponseEvent interactionResponseEvent:

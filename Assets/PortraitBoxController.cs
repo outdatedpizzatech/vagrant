@@ -42,7 +42,7 @@ public class PortraitBoxController : MonoBehaviour, IObserver
 
     public void OnNotify(SubjectMessage message)
     {
-        if (message == SubjectMessage.EndEventSequence)
+        if (message == SubjectMessage.LoseInteractionTarget)
         {
             _window.Hide();
         }

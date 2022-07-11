@@ -4,74 +4,58 @@ using System.Linq;
 
 public class ContextController : MonoBehaviour, IObserver
 {
-    private Subject _flowSubject;
+    private Subject _contextSubject;
 
-    private readonly List<Enums.ControlContext> _activeContexts = new ();
+    private readonly List<Window> _activeContexts = new ();
 
-    public void Setup(Subject flowSubject)
+    public void Setup(Subject contextSubject)
     {
-        _flowSubject = flowSubject;
+        _contextSubject = contextSubject;
 
-        _flowSubject.AddObserver(this);
+        _contextSubject.AddObserver(this);
     }
-    
+
+    private void Update()
+    {
+        print(_activeContexts.Count);
+    }
+
     public void OnNotify(SubjectMessage subjectMessage)
     {
-        switch (subjectMessage)
-        {
-            case SubjectMessage.OpenInteractionMenu:
-                AddContext(Enums.ControlContext.InteractionMenu);
-                break;
-            case SubjectMessage.OpenInventoryMenu:
-                AddContext(Enums.ControlContext.InventoryMenu);
-                break;
-            case SubjectMessage.AdvanceEvent:
-                RemoveContext(Enums.ControlContext.Event);
-                AddContext(Enums.ControlContext.Event);
-                break;
-            case SubjectMessage.CloseInventoryMenu:
-                RemoveContext(Enums.ControlContext.InventoryMenu);
-                break;
-            case SubjectMessage.CloseInteractionMenu:
-                RemoveContext(Enums.ControlContext.InteractionMenu);
-                break;
-            case SubjectMessage.EndEventSequence:
-                RemoveContext(Enums.ControlContext.Event);
-                break;
-        }
     }
 
     public void OnNotify<T>(T parameters)
     {
         switch (parameters)
         {
-            case InteractionResponseEvent:
-                AddContext(Enums.ControlContext.Event);
+            case GainFocus windowEvent:
+                AddContext(windowEvent.Window);
+                break;
+            case DismissWindow windowEvent:
+                RemoveContext(windowEvent.Window);
                 break;
         }
     }
 
-    public bool InHistory(Enums.ControlContext controlContext)
-    {
-        return (_activeContexts.Any((x) =>
-            x == controlContext));
-    }
-
-    public Enums.ControlContext Current()
-    {
-        return _activeContexts.Count == 0
-            ? Enums.ControlContext.None
-            : _activeContexts.Last();
-    }
-
-    private void AddContext(Enums.ControlContext context)
+    private void AddContext(Window context)
     {
         _activeContexts.Remove(context);
         _activeContexts.Add(context);
     }
 
-    private void RemoveContext(Enums.ControlContext context)
+    private void RemoveContext(Window context)
     {
         _activeContexts.Remove(context);
+
+        if (_activeContexts.Count > 0)
+        {
+            var windowEvent = new RegainFocus(_activeContexts.Last());
+            _contextSubject.Notify(windowEvent);
+        }
+    }
+
+    public bool Any()
+    {
+        return _activeContexts.Count > 0;
     }
 }

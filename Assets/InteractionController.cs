@@ -6,7 +6,6 @@ public class InteractionController : MonoBehaviour, IObserver
     public ContextController contextController;
     public float menuDirectionalDebounceTiming;
 
-    private bool _inEvent;
     private bool _inEncounter;
     private bool _aMenuIsOpen;
     private bool _halted;
@@ -26,20 +25,6 @@ public class InteractionController : MonoBehaviour, IObserver
     {
         _timeSinceLastDirectionalInput += Time.deltaTime;
 
-        var currentControlContext = contextController.Current();
-
-        _interactionMenuFocused = currentControlContext == Enums.ControlContext.InteractionMenu;
-        _inventoryMenuFocused = currentControlContext == Enums.ControlContext.InventoryMenu;
-        _messageBoxFocused = currentControlContext == Enums.ControlContext.Event;
-
-        var interactionMenuOpen =
-            _interactionMenuFocused || contextController.InHistory(Enums.ControlContext.InteractionMenu);
-        var inventoryMenuOpen =
-            _inventoryMenuFocused || contextController.InHistory(Enums.ControlContext.InventoryMenu);
-
-        _aMenuIsOpen = interactionMenuOpen || inventoryMenuOpen;
-        _inEvent = _messageBoxFocused || contextController.InHistory(Enums.ControlContext.Event);
-
         if (!_halted)
         {
             if (!IsFreeRoaming())
@@ -57,44 +42,18 @@ public class InteractionController : MonoBehaviour, IObserver
             }
         }
 
-        if (_interactionMenuFocused && !_requestedInteractionMenuFocus)
-        {
-            _requestedInteractionMenuFocus = true;
-            _flowSubject.Notify(SubjectMessage.GiveContextToInteractionMenu);
-        }
-        else if (!_interactionMenuFocused)
-        {
-            _requestedInteractionMenuFocus = false;
-        }
-        
-        if (_inventoryMenuFocused && !_requestedInventoryMenuFocus)
-        {
-            _requestedInventoryMenuFocus = true;
-            _flowSubject.Notify(SubjectMessage.GiveContextToInventoryMenu);
-        }
-        else if (!_inventoryMenuFocused)
-        {
-            _requestedInventoryMenuFocus = false;
-        }
-
         void NotifyMenuInputs()
         {
             if (IsFreeRoaming() || !_inputAction.InputDirections.Any()) return;
-            if (_inEncounter)
-            {
-                _encounterSubject.Notify(new MenuNavigation(_inputAction.InputDirections.Last()));
-            }
-            else
-            {
-                _flowSubject.Notify(new MenuNavigation(_inputAction.InputDirections.Last()));
-            }
+            
+            _interactionSubject.Notify(new MenuNavigation(_inputAction.InputDirections.Last()));
         }
 
         Utilities.Debounce(ref _timeSinceLastDirectionalInput, menuDirectionalDebounceTiming, NotifyMenuInputs);
     }
 
     public void Setup(Subject interactionSubject, PositionGrid positionGrid, Subject flowSubject,
-        InputAction inputAction, Subject encounterSubject)
+        InputAction inputAction, Subject encounterSubject, Subject contextSubject)
     {
         _interactionSubject = interactionSubject;
         _positionGrid = positionGrid;
@@ -105,7 +64,7 @@ public class InteractionController : MonoBehaviour, IObserver
         _interactionSubject.AddObserver(this);
         _flowSubject.AddObserver(this);
 
-        contextController.Setup(flowSubject);
+        contextController.Setup(contextSubject);
     }
 
     public void OnNotify(SubjectMessage subjectMessage)
@@ -116,13 +75,6 @@ public class InteractionController : MonoBehaviour, IObserver
                 if (IsFreeRoaming())
                 {
                     _flowSubject.Notify(SubjectMessage.OpenInventoryMenu);
-                }
-                else if (_aMenuIsOpen)
-                {
-                    if (_inventoryMenuFocused)
-                    {
-                        _flowSubject.Notify(SubjectMessage.CloseInventoryMenu);
-                    }
                 }
                 else if (_inEncounter)
                 {
@@ -191,6 +143,6 @@ public class InteractionController : MonoBehaviour, IObserver
 
     private bool IsFreeRoaming()
     {
-        return !_inEvent && !_aMenuIsOpen && !_inEncounter;
+        return !contextController.Any() && !_inEncounter;
     }
 }
