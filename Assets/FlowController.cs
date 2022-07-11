@@ -130,8 +130,7 @@ public class FlowController : MonoBehaviour, IObserver
 
     private void ProcessEvent(InteractionEvent interactionEvent)
     {
-        _eventStepMarker.StartNew(interactionEvent);
-        _flowSubject.Notify(new StartEventStep(_eventStepMarker.EventStepIndex()));
+        _eventStepMarker.StartNew(interactionEvent, _flowSubject);
     }
 
     private void AdvanceEventSequence()

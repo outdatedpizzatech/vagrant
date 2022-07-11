@@ -6,11 +6,12 @@ public class EventStepMarker : MonoBehaviour
     private InteractionEvent _interactionEvent;
     private bool _atEndOfMessage;
 
-    public void StartNew(InteractionEvent interactionEvent)
+    public void StartNew(InteractionEvent interactionEvent, Subject subject)
     {
         _eventStepIndex = 0;
         _interactionEvent = interactionEvent;
         _atEndOfMessage = false;
+        subject.Notify(new StartEventStep(EventStepIndex()));
     }
 
     public void StartNextEventStep()

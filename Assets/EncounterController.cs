@@ -120,9 +120,8 @@ public class EncounterController : MonoBehaviour, IObserver
 
     private void ProcessEvent(InteractionEvent interactionEvent)
     {
-        _eventStepMarker.StartNew(interactionEvent);
+        _eventStepMarker.StartNew(interactionEvent, _encounterSubject);
         _inDialogue = true;
-        _encounterSubject.Notify(new StartEventStep(_eventStepMarker.EventStepIndex()));
     }
 
     private void UpdateTargetSelection(MenuNavigation menuNavigation)
