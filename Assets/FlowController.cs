@@ -78,10 +78,6 @@ public class FlowController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case InteractionResponseEvent interactionResponseEvent:
-                ProcessEvent(interactionResponseEvent.InteractionEvent);
-                break;
-
             case SelectInventoryItemEvent selectInventoryItemEvent:
             {
                 if (_interactable == null)
@@ -125,12 +121,6 @@ public class FlowController : MonoBehaviour, IObserver
                     new InteractionResponseEvent(_interactable.ReceiveInteraction(promptResponseEvent.PromptResponse)));
                 break;
         }
-    }
-
-
-    private void ProcessEvent(InteractionEvent interactionEvent)
-    {
-        _eventStepMarker.StartNew(interactionEvent);
     }
 
     private void AdvanceEventSequence()

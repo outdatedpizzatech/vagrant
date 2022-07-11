@@ -110,15 +110,14 @@ public class EncounterController : MonoBehaviour, IObserver
             case MenuNavigation menuNavigation when _state == State.PickingAttackTarget:
                 UpdateTargetSelection(menuNavigation);
                 break;
-            case InteractionResponseEvent interactionResponseEvent:
-                ProcessEvent(interactionResponseEvent.InteractionEvent);
+            case InteractionResponseEvent:
+                ProcessEvent();
                 break;
         }
     }
 
-    private void ProcessEvent(InteractionEvent interactionEvent)
+    private void ProcessEvent()
     {
-        _eventStepMarker.StartNew(interactionEvent);
         _inDialogue = true;
     }
 

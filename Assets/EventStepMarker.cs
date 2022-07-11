@@ -12,7 +12,7 @@ public class EventStepMarker : IObserver
         subject.AddObserver(this);
     }
 
-    public void StartNew(InteractionEvent interactionEvent)
+    private void StartNew(InteractionEvent interactionEvent)
     {
         _eventStepIndex = 0;
         _interactionEvent = interactionEvent;
@@ -37,11 +37,6 @@ public class EventStepMarker : IObserver
         return _atEndOfMessage;
     }
 
-    public int EventStepIndex()
-    {
-        return _eventStepIndex;
-    }
-
     public InteractionEvent InteractionEvent()
     {
         return _interactionEvent;
@@ -63,7 +58,7 @@ public class EventStepMarker : IObserver
         return _interactionEvent != null && _atEndOfMessage && AtEndOfEvent() &&
                _interactionEvent.Information is PostEvent informationPostEvent && informationPostEvent == postEvent;
     }
-    
+
     public void OnNotify(SubjectMessage message)
     {
         switch (message)
@@ -73,15 +68,24 @@ public class EventStepMarker : IObserver
                 break;
         }
     }
-    
+
     public void OnNotify<T>(T parameters)
     {
-        
+        switch (parameters)
+        {
+            case InteractionResponseEvent interactionResponseEvent:
+                StartNew(interactionResponseEvent.InteractionEvent);
+                break;
+        }
     }
-    
+
     private void ReachedEndOfMessage()
     {
         _atEndOfMessage = true;
     }
 
+    private int EventStepIndex()
+    {
+        return _eventStepIndex;
+    }
 }
