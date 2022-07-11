@@ -10,7 +10,7 @@ public class FlowController : MonoBehaviour, IObserver
     private bool _shownInteractionMenu;
     private bool _encounterIsEqueued;
     private Interactable _interactable;
-    private readonly EventStepMarker _eventStepMarker = new();
+    private EventStepMarker _eventStepMarker;
 
     public void Update()
     {
@@ -29,6 +29,7 @@ public class FlowController : MonoBehaviour, IObserver
     {
         _flowSubject = flowSubject;
         _flowSubject.AddObserver(this);
+        _eventStepMarker = new EventStepMarker(flowSubject);
     }
 
     public void OnNotify(SubjectMessage message)
@@ -61,7 +62,6 @@ public class FlowController : MonoBehaviour, IObserver
                     _flowSubject.Notify(new ReceiveItem(item));
                 }
 
-                _eventStepMarker.ReachedEndOfMessage();
                 _shownInteractionMenu = false;
 
                 break;
@@ -130,7 +130,7 @@ public class FlowController : MonoBehaviour, IObserver
 
     private void ProcessEvent(InteractionEvent interactionEvent)
     {
-        _eventStepMarker.StartNew(interactionEvent, _flowSubject);
+        _eventStepMarker.StartNew(interactionEvent);
     }
 
     private void AdvanceEventSequence()
@@ -149,7 +149,7 @@ public class FlowController : MonoBehaviour, IObserver
         }
         else
         {
-            _eventStepMarker.StartNextEventStep(_flowSubject);
+            _eventStepMarker.StartNextEventStep();
         }
     }
 

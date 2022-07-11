@@ -1,24 +1,30 @@
-using UnityEngine;
-
-public class EventStepMarker : MonoBehaviour
+public class EventStepMarker : IObserver
 {
     private int _eventStepIndex;
     private InteractionEvent _interactionEvent;
     private bool _atEndOfMessage;
 
-    public void StartNew(InteractionEvent interactionEvent, Subject subject)
+    private readonly Subject _subject;
+
+    public EventStepMarker(Subject subject)
+    {
+        _subject = subject;
+        subject.AddObserver(this);
+    }
+
+    public void StartNew(InteractionEvent interactionEvent)
     {
         _eventStepIndex = 0;
         _interactionEvent = interactionEvent;
         _atEndOfMessage = false;
-        subject.Notify(new StartEventStep(EventStepIndex()));
+        _subject.Notify(new StartEventStep(EventStepIndex()));
     }
 
-    public void StartNextEventStep(Subject subject)
+    public void StartNextEventStep()
     {
         _eventStepIndex++;
         _atEndOfMessage = false;
-        subject.Notify(new StartEventStep(EventStepIndex()));
+        _subject.Notify(new StartEventStep(EventStepIndex()));
     }
 
     public void End()
@@ -29,11 +35,6 @@ public class EventStepMarker : MonoBehaviour
     public bool IsAtEndOfMessage()
     {
         return _atEndOfMessage;
-    }
-
-    public void ReachedEndOfMessage()
-    {
-        _atEndOfMessage = true;
     }
 
     public int EventStepIndex()
@@ -62,4 +63,25 @@ public class EventStepMarker : MonoBehaviour
         return _interactionEvent != null && _atEndOfMessage && AtEndOfEvent() &&
                _interactionEvent.Information is PostEvent informationPostEvent && informationPostEvent == postEvent;
     }
+    
+    public void OnNotify(SubjectMessage message)
+    {
+        switch (message)
+        {
+            case SubjectMessage.ReachedEndOfMessage:
+                ReachedEndOfMessage();
+                break;
+        }
+    }
+    
+    public void OnNotify<T>(T parameters)
+    {
+        
+    }
+    
+    private void ReachedEndOfMessage()
+    {
+        _atEndOfMessage = true;
+    }
+
 }

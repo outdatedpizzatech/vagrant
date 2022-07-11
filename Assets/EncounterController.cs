@@ -18,7 +18,7 @@ public class EncounterController : MonoBehaviour, IObserver
     private AbilityAnimation _abilityAnimation;
     private bool _inDialogue;
     private Transform _opponentsTransform;
-    private readonly EventStepMarker _eventStepMarker = new();
+    private EventStepMarker _eventStepMarker;
 
     private void Update()
     {
@@ -40,6 +40,7 @@ public class EncounterController : MonoBehaviour, IObserver
         _abilityAnimation = abilityAnimation;
         abilityAnimation.Setup(_encounterSubject);
         _opponentsTransform = opponentsTransform;
+        _eventStepMarker = new EventStepMarker(encounterSubject);
     }
 
     public void OnNotify(SubjectMessage message)
@@ -68,9 +69,6 @@ public class EncounterController : MonoBehaviour, IObserver
             }
             case SubjectMessage.MenuSelection when _inDialogue && _eventStepMarker.IsAtEndOfMessage():
                 AdvanceEventSequence();
-                break;
-            case SubjectMessage.ReachedEndOfMessage:
-                _eventStepMarker.ReachedEndOfMessage();
                 break;
             case SubjectMessage.EndEventSequence when _state == State.PickingAttackTarget:
             {
@@ -120,7 +118,7 @@ public class EncounterController : MonoBehaviour, IObserver
 
     private void ProcessEvent(InteractionEvent interactionEvent)
     {
-        _eventStepMarker.StartNew(interactionEvent, _encounterSubject);
+        _eventStepMarker.StartNew(interactionEvent);
         _inDialogue = true;
     }
 
@@ -164,7 +162,7 @@ public class EncounterController : MonoBehaviour, IObserver
         }
         else
         {
-            _eventStepMarker.StartNextEventStep(_encounterSubject);
+            _eventStepMarker.StartNextEventStep();
         }
     }
 
