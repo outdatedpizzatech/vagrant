@@ -14,10 +14,11 @@ public class EventStepMarker : MonoBehaviour
         subject.Notify(new StartEventStep(EventStepIndex()));
     }
 
-    public void StartNextEventStep()
+    public void StartNextEventStep(Subject subject)
     {
         _eventStepIndex++;
         _atEndOfMessage = false;
+        subject.Notify(new StartEventStep(EventStepIndex()));
     }
 
     public void End()

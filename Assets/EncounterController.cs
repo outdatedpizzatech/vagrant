@@ -164,8 +164,7 @@ public class EncounterController : MonoBehaviour, IObserver
         }
         else
         {
-            _eventStepMarker.StartNextEventStep();
-            _encounterSubject.Notify(new StartEventStep(_eventStepMarker.EventStepIndex()));
+            _eventStepMarker.StartNextEventStep(_encounterSubject);
         }
     }
 

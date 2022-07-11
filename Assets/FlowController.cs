@@ -149,8 +149,7 @@ public class FlowController : MonoBehaviour, IObserver
         }
         else
         {
-            _eventStepMarker.StartNextEventStep();
-            _flowSubject.Notify(new StartEventStep(_eventStepMarker.EventStepIndex()));
+            _eventStepMarker.StartNextEventStep(_flowSubject);
         }
     }
 
