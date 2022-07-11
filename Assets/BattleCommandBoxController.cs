@@ -52,7 +52,7 @@ public class BattleCommandBoxController : MonoBehaviour, IObserver
                 _window.GainFocus();
                 RenderText();
                 break;
-            case SubjectMessage.MenuSelection when _window.IsFocused():
+            case SubjectMessage.PlayerInputConfirm when _window.IsFocused():
                 switch (_selectedPromptIndex)
                 {
                     case 0:

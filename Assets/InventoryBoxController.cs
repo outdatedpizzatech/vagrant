@@ -81,7 +81,7 @@ public class InventoryBoxController : MonoBehaviour, IObserver
                 _window.Hide();
 
                 break;
-            case SubjectMessage.MenuSelection when _window.IsFocused():
+            case SubjectMessage.PlayerInputConfirm when _window.IsFocused():
                 var selectedItem = playerController.Items()[_selectedPromptIndex];
                 var selectInventoryItemEvent = new SelectInventoryItemEvent(selectedItem);
                 _flowSubject.Notify(selectInventoryItemEvent);

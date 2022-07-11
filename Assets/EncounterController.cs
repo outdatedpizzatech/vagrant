@@ -55,7 +55,7 @@ public class EncounterController : MonoBehaviour, IObserver
                 SetState(State.None);
                 _encounterSubject.Notify(SubjectMessage.OpenMainMenu);
                 break;
-            case SubjectMessage.MenuSelection when _state == State.PickingAttackTarget && _eventStepMarker.InteractionEvent() == null:
+            case SubjectMessage.PlayerInputConfirm when _state == State.PickingAttackTarget && _eventStepMarker.InteractionEvent() == null:
                 _encounterSubject.Notify(SubjectMessage.AttackTarget);
                 break;
             case SubjectMessage.AttackTarget:
@@ -66,7 +66,7 @@ public class EncounterController : MonoBehaviour, IObserver
                 _encounterSubject.Notify(response);
                 break;
             }
-            case SubjectMessage.MenuSelection when _eventStepMarker.InteractionEvent() != null && _eventStepMarker.IsAtEndOfMessage():
+            case SubjectMessage.PlayerInputConfirm when _eventStepMarker.InteractionEvent() != null && _eventStepMarker.IsAtEndOfMessage():
                 AdvanceEventSequence();
                 break;
             case SubjectMessage.EndEventSequence when _state == State.PickingAttackTarget:

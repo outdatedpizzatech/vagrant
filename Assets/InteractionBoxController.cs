@@ -81,7 +81,7 @@ public class InteractionBoxController : MonoBehaviour, IObserver
                 _window.Show();
 
                 break;
-            case SubjectMessage.MenuSelection when _window.IsFocused():
+            case SubjectMessage.PlayerInputConfirm when _window.IsFocused():
                 switch (_selectedPromptIndex)
                 {
                     case 0:

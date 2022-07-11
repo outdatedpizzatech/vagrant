@@ -167,17 +167,11 @@ public class InteractionController : MonoBehaviour, IObserver
             }
             case PlayerRequestsPrimaryActionEvent:
             {
+                _flowSubject.Notify(SubjectMessage.PlayerInputConfirm);
+                _encounterSubject.Notify(SubjectMessage.PlayerInputConfirm);
                 if (_messageBoxFocused)
                 {
                     _flowSubject.Notify(SubjectMessage.AdvanceEvent);
-                }
-                else if(_inEncounter)
-                {
-                    _encounterSubject.Notify(SubjectMessage.MenuSelection);
-                }
-                else
-                {
-                    _flowSubject.Notify(SubjectMessage.MenuSelection);
                 }
 
                 break;

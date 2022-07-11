@@ -12,7 +12,7 @@ public enum SubjectMessage
     OpenInventoryMenu,
     CloseInventoryMenu,
     ReachedEndOfMessage,
-    MenuSelection,
+    PlayerInputConfirm,
     TimeShouldFreeze,
     TimeShouldFlow,
     OpenInteractionMenu,
