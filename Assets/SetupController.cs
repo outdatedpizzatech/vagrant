@@ -25,11 +25,11 @@ public class SetupController : MonoBehaviour, IObserver
         var inventoryBoxController = GameObject.Find("WorldSpaceCanvas/InventoryBox").GetComponent<InventoryBoxController>();
         var interactionBoxController = GameObject.Find("WorldSpaceCanvas/InteractionBox").GetComponent<InteractionBoxController>();
         var portraitBoxController = GameObject.Find("WorldSpaceCanvas/PortraitBox").GetComponent<PortraitBoxController>();
-        var encounterBoxController = GameObject.Find("WorldSpaceCanvas/EncounterBox").GetComponent<EncounterBoxController>();
-        var opponentsTransform = GameObject.Find("WorldSpaceCanvas/EncounterBox/Opponents").transform;
-        var abilityAnimation = GameObject.Find("WorldSpaceCanvas/EncounterBox/AbilityAnimation").GetComponent<AbilityAnimation>();
-        var battleCommandBoxController = GameObject.Find("WorldSpaceCanvas/EncounterBox/BattleCommandBox").GetComponent<EncounterCommandWindowController>();
-        var encounterMessageBoxController = GameObject.Find("WorldSpaceCanvas/EncounterBox/MessageBox").GetComponent<EncounterMessageBoxController>();
+        var encounterBoxController = GameObject.Find("WorldSpaceCanvas/EncounterWindow").GetComponent<EncounterWindowController>();
+        var opponentsTransform = GameObject.Find("WorldSpaceCanvas/EncounterWindow/Opponents").transform;
+        var abilityAnimation = GameObject.Find("WorldSpaceCanvas/EncounterWindow/AbilityAnimation").GetComponent<AbilityAnimation>();
+        var battleCommandBoxController = GameObject.Find("WorldSpaceCanvas/EncounterWindow/CommandWindow").GetComponent<EncounterCommandWindowController>();
+        var encounterMessageBoxController = GameObject.Find("WorldSpaceCanvas/EncounterWindow/MessageBox").GetComponent<EncounterMessageBoxController>();
         var flowController = GameObject.Find("Controllers/FlowController").GetComponent<FlowController>();
         var encounterController = GameObject.Find("Controllers/EncounterController").GetComponent<EncounterController>();
         var treasureA = GameObject.Find("Objects/TreasureA").GetComponent<TreasureController>();

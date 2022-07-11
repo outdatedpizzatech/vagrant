@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class EncounterBoxController : MonoBehaviour, IObserver
+public class EncounterWindowController : MonoBehaviour, IObserver
 {
     private Animation _animation;
     private Window _window;
@@ -17,27 +15,25 @@ public class EncounterBoxController : MonoBehaviour, IObserver
     public void Setup(Subject flowSubject)
     {
         _flowSubject = flowSubject;
-
         _flowSubject.AddObserver(this);
     }
     
     public void OnNotify(SubjectMessage message)
     {
-        if (message == SubjectMessage.StartEncounter)
+        switch (message)
         {
-            WipeIn();
-        }
-        if (message == SubjectMessage.EncounterStartWipeOut)
-        {
-            _animation.Play("EncounterWipeOut");
-        }
-        if (message == SubjectMessage.EndEncounter)
-        {
-            _window.Hide();
-        }
-        if (message == SubjectMessage.EncounterFinishedWipeIn)
-        {
-            _window.Show();
+            case SubjectMessage.StartEncounter:
+                WipeIn();
+                break;
+            case SubjectMessage.EncounterStartWipeOut:
+                WipeOut();
+                break;
+            case SubjectMessage.EndEncounter:
+                _window.Hide();
+                break;
+            case SubjectMessage.EncounterFinishedWipeIn:
+                _window.Show();
+                break;
         }
     }
     
@@ -58,5 +54,10 @@ public class EncounterBoxController : MonoBehaviour, IObserver
     private void WipeIn()
     {
         _animation.Play("EncounterWipeIn");
+    }
+    
+    private void WipeOut()
+    {
+        _animation.Play("EncounterWipeOut");
     }
 }
