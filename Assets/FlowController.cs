@@ -7,12 +7,10 @@ public class FlowController : MonoBehaviour, IObserver
     public MessageBoxController messageBoxController;
 
     private Subject _flowSubject;
-    private InteractionEvent _interactionEvent;
-    private int _eventStepIndex;
-    private bool _atEndOfMessage;
     private bool _shownInteractionMenu;
     private bool _encounterIsEqueued;
     private Interactable _interactable;
+    private EventStepMarker _eventStepMarker = new();
 
     public void Update()
     {
@@ -39,16 +37,17 @@ public class FlowController : MonoBehaviour, IObserver
         {
             case SubjectMessage.EndEventSequence:
                 _interactable = null;
-                _interactionEvent = null;
+                _eventStepMarker.End();
 
                 if (_encounterIsEqueued)
                 {
                     _encounterIsEqueued = false;
                     _flowSubject.Notify(SubjectMessage.StartEncounter);
                 }
+
                 break;
             case SubjectMessage.AdvanceEvent:
-                if (_atEndOfMessage)
+                if (_eventStepMarker.IsAtEndOfMessage())
                 {
                     AdvanceEventSequence();
                 }
@@ -62,7 +61,7 @@ public class FlowController : MonoBehaviour, IObserver
                     _flowSubject.Notify(new ReceiveItem(item));
                 }
 
-                _atEndOfMessage = true;
+                _eventStepMarker.ReachedEndOfMessage();
                 _shownInteractionMenu = false;
 
                 break;
@@ -131,17 +130,16 @@ public class FlowController : MonoBehaviour, IObserver
 
     private void ProcessEvent(InteractionEvent interactionEvent)
     {
-        _eventStepIndex = 0;
-        _interactionEvent = interactionEvent;
-        _atEndOfMessage = false;
-        _flowSubject.Notify(new StartEventStep(_eventStepIndex));
+        _eventStepMarker.StartNew(interactionEvent);
+        _eventStepMarker.StartNew(interactionEvent);
+        _flowSubject.Notify(new StartEventStep(_eventStepMarker.EventStepIndex()));
     }
 
     private void AdvanceEventSequence()
     {
         if (AtEndOfEvent())
         {
-            if (_interactionEvent.Information is List<Prompt> prompts && prompts.Any())
+            if (_eventStepMarker.InteractionEvent().Information is List<Prompt> prompts && prompts.Any())
             {
                 var selectedPrompt = messageBoxController.SelectedPrompt();
                 _flowSubject.Notify(
@@ -153,31 +151,30 @@ public class FlowController : MonoBehaviour, IObserver
         }
         else
         {
-            _eventStepIndex++;
-            _atEndOfMessage = false;
-            _flowSubject.Notify(new StartEventStep(_eventStepIndex));
+            _eventStepMarker.StartNextEventStep();
+            _flowSubject.Notify(new StartEventStep(_eventStepMarker.EventStepIndex()));
         }
     }
 
     private EventStep CurrentMessage()
     {
-        return (_interactionEvent.EventSteps[_eventStepIndex]);
+        return _eventStepMarker.CurrentMessage();
     }
 
     private bool ShouldShowInteractionMenu()
     {
-        return _interactionEvent != null && !_shownInteractionMenu && _atEndOfMessage &&
-               AtEndOfEvent() && _interactionEvent.Information is PostEvent.CanFollowUp;
+        return _eventStepMarker.IsReadyToYield(PostEvent.CanFollowUp) &&
+               !_shownInteractionMenu;
     }
 
     private bool ShouldStartEncounter()
     {
-        return _interactionEvent != null && !_encounterIsEqueued && _atEndOfMessage &&
-               AtEndOfEvent() && _interactionEvent.Information is PostEvent.TriggersEncounter;
+        return _eventStepMarker.IsReadyToYield(PostEvent.TriggersEncounter) &&
+               !_encounterIsEqueued;
     }
 
     private bool AtEndOfEvent()
     {
-        return _eventStepIndex >= _interactionEvent.EventSteps.Count - 1;
+        return _eventStepMarker.AtEndOfEvent();
     }
 }
