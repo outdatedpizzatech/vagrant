@@ -72,7 +72,6 @@ public class EncounterController : MonoBehaviour, IObserver
             case SubjectMessage.EndEventSequence when _state == State.PickingAttackTarget:
             {
                 var selectedOpponent = SelectedOpponent();
-                _eventStepMarker.End();
                 selectedOpponent.shouldBlink = false;
                 _abilityAnimation.PlaySwordAnimationOn(selectedOpponent);
                 
@@ -81,7 +80,6 @@ public class EncounterController : MonoBehaviour, IObserver
             }
             case SubjectMessage.EndEventSequence when _state == State.InAttackAnimation:
             {
-                _eventStepMarker.End();
                 SetState(State.None);
                 _encounterSubject.Notify(SubjectMessage.OpenMainMenu);
                 break;

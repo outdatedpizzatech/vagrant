@@ -38,7 +38,6 @@ public class FlowController : MonoBehaviour, IObserver
         {
             case SubjectMessage.EndEventSequence:
                 _interactable = null;
-                _eventStepMarker.End();
 
                 if (_encounterIsEqueued)
                 {

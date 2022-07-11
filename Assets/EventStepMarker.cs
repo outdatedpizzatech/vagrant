@@ -19,7 +19,7 @@ public class EventStepMarker : IObserver
         _subject.Notify(new StartEventStep(EventStepIndex()));
     }
 
-    public void End()
+    private void End()
     {
         _interactionEvent = null;
     }
@@ -57,6 +57,9 @@ public class EventStepMarker : IObserver
         {
             case SubjectMessage.ReachedEndOfMessage:
                 ReachedEndOfMessage();
+                break;
+            case SubjectMessage.EndEventSequence:
+                End();
                 break;
         }
     }
