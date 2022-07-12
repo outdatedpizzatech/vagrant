@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 public class EventStepMarker : IObserver
 {
     private int _eventStepIndex;
@@ -5,11 +8,13 @@ public class EventStepMarker : IObserver
     private bool _atEndOfMessage;
 
     private readonly Subject _subject;
+    private readonly MessageWindowController _messageWindowController;
 
-    public EventStepMarker(Subject subject)
+    public EventStepMarker(Subject subject, MessageWindowController messageWindowController)
     {
         _subject = subject;
         subject.AddObserver(this);
+        _messageWindowController = messageWindowController;
     }
 
     public void StartNextEventStep()
@@ -56,6 +61,9 @@ public class EventStepMarker : IObserver
             case SubjectMessage.EndEventSequence:
                 End();
                 break;
+            case SubjectMessage.AdvanceEvent when IsAtEndOfMessage():
+                AdvanceEventSequence();
+                break;
         }
     }
 
@@ -90,5 +98,25 @@ public class EventStepMarker : IObserver
     private void End()
     {
         _interactionEvent = null;
+    }
+    
+    private void AdvanceEventSequence()
+    {
+        if (AtEndOfEvent())
+        {
+            if (InteractionEvent().Information is List<Prompt> prompts && prompts.Any())
+            {
+                var selectedPrompt = _messageWindowController.SelectedPrompt();
+                _subject.Notify(
+                    new PromptResponseEvent(selectedPrompt.ID));
+                return;
+            }
+            
+            _subject.Notify(SubjectMessage.EndEventSequence);
+        }
+        else
+        {
+            StartNextEventStep();
+        }
     }
 }

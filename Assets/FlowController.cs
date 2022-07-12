@@ -29,7 +29,7 @@ public class FlowController : MonoBehaviour, IObserver
     {
         _flowSubject = flowSubject;
         _flowSubject.AddObserver(this);
-        _eventStepMarker = new EventStepMarker(flowSubject);
+        _eventStepMarker = new EventStepMarker(flowSubject, messageWindowController);
         interactionSubject.AddObserver(this);
     }
 
@@ -52,9 +52,6 @@ public class FlowController : MonoBehaviour, IObserver
                 break;
             case SubjectMessage.PlayerInputConfirm when messageWindowController.IsFocused():
                 _flowSubject.Notify(SubjectMessage.AdvanceEvent);
-                break;
-            case SubjectMessage.AdvanceEvent when _eventStepMarker.IsAtEndOfMessage():
-                AdvanceEventSequence();
                 break;
             case SubjectMessage.ReachedEndOfMessage:
                 var currentMessage = CurrentMessage();
@@ -127,26 +124,6 @@ public class FlowController : MonoBehaviour, IObserver
                 _flowSubject.Notify(
                     new InteractionResponseEvent(_interactable.ReceiveInteraction(promptResponseEvent.PromptResponse)));
                 break;
-        }
-    }
-
-    private void AdvanceEventSequence()
-    {
-        if (AtEndOfEvent())
-        {
-            if (_eventStepMarker.InteractionEvent().Information is List<Prompt> prompts && prompts.Any())
-            {
-                var selectedPrompt = messageWindowController.SelectedPrompt();
-                _flowSubject.Notify(
-                    new PromptResponseEvent(selectedPrompt.ID));
-                return;
-            }
-
-            _flowSubject.Notify(SubjectMessage.EndEventSequence);
-        }
-        else
-        {
-            _eventStepMarker.StartNextEventStep();
         }
     }
 

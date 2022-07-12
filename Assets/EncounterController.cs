@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class EncounterController : MonoBehaviour, IObserver
@@ -40,7 +41,7 @@ public class EncounterController : MonoBehaviour, IObserver
         _abilityAnimation = abilityAnimation;
         abilityAnimation.Setup(_encounterSubject);
         _opponentsTransform = opponentsTransform;
-        _eventStepMarker = new EventStepMarker(encounterSubject);
+        _eventStepMarker = new EventStepMarker(encounterSubject, messageWindowController);
         interactionSubject.AddObserver(this);
     }
 
@@ -70,9 +71,6 @@ public class EncounterController : MonoBehaviour, IObserver
             }
             case SubjectMessage.PlayerInputConfirm when messageWindowController.IsFocused():
                 _encounterSubject.Notify(SubjectMessage.AdvanceEvent);
-                break;
-            case SubjectMessage.AdvanceEvent when _eventStepMarker.IsAtEndOfMessage():
-                AdvanceEventSequence();
                 break;
             case SubjectMessage.EndEventSequence when _state == State.PickingAttackTarget:
             {
@@ -152,18 +150,6 @@ public class EncounterController : MonoBehaviour, IObserver
     private void SetState(State newState)
     {
         _nextState = newState;
-    }
-
-    private void AdvanceEventSequence()
-    {
-        if (AtEndOfEvent())
-        {
-            _encounterSubject.Notify(SubjectMessage.EndEventSequence);
-        }
-        else
-        {
-            _eventStepMarker.StartNextEventStep();
-        }
     }
 
     private bool AtEndOfEvent()
