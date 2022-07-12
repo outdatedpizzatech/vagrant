@@ -41,28 +41,28 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
             case MenuNavigation menuNavigation when _window.IsFocused():
                 UpdatePromptSelection(menuNavigation);
                 break;
-            case SubjectMessage.EncounterFinishedWipeIn:
+            case FlowTopic.EncounterFinishedWipeIn:
                 Show();
                 break;
-            case SubjectMessage.EncounterStartWipeOut:
+            case FlowTopic.EncounterStartWipeOut:
                 _window.Hide();
                 break;
-            case SubjectMessage.PickedAttack:
+            case EncounterTopic.PickedAttack:
                 _window.LoseFocus();
                 RenderText();
                 break;
-            case SubjectMessage.OpenMainMenu:
+            case EncounterTopic.OpenMainMenu:
                 _window.GainFocus();
                 RenderText();
                 break;
-            case SubjectMessage.PlayerInputConfirm when _window.IsFocused():
+            case PlayerRequestsPrimaryActionEvent when _window.IsFocused():
                 switch (_selectedPromptIndex)
                 {
                     case 0:
-                        _encounterSubject.Notify(SubjectMessage.PickedAttack);
+                        _encounterSubject.Notify(EncounterTopic.PickedAttack);
                         break;
                     case 1:
-                        _flowSubject.Notify(SubjectMessage.EncounterStartWipeOut);
+                        _flowSubject.Notify(FlowTopic.EncounterStartWipeOut);
                         break;
                 }
                 break;

@@ -1,35 +1,43 @@
-using System.Collections.Generic;
 using UnityEngine;
 
-public enum SubjectMessage
+public enum GeneralTopic
 {
     PlayerRequestingWarp,
     ScreenFinishedWipeOut,
     ScreenFinishedWipeIn,
+    PlayerRequestsSecondaryAction,
+}
+
+public enum EventTopic
+{
+    ReachedEndOfMessage,
     AdvanceEvent,
     EndEventSequence,
-    PlayerRequestsSecondaryAction,
-    OpenInventoryMenu,
-    CloseInventoryMenu,
-    ReachedEndOfMessage,
-    PlayerInputConfirm,
-    TimeShouldFreeze,
-    TimeShouldFlow,
-    OpenInteractionMenu,
-    CloseInteractionMenu,
-    EndInteraction,
-    GiveContextToInteractionMenu,
-    GiveContextToInventoryMenu,
+}
+
+public enum FlowTopic
+{
+    LoseInteractionTarget,
     StartEncounter,
     EndEncounter,
     EncounterFinishedWipeIn,
     EncounterStartWipeOut,
-    PickedAttack,
-    Cancel,
-    OpenMainMenu,
+    EndInteraction,
+    CloseCommandWindow,
+    OpenCommandWindow,
+    TimeShouldFreeze,
+    TimeShouldFlow,
+    OpenInventoryMenu,
+    CloseInventoryMenu,
+}
+
+public enum EncounterTopic
+{
     AttackTarget,
     EndAttackAnimation,
-    LoseInteractionTarget
+    OpenMainMenu,
+    Cancel,
+    PickedAttack,
 }
 
 public class GainFocus

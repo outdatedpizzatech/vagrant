@@ -41,7 +41,7 @@ public class MessageWindowController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case SubjectMessage.EndEventSequence:
+            case EventTopic.EndEventSequence:
                 _window.Hide();
                 break;
             case InteractionResponseEvent interactionResponseEvent:
@@ -89,7 +89,7 @@ public class MessageWindowController : MonoBehaviour, IObserver
         {
             if (_atEndOfMessage) return;
             _atEndOfMessage = true;
-            _flowSubject.Notify(SubjectMessage.ReachedEndOfMessage);
+            _flowSubject.Notify(EventTopic.ReachedEndOfMessage);
 
             return;
         }

@@ -22,19 +22,15 @@ public class InventoryWindowController : MonoBehaviour, IObserver
             case StartEventStep when _window.IsFocused():
                 _window.LoseFocus();
                 break;
-            case SubjectMessage.GiveContextToInventoryMenu:
-                _window.Show();
-
-                break;
-            case SubjectMessage.OpenInventoryMenu:
+            case FlowTopic.OpenInventoryMenu:
                 Show();
 
                 break;
-            case SubjectMessage.CloseInventoryMenu:
+            case FlowTopic.CloseInventoryMenu:
                 _window.Hide();
 
                 break;
-            case SubjectMessage.PlayerInputConfirm when _readyForInputs:
+            case PlayerRequestsPrimaryActionEvent when _readyForInputs:
                 if (playerController.Items().Any())
                 {
                     var selectedItem = playerController.Items()[_selectedPromptIndex];
@@ -43,7 +39,7 @@ public class InventoryWindowController : MonoBehaviour, IObserver
                 }
 
                 break;
-            case SubjectMessage.PlayerRequestsSecondaryAction when _readyForInputs:
+            case GeneralTopic.PlayerRequestsSecondaryAction when _readyForInputs:
                 _window.Hide();
 
                 break;

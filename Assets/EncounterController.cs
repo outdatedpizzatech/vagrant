@@ -39,23 +39,23 @@ public class EncounterController : MonoBehaviour, IObserver
             case MenuNavigation menuNavigation when _state == State.PickingAttackTarget:
                 UpdateTargetSelection(menuNavigation);
                 break;
-            case SubjectMessage.PickedAttack:
+            case EncounterTopic.PickedAttack:
                 SetState(State.PickingAttackTarget);
                 SelectedOpponent().shouldBlink = true;
                 break;
-            case SubjectMessage.Cancel when _state == State.PickingAttackTarget:
+            case EncounterTopic.Cancel when _state == State.PickingAttackTarget:
                 SelectedOpponent().shouldBlink = false;
                 SetState(State.None);
-                _encounterSubject.Notify(SubjectMessage.OpenMainMenu);
+                _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
                 break;
-            case SubjectMessage.PlayerInputConfirm
+            case PlayerRequestsPrimaryActionEvent
                 when _state == State.PickingAttackTarget && !_eventStepMarker.Active():
-                _encounterSubject.Notify(SubjectMessage.AttackTarget);
+                _encounterSubject.Notify(EncounterTopic.AttackTarget);
                 break;
-            case SubjectMessage.PlayerRequestsSecondaryAction:
-                _encounterSubject.Notify(SubjectMessage.Cancel);
+            case GeneralTopic.PlayerRequestsSecondaryAction:
+                _encounterSubject.Notify(EncounterTopic.Cancel);
                 break;
-            case SubjectMessage.AttackTarget:
+            case EncounterTopic.AttackTarget:
             {
                 var newEvent = new InteractionEvent();
                 newEvent.AddMessage("So and so attacks!");
@@ -63,7 +63,7 @@ public class EncounterController : MonoBehaviour, IObserver
                 _encounterSubject.Notify(response);
                 break;
             }
-            case SubjectMessage.EndEventSequence when _state == State.PickingAttackTarget:
+            case EventTopic.EndEventSequence when _state == State.PickingAttackTarget:
             {
                 var selectedOpponent = SelectedOpponent();
                 selectedOpponent.shouldBlink = false;
@@ -72,13 +72,13 @@ public class EncounterController : MonoBehaviour, IObserver
                 SetState(State.InAttackAnimation);
                 break;
             }
-            case SubjectMessage.EndEventSequence when _state == State.InAttackAnimation:
+            case EventTopic.EndEventSequence when _state == State.InAttackAnimation:
             {
                 SetState(State.None);
-                _encounterSubject.Notify(SubjectMessage.OpenMainMenu);
+                _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
                 break;
             }
-            case SubjectMessage.EndAttackAnimation:
+            case EncounterTopic.EndAttackAnimation:
             {
                 var newEvent = new InteractionEvent();
                 newEvent.AddMessage("A critical hit!");

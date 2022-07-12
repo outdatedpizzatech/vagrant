@@ -17,7 +17,7 @@ public class AbilityAnimation : MonoBehaviour
 
     public void EndAnimation()
     {
-        _encounterSubject.Notify(SubjectMessage.EndAttackAnimation);
+        _encounterSubject.Notify(EncounterTopic.EndAttackAnimation);
     }
 
     public void PlaySwordAnimationOn(Blinker opponent)

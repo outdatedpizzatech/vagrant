@@ -20,10 +20,10 @@ public class PortraitBoxController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case SubjectMessage.LoseInteractionTarget:
+            case FlowTopic.LoseInteractionTarget:
                 _window.Hide();
                 break;
-            case SubjectMessage.ReachedEndOfMessage:
+            case EventTopic.ReachedEndOfMessage:
                 var eventStep = _interactionEvent.EventSteps[_eventStepIndex];
 
                 if (eventStep.Information is not Message messageFromInteraction) return;

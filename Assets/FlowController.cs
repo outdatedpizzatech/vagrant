@@ -25,44 +25,44 @@ public class FlowController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case SubjectMessage.EndEventSequence:
+            case EventTopic.EndEventSequence:
                 if (!_shownInteractionMenu)
                 {
-                    _flowSubject.Notify(SubjectMessage.LoseInteractionTarget);
+                    _flowSubject.Notify(FlowTopic.LoseInteractionTarget);
                 }
 
                 if (_encounterIsEnqueued)
                 {
                     _encounterIsEnqueued = false;
-                    _flowSubject.Notify(SubjectMessage.StartEncounter);
+                    _flowSubject.Notify(FlowTopic.StartEncounter);
                 }
 
                 break;
-            case SubjectMessage.ReachedEndOfMessage:
+            case EventTopic.ReachedEndOfMessage:
                 _shownInteractionMenu = false;
 
                 break;
-            case SubjectMessage.EndInteraction:
-                _flowSubject.Notify(SubjectMessage.CloseInteractionMenu);
-                _flowSubject.Notify(SubjectMessage.EndEventSequence);
-                _flowSubject.Notify(SubjectMessage.LoseInteractionTarget);
+            case FlowTopic.EndInteraction:
+                _flowSubject.Notify(FlowTopic.CloseCommandWindow);
+                _flowSubject.Notify(EventTopic.EndEventSequence);
+                _flowSubject.Notify(FlowTopic.LoseInteractionTarget);
 
                 break;
-            case SubjectMessage.LoseInteractionTarget:
+            case FlowTopic.LoseInteractionTarget:
                 _interactable = null;
 
                 break;
-            case SubjectMessage.StartEncounter:
+            case FlowTopic.StartEncounter:
                 _inEncounter = true;
                 break;
-            case SubjectMessage.EndEncounter:
+            case FlowTopic.EndEncounter:
                 _inEncounter = false;
                 break;
-            case SubjectMessage.PlayerRequestsSecondaryAction:
+            case GeneralTopic.PlayerRequestsSecondaryAction:
                 if (!_inEncounter && !commandWindowController.IsVisible() && !inventoryWindowController.IsVisible() &&
                     !messageWindowController.IsVisible())
                 {
-                    _flowSubject.Notify(SubjectMessage.OpenInventoryMenu);
+                    _flowSubject.Notify(FlowTopic.OpenInventoryMenu);
                 }
 
                 break;
@@ -83,8 +83,8 @@ public class FlowController : MonoBehaviour, IObserver
                         _flowSubject.Notify(new InteractionResponseEvent(interactionResponse));
                     }
 
-                    _flowSubject.Notify(SubjectMessage.CloseInventoryMenu);
-                    _flowSubject.Notify(SubjectMessage.CloseInteractionMenu);
+                    _flowSubject.Notify(FlowTopic.CloseInventoryMenu);
+                    _flowSubject.Notify(FlowTopic.CloseCommandWindow);
                 }
 
                 break;
@@ -127,7 +127,7 @@ public class FlowController : MonoBehaviour, IObserver
         if (ShouldShowInteractionMenu())
         {
             _shownInteractionMenu = true;
-            _flowSubject.Notify(SubjectMessage.OpenInteractionMenu);
+            _flowSubject.Notify(FlowTopic.OpenCommandWindow);
         }
         else if (ShouldStartEncounter())
         {

@@ -48,30 +48,26 @@ public class CommandWindowController : MonoBehaviour, IObserver
             case MenuNavigation menuNavigation when _window.IsFocused():
                 UpdatePromptSelection(menuNavigation);
                 break; 
-            case SubjectMessage.OpenInteractionMenu:
+            case FlowTopic.OpenCommandWindow:
                 Show();
 
                 break;
-            case SubjectMessage.CloseInteractionMenu:
+            case FlowTopic.CloseCommandWindow:
                 _window.Hide();
 
                 break;
-            case SubjectMessage.OpenInventoryMenu when _window.IsFocused():
+            case FlowTopic.OpenInventoryMenu when _window.IsFocused():
                 _window.LoseFocus();
 
                 break;
-            case SubjectMessage.GiveContextToInteractionMenu:
-                _window.Show();
-
-                break;
-            case SubjectMessage.PlayerInputConfirm when _window.IsFocused():
+            case PlayerRequestsPrimaryActionEvent when _window.IsFocused():
                 switch (_selectedPromptIndex)
                 {
                     case 0:
-                        _flowSubject.Notify(SubjectMessage.EndInteraction);
+                        _flowSubject.Notify(FlowTopic.EndInteraction);
                         break;
                     case 1:
-                        _flowSubject.Notify(SubjectMessage.OpenInventoryMenu);
+                        _flowSubject.Notify(FlowTopic.OpenInventoryMenu);
                         break;
                 }
 

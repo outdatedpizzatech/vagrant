@@ -26,11 +26,11 @@ public class PersonMovement : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case SubjectMessage.TimeShouldFlow:
+            case FlowTopic.TimeShouldFlow:
                 canMakeAnotherMove = true;
                 _animator.speed = _tempAnimationSpeed;
                 break;
-            case SubjectMessage.TimeShouldFreeze:
+            case FlowTopic.TimeShouldFreeze:
                 canMakeAnotherMove = false;
                 _tempAnimationSpeed = _animator.speed;
                 _animator.speed = 0;

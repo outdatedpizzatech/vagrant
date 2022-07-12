@@ -37,7 +37,7 @@ public class EventStepMarker : IObserver
             case InteractionResponseEvent interactionResponseEvent:
                 StartNew(interactionResponseEvent.InteractionEvent);
                 break;
-            case SubjectMessage.ReachedEndOfMessage:
+            case EventTopic.ReachedEndOfMessage:
                 _atEndOfMessage = true;
                 
                 var currentMessage = CurrentMessage();
@@ -48,14 +48,14 @@ public class EventStepMarker : IObserver
                 }
                 
                 break;
-            case SubjectMessage.EndEventSequence:
+            case EventTopic.EndEventSequence:
                 _interactionEvent = null;
                 break;
-            case SubjectMessage.AdvanceEvent when _atEndOfMessage:
+            case EventTopic.AdvanceEvent when _atEndOfMessage:
                 AdvanceEventSequence();
                 break;
-            case SubjectMessage.PlayerInputConfirm when _messageWindowController.IsFocused():
-                _subject.Notify(SubjectMessage.AdvanceEvent);
+            case PlayerRequestsPrimaryActionEvent when _messageWindowController.IsFocused():
+                _subject.Notify(EventTopic.AdvanceEvent);
                 break;
         }
     }
@@ -80,7 +80,7 @@ public class EventStepMarker : IObserver
                 return;
             }
             
-            _subject.Notify(SubjectMessage.EndEventSequence);
+            _subject.Notify(EventTopic.EndEventSequence);
         }
         else
         {

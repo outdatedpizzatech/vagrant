@@ -23,7 +23,7 @@ public class PlayerWarp : MonoBehaviour, IObserver
 
     public void WarpTo(int x, int y, Enums.Direction direction)
     {
-        _subject.Notify(SubjectMessage.PlayerRequestingWarp);
+        _subject.Notify(GeneralTopic.PlayerRequestingWarp);
         StartCoroutine(BeginWarping(0.25f, x, y, direction));
     }
 
@@ -49,15 +49,15 @@ public class PlayerWarp : MonoBehaviour, IObserver
                 _personMovement.facingDirection = playerBeganWarpingEvent.FacingDirection;
                 _personMovement.SetPosition(playerBeganWarpingEvent.X, playerBeganWarpingEvent.Y);
                 break;
-            case SubjectMessage.PlayerRequestingWarp:
+            case GeneralTopic.PlayerRequestingWarp:
                 _personMovement.canMakeAnotherMove = false;
                 break;
-            case SubjectMessage.ScreenFinishedWipeOut:
+            case GeneralTopic.ScreenFinishedWipeOut:
                 _personMovement.MoveTransformToPosition();
                 _animator.SetInteger(FacingDirection, (int)_personMovement.facingDirection);
                 _animator.SetBool(IsMoving, false);
                 break;
-            case SubjectMessage.ScreenFinishedWipeIn:
+            case GeneralTopic.ScreenFinishedWipeIn:
                 _personMovement.canMakeAnotherMove = true;
                 break;
         }

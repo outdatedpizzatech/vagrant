@@ -33,7 +33,7 @@ public class PlayerAction : MonoBehaviour
         {
             void NotifySecondaryInput()
             {
-                _actionSubject.Notify(SubjectMessage.PlayerRequestsSecondaryAction);
+                _actionSubject.Notify(GeneralTopic.PlayerRequestsSecondaryAction);
             }
 
             Utilities.Debounce(ref _timeSinceLastSecondaryInput, 0.2f, NotifySecondaryInput);

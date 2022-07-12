@@ -15,14 +15,14 @@ public class WiperController : MonoBehaviour, IObserver
     // animation hook
     public void FinishWipeOut()
     {
-        _subject.Notify(SubjectMessage.ScreenFinishedWipeOut);
+        _subject.Notify(GeneralTopic.ScreenFinishedWipeOut);
         WipeIn();
     }
 
     // animation hook
     public void FinishWipeIn()
     {
-        _subject.Notify(SubjectMessage.ScreenFinishedWipeIn);
+        _subject.Notify(GeneralTopic.ScreenFinishedWipeIn);
     }
     
     public void OnNotify<T>(T parameters)

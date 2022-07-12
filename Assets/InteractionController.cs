@@ -11,7 +11,6 @@ public class InteractionController : MonoBehaviour, IObserver
     private bool _halted;
     private Subject _interactionSubject;
     private Subject _flowSubject;
-    private Subject _encounterSubject;
     private PositionGrid _positionGrid;
     private InputAction _inputAction;
     private float _timeSinceLastDirectionalInput;
@@ -29,7 +28,7 @@ public class InteractionController : MonoBehaviour, IObserver
         {
             if (!IsFreeRoaming())
             {
-                _flowSubject.Notify(SubjectMessage.TimeShouldFreeze);
+                _flowSubject.Notify(FlowTopic.TimeShouldFreeze);
                 _halted = true;
             }
         }
@@ -37,7 +36,7 @@ public class InteractionController : MonoBehaviour, IObserver
         {
             if (IsFreeRoaming())
             {
-                _flowSubject.Notify(SubjectMessage.TimeShouldFlow);
+                _flowSubject.Notify(FlowTopic.TimeShouldFlow);
                 _halted = false;
             }
         }
@@ -58,7 +57,6 @@ public class InteractionController : MonoBehaviour, IObserver
         _interactionSubject = interactionSubject;
         _positionGrid = positionGrid;
         _flowSubject = flowSubject;
-        _encounterSubject = encounterSubject;
         _inputAction = inputAction;
 
         _interactionSubject.AddObserver(this);
@@ -71,10 +69,10 @@ public class InteractionController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case SubjectMessage.StartEncounter:
+            case FlowTopic.StartEncounter:
                 _inEncounter = true;
                 break;
-            case SubjectMessage.EndEncounter:
+            case FlowTopic.EndEncounter:
                 _inEncounter = false;
                 break;
             case PlayerRequestsPrimaryActionEvent playerActionEvent when IsFreeRoaming():
@@ -107,12 +105,6 @@ public class InteractionController : MonoBehaviour, IObserver
                         _flowSubject.Notify(interactWithEvent);
                     }
                 }
-
-                break;
-            }
-            case PlayerRequestsPrimaryActionEvent:
-            {
-                _interactionSubject.Notify(SubjectMessage.PlayerInputConfirm);
 
                 break;
             }
