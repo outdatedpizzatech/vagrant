@@ -16,16 +16,21 @@ internal static class Utilities
         return (Enums.Direction)newDirection;
     }
 
-    public static string PromptOutput(List<string> prompts, int selectedPromptIndex)
+    public static string PromptOutput(List<string> prompts, int selectedPromptIndex, bool isFocused)
     {
         var promptIndex = 0;
         var text = "";
-        
+
         foreach (var prompt in prompts)
         {
             if (promptIndex == selectedPromptIndex)
             {
-                text += $"\n<sprite anim='0,1,4'> {prompt}";
+                if (isFocused)
+                {
+                    text += $"\n<sprite anim='0,1,4'> {prompt}";
+                }else{
+                    text += $"\n<sprite=0> {prompt}";
+                }
             }
             else
             {

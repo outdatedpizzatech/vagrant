@@ -65,37 +65,16 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
                         _flowSubject.Notify(FlowTopic.EncounterStartWipeOut);
                         break;
                 }
+
                 break;
         }
     }
 
     private void RenderText()
     {
-        var promptIndex = 0;
-        var text = "";
-
-        foreach (var prompt in _prompts)
-        {
-            if (promptIndex == _selectedPromptIndex)
-            {
-                if (_window.IsFocused())
-                {
-                    text += $"\n<sprite anim='0,1,4'> {prompt}";
-                }else{
-                    text += $"\n<sprite=0> {prompt}";
-                }
-            }
-            else
-            {
-                text += $"\n<sprite=1> {prompt}";
-            }
-
-            promptIndex++;
-        }
-
-        _text.text = text;
+        _text.text = Utilities.PromptOutput(_prompts, _selectedPromptIndex, _window.IsFocused());
     }
-    
+
     private void UpdatePromptSelection(MenuNavigation menuNavigation)
     {
         var promptCount = _prompts.Count;

@@ -35,7 +35,7 @@ public class PromptController : MonoBehaviour, IObserver
         var text = "\n";
         var promptTexts = _prompts.Select(prompt => prompt.Text).ToList();
 
-        text += Utilities.PromptOutput(promptTexts, _selectedPromptIndex);
+        text += Utilities.PromptOutput(promptTexts, _selectedPromptIndex, _messageWindowController.IsFocused());
 
         return text;
     }

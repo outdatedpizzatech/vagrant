@@ -33,7 +33,7 @@ public class CommandWindowController : MonoBehaviour, IObserver
 
     private void RenderText()
     {
-        _text.text = Utilities.PromptOutput(_prompts, _selectedPromptIndex);
+        _text.text = Utilities.PromptOutput(_prompts, _selectedPromptIndex, _window.IsFocused());
     }
 
     public bool IsVisible()
