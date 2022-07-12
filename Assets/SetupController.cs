@@ -6,35 +6,51 @@ public class SetupController : MonoBehaviour, IObserver
     
     private void Awake()
     {
+        // Message subjects
         var warpingAndWiping = new Subject("warping and wiping");
         var occupiedSpacesSubject = new Subject("occupied spaces");
         var interactionSubject = new Subject("interactions from the player");
         var flowSubject = new Subject("the flow of things");
         var windowSubject = new Subject("focusing of windows");
         var encounterSubject = new Subject("all things related to being in an encounter");
-        
+
+        // NPCs
+        var npcs = GameObject.Find("NPCs").transform;
         var player = GameObject.Find("Player").GetComponent<PlayerController>();
-        var klara = GameObject.Find("NPCs/Klara").GetComponent<NpcController>();
-        var grayson = GameObject.Find("NPCs/Grayson").GetComponent<NpcController>();
-        var keever = GameObject.Find("NPCs/Keever").GetComponent<NpcController>();
-        var wiperController = GameObject.Find("Canvas/Wiper").GetComponent<WiperController>();
-        var inputController = GameObject.Find("Controllers/InputController").GetComponent<InputController>();
-        var positionController = GameObject.Find("Controllers/PositionController").GetComponent<PositionController>();
-        var interactionController = GameObject.Find("Controllers/InteractionController").GetComponent<InteractionController>();
-        var messageWindowController = GameObject.Find("WorldSpaceCanvas/MessageWindow").GetComponent<MessageWindowController>();
-        var inventoryWindowController = GameObject.Find("WorldSpaceCanvas/InventoryWindow").GetComponent<InventoryWindowController>();
-        var commandWindowController = GameObject.Find("WorldSpaceCanvas/CommandWindow").GetComponent<CommandWindowController>();
-        var portraitWindowController = GameObject.Find("WorldSpaceCanvas/PortraitWindow").GetComponent<PortraitBoxController>();
-        var encounterWindowController = GameObject.Find("WorldSpaceCanvas/EncounterWindow").GetComponent<EncounterWindowController>();
-        var opponentsTransform = GameObject.Find("WorldSpaceCanvas/EncounterWindow/Opponents").transform;
-        var abilityAnimation = GameObject.Find("WorldSpaceCanvas/EncounterWindow/AbilityAnimation").GetComponent<AbilityAnimation>();
-        var encounterCommandWindowController = GameObject.Find("WorldSpaceCanvas/EncounterWindow/CommandWindow").GetComponent<EncounterCommandWindowController>();
-        var encounterMessageWindowController = GameObject.Find("WorldSpaceCanvas/EncounterWindow/MessageWindow").GetComponent<MessageWindowController>();
-        var flowController = GameObject.Find("Controllers/FlowController").GetComponent<FlowController>();
-        var encounterController = GameObject.Find("Controllers/EncounterController").GetComponent<EncounterController>();
-        var treasureA = GameObject.Find("Objects/TreasureA").GetComponent<TreasureController>();
-        var treasureB = GameObject.Find("Objects/TreasureB").GetComponent<TreasureController>();
+        var klara = npcs.Find("Klara").GetComponent<NpcController>();
+        var grayson = npcs.Find("Grayson").GetComponent<NpcController>();
+        var keever = npcs.Find("Keever").GetComponent<NpcController>();
         
+        // Objects
+        var objects = GameObject.Find("Objects").transform;
+        var treasureA = objects.Find("TreasureA").GetComponent<TreasureController>();
+        var treasureB = objects.Find("TreasureB").GetComponent<TreasureController>();
+        
+        // Controllers
+        var controllers = GameObject.Find("Controllers").transform;
+        var wiperController = GameObject.Find("Canvas/Wiper").GetComponent<WiperController>();
+        var inputController = controllers.Find("InputController").GetComponent<InputController>();
+        var positionController = controllers.Find("PositionController").GetComponent<PositionController>();
+        var interactionController = controllers.Find("InteractionController").GetComponent<InteractionController>();
+        var flowController = controllers.Find("FlowController").GetComponent<FlowController>();
+        var encounterController = controllers.Find("EncounterController").GetComponent<EncounterController>();
+        
+        // WorldSpaceCanvas
+        var worldSpaceCanvas = GameObject.Find("WorldSpaceCanvas").transform;
+        var messageWindowController = worldSpaceCanvas.Find("MessageWindow").GetComponent<MessageWindowController>();
+        var inventoryWindowController = worldSpaceCanvas.Find("InventoryWindow").GetComponent<InventoryWindowController>();
+        var commandWindowController = worldSpaceCanvas.Find("CommandWindow").GetComponent<CommandWindowController>();
+        var portraitWindowController = worldSpaceCanvas.Find("PortraitWindow").GetComponent<PortraitBoxController>();
+        
+        // EncounterWindow
+        var encounterWindow = worldSpaceCanvas.Find("EncounterWindow");
+        var encounterWindowController = worldSpaceCanvas.Find("EncounterWindow").GetComponent<EncounterWindowController>();
+        var opponentsTransform = encounterWindow.Find("Opponents").transform;
+        var abilityAnimation = encounterWindow.Find("AbilityAnimation").GetComponent<AbilityAnimation>();
+        var encounterCommandWindowController = encounterWindow.Find("CommandWindow").GetComponent<EncounterCommandWindowController>();
+        var encounterMessageWindowController = encounterWindow.Find("MessageWindow").GetComponent<MessageWindowController>();
+        
+        // Setup
         wiperController.Setup(warpingAndWiping);
         player.Setup(warpingAndWiping, inputController.InputAction, occupiedSpacesSubject, positionController.PositionGrid, interactionSubject, flowSubject);
         klara.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
@@ -54,17 +70,12 @@ public class SetupController : MonoBehaviour, IObserver
         treasureA.Setup(occupiedSpacesSubject);
         treasureB.Setup(occupiedSpacesSubject);
         
-        /*
-         * DEBUG
-         */
-
-        if (DebugMode)
-        {
-            flowSubject.AddObserver(this);
-            encounterSubject.AddObserver(this);
-            interactionSubject.AddObserver(this);
-            windowSubject.AddObserver(this);
-        }
+        // Debug
+        if (!DebugMode) return;
+        flowSubject.AddObserver(this);
+        encounterSubject.AddObserver(this);
+        interactionSubject.AddObserver(this);
+        windowSubject.AddObserver(this);
     }
 
     public void OnNotify<T>(T parameters)
