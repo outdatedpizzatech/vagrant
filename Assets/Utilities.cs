@@ -42,4 +42,23 @@ internal static class Utilities
 
         return text;
     }
+    
+    public static int UpdatePromptSelection(Enums.Direction direction, int selectedPromptIndex, int promptCount)
+    {
+        var newIndex = selectedPromptIndex;
+        
+        switch (direction)
+        {
+            case Enums.Direction.Down:
+                newIndex++;
+                break;
+            case Enums.Direction.Up:
+                newIndex--;
+                break;
+        }
+
+        newIndex = newIndex < 0 ? promptCount - 1 : newIndex % promptCount;
+
+        return newIndex;
+    } 
 }

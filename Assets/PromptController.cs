@@ -47,29 +47,14 @@ public class PromptController : MonoBehaviour, IObserver
 
     private void UpdatePromptSelection(MenuNavigation menuNavigation)
     {
+        if (!_messageWindowController.AtEndOfCurrentMessage()) return;
+
         var currentEvent = _messageWindowController.InteractionEvent();
-
-        var promptCount = 0;
-
-        if (currentEvent.Information is List<Prompt> prompts)
-        {
-            promptCount = prompts.Count();
-        }
-
-        if (promptCount <= 0 || !_messageWindowController.AtEndOfCurrentMessage()) return;
-
-        switch (menuNavigation.Direction)
-        {
-            case Enums.Direction.Down:
-                _selectedPromptIndex++;
-                break;
-            case Enums.Direction.Up:
-                _selectedPromptIndex--;
-                break;
-        }
-
-        _selectedPromptIndex = _selectedPromptIndex < 0 ? promptCount - 1 : _selectedPromptIndex % promptCount;
-
+        if (currentEvent.Information is not List<Prompt> prompts || prompts.Count < 1) return;
+        
+        _selectedPromptIndex =
+            Utilities.UpdatePromptSelection(menuNavigation.Direction, _selectedPromptIndex, prompts.Count);
+        
         _messageWindowController.RenderText();
     }
 }

@@ -78,23 +78,10 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
     private void UpdatePromptSelection(MenuNavigation menuNavigation)
     {
         var promptCount = _prompts.Count;
+        if (promptCount < 1) return;
 
-        if (promptCount == 0)
-        {
-            return;
-        }
-
-        switch (menuNavigation.Direction)
-        {
-            case Enums.Direction.Down:
-                _selectedPromptIndex++;
-                break;
-            case Enums.Direction.Up:
-                _selectedPromptIndex--;
-                break;
-        }
-
-        _selectedPromptIndex = _selectedPromptIndex < 0 ? promptCount - 1 : _selectedPromptIndex % promptCount;
+        _selectedPromptIndex =
+            Utilities.UpdatePromptSelection(menuNavigation.Direction, _selectedPromptIndex, promptCount);
 
         RenderText();
     }
