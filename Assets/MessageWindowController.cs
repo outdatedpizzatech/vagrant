@@ -16,6 +16,11 @@ public class MessageWindowController : MonoBehaviour, IObserver
 
     private bool _atEndOfMessage;
 
+    public bool IsVisible()
+    {
+        return _window.IsVisible();
+    }
+
     public InteractionEvent InteractionEvent()
     {
         return _interactionEvent;

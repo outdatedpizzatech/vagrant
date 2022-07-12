@@ -8,17 +8,6 @@ public class TreasureController : Interactable
     private Subject _occupiedSpacesSubject;
     private SpriteRenderer _spriteRenderer;
     private bool _open;
-
-    private void Awake()
-    {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-    }
-
-    private void Start()
-    {
-        var currentPosition = transform.position;
-        SetPosition((int)currentPosition.x, (int)currentPosition.y);
-    }
     
     public override InteractionEvent ReceiveInteraction(Enums.Direction direction)
     {
@@ -36,14 +25,25 @@ public class TreasureController : Interactable
         
         return response;
     }
-
-    public void SetPosition(int x, int y)
-    {
-        _occupiedSpacesSubject.Notify(new EnteredPositionEvent(this.gameObject, x, y));
-    }
     
     public void Setup(Subject occupiedSpaces)
     {
         _occupiedSpacesSubject = occupiedSpaces;
+    }
+
+    private void SetPosition(int x, int y)
+    {
+        _occupiedSpacesSubject.Notify(new EnteredPositionEvent(this.gameObject, x, y));
+    }
+
+    private void Awake()
+    {
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    private void Start()
+    {
+        var currentPosition = transform.position;
+        SetPosition((int)currentPosition.x, (int)currentPosition.y);
     }
 }

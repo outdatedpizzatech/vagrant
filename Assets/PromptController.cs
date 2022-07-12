@@ -36,22 +36,10 @@ public class PromptController : MonoBehaviour, IObserver
 
     public string PromptContent()
     {
-        var promptIndex = 0;
         var text = "\n";
+        var promptTexts = _prompts.Select(prompt => prompt.Text).ToList();
 
-        foreach (var prompt in _prompts)
-        {
-            if (promptIndex == _selectedPromptIndex)
-            {
-                text += $"\n<sprite anim='0,1,4'> {prompt.Text}";
-            }
-            else
-            {
-                text += $"\n<sprite=1> {prompt.Text}";
-            }
-
-            promptIndex++;
-        }
+        text += Utilities.PromptOutput(promptTexts, _selectedPromptIndex);
 
         return text;
     }

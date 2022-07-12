@@ -2,13 +2,10 @@ using System.Collections.Generic;
 
 public class Subject
 {
-    
-    readonly List<IObserver> _observers = new();
-    public string Topic { get; }
-    
+    private readonly List<IObserver> _observers = new();
+
     public Subject(string topic)
     {
-        Topic = topic;
     }
 
     public void Notify(SubjectMessage message)

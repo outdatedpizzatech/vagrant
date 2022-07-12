@@ -277,7 +277,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 835d1ff429f144278886a0035c18c19e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  messageWindowController: {fileID: 0}
+  messageWindowController: {fileID: 998122489}
 --- !u!1 &144695567
 GameObject:
   m_ObjectHideFlags: 0
@@ -29852,7 +29852,7 @@ GameObject:
   - component: {fileID: 939078276}
   - component: {fileID: 939078279}
   m_Layer: 5
-  m_Name: InteractionBox
+  m_Name: CommandWindow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30108,7 +30108,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bc9df70427ba4d2d959bb70b3ca4e5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  messageWindowController: {fileID: 0}
+  messageWindowController: {fileID: 1373281482}
 --- !u!1 &1097817240
 GameObject:
   m_ObjectHideFlags: 0
@@ -31004,7 +31004,7 @@ GameObject:
   - component: {fileID: 1363967369}
   - component: {fileID: 1363967374}
   m_Layer: 5
-  m_Name: PortraitBox
+  m_Name: PortraitWindow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31264,7 +31264,7 @@ GameObject:
   - component: {fileID: 1380753666}
   - component: {fileID: 1380753667}
   m_Layer: 5
-  m_Name: InventoryBox
+  m_Name: InventoryWindow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

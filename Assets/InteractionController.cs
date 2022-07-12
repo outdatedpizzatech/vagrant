@@ -71,17 +71,6 @@ public class InteractionController : MonoBehaviour, IObserver
     {
         switch (subjectMessage)
         {
-            case SubjectMessage.PlayerRequestsSecondaryAction:
-                if (IsFreeRoaming())
-                {
-                    _flowSubject.Notify(SubjectMessage.OpenInventoryMenu);
-                }
-                else if (_inEncounter)
-                {
-                    _encounterSubject.Notify(SubjectMessage.Cancel);
-                }
-
-                break;
             case SubjectMessage.StartEncounter:
                 _inEncounter = true;
                 break;

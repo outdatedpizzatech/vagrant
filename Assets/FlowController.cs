@@ -1,35 +1,23 @@
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class FlowController : MonoBehaviour, IObserver
 {
     public MessageWindowController messageWindowController;
+    public InventoryWindowController inventoryWindowController;
+    public CommandWindowController commandWindowController;
 
     private Subject _flowSubject;
     private bool _shownInteractionMenu;
-    private bool _encounterIsEqueued;
+    private bool _encounterIsEnqueued;
     private Interactable _interactable;
     private EventStepMarker _eventStepMarker;
-
-    public void Update()
-    {
-        if (ShouldShowInteractionMenu())
-        {
-            _shownInteractionMenu = true;
-            _flowSubject.Notify(SubjectMessage.OpenInteractionMenu);
-        }
-        else if (ShouldStartEncounter())
-        {
-            _encounterIsEqueued = true;
-        }
-    }
+    private bool _inEncounter;
 
     public void Setup(Subject flowSubject, Subject interactionSubject)
     {
         _flowSubject = flowSubject;
         _flowSubject.AddObserver(this);
-        _eventStepMarker = new EventStepMarker(flowSubject, messageWindowController);
+        _eventStepMarker = new EventStepMarker(flowSubject, messageWindowController, interactionSubject);
         interactionSubject.AddObserver(this);
     }
 
@@ -43,28 +31,17 @@ public class FlowController : MonoBehaviour, IObserver
                     _flowSubject.Notify(SubjectMessage.LoseInteractionTarget);
                 }
 
-                if (_encounterIsEqueued)
+                if (_encounterIsEnqueued)
                 {
-                    _encounterIsEqueued = false;
+                    _encounterIsEnqueued = false;
                     _flowSubject.Notify(SubjectMessage.StartEncounter);
                 }
 
                 break;
-            case SubjectMessage.PlayerInputConfirm when messageWindowController.IsFocused():
-                _flowSubject.Notify(SubjectMessage.AdvanceEvent);
-                break;
             case SubjectMessage.ReachedEndOfMessage:
-                var currentMessage = CurrentMessage();
-
-                if (currentMessage.Information is Item item)
-                {
-                    _flowSubject.Notify(new ReceiveItem(item));
-                }
-
                 _shownInteractionMenu = false;
 
                 break;
-
             case SubjectMessage.EndInteraction:
                 _flowSubject.Notify(SubjectMessage.CloseInteractionMenu);
                 _flowSubject.Notify(SubjectMessage.EndEventSequence);
@@ -73,6 +50,20 @@ public class FlowController : MonoBehaviour, IObserver
                 break;
             case SubjectMessage.LoseInteractionTarget:
                 _interactable = null;
+
+                break;
+            case SubjectMessage.StartEncounter:
+                _inEncounter = true;
+                break;
+            case SubjectMessage.EndEncounter:
+                _inEncounter = false;
+                break;
+            case SubjectMessage.PlayerRequestsSecondaryAction:
+                if (!_inEncounter && !commandWindowController.IsVisible() && !inventoryWindowController.IsVisible() &&
+                    !messageWindowController.IsVisible())
+                {
+                    _flowSubject.Notify(SubjectMessage.OpenInventoryMenu);
+                }
 
                 break;
         }
@@ -109,8 +100,7 @@ public class FlowController : MonoBehaviour, IObserver
             case InteractWith interactWithEvent:
             {
                 _interactable = interactWithEvent.Interactable;
-                var newDirection = ((int)interactWithEvent.Direction + 2) % 4;
-                Enums.Direction receivedFromDirection = (Enums.Direction)newDirection;
+                var receivedFromDirection = Utilities.GetOppositeDirection(interactWithEvent.Direction);
                 var interactionResponse = _interactable.ReceiveInteraction(receivedFromDirection);
                 if (interactionResponse != null)
                 {
@@ -127,11 +117,6 @@ public class FlowController : MonoBehaviour, IObserver
         }
     }
 
-    private EventStep CurrentMessage()
-    {
-        return _eventStepMarker.CurrentMessage();
-    }
-
     private bool ShouldShowInteractionMenu()
     {
         return _eventStepMarker.IsReadyToYield(PostEvent.CanFollowUp) &&
@@ -141,11 +126,19 @@ public class FlowController : MonoBehaviour, IObserver
     private bool ShouldStartEncounter()
     {
         return _eventStepMarker.IsReadyToYield(PostEvent.TriggersEncounter) &&
-               !_encounterIsEqueued;
+               !_encounterIsEnqueued;
     }
 
-    private bool AtEndOfEvent()
+    private void Update()
     {
-        return _eventStepMarker.AtEndOfEvent();
+        if (ShouldShowInteractionMenu())
+        {
+            _shownInteractionMenu = true;
+            _flowSubject.Notify(SubjectMessage.OpenInteractionMenu);
+        }
+        else if (ShouldStartEncounter())
+        {
+            _encounterIsEnqueued = true;
+        }
     }
 }

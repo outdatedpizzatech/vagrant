@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,34 +8,12 @@ public class PortraitBoxController : MonoBehaviour, IObserver
     private Image _image;
     private InteractionEvent _interactionEvent;
     private int _eventStepIndex;
-    
+    private Animator _animator;
+
     public void Setup(Subject flowSubject)
     {
         _flowSubject = flowSubject;
-
         _flowSubject.AddObserver(this);
-    }
-    
-    private void Show()
-    {
-        var eventStep = _interactionEvent.EventSteps[_eventStepIndex];
-
-        if (eventStep.Information is Message message)
-        {
-            if (message.SpeakingAnimation != null)
-            {
-                _image.GetComponent<Animator>().Play(message.SpeakingAnimation.name);
-                _window.Show();
-                return;
-            }
-        }
-        
-        _window.Hide();
-    }
-    private void Awake()
-    {
-        _image = transform.Find("Image").GetComponent<Image>();
-        _window = GetComponent<Window>();
     }
 
     public void OnNotify(SubjectMessage message)
@@ -47,17 +23,14 @@ public class PortraitBoxController : MonoBehaviour, IObserver
             _window.Hide();
         }
 
-        if (message == SubjectMessage.ReachedEndOfMessage)
-        {
-            var eventStep = _interactionEvent.EventSteps[_eventStepIndex];
+        if (message != SubjectMessage.ReachedEndOfMessage) return;
 
-            if (eventStep.Information is Message messageFromInteraction)
-            {
-                if (messageFromInteraction.IdleAnimation != null)
-                {
-                    _image.GetComponent<Animator>().Play(messageFromInteraction.IdleAnimation.name);
-                }
-            }
+        var eventStep = _interactionEvent.EventSteps[_eventStepIndex];
+
+        if (eventStep.Information is not Message messageFromInteraction) return;
+        if (messageFromInteraction.IdleAnimation != null)
+        {
+            _animator.Play(messageFromInteraction.IdleAnimation.name);
         }
     }
 
@@ -73,5 +46,29 @@ public class PortraitBoxController : MonoBehaviour, IObserver
                 Show();
                 break;
         }
+    }
+
+    private void Show()
+    {
+        var eventStep = _interactionEvent.EventSteps[_eventStepIndex];
+
+        if (eventStep.Information is Message message)
+        {
+            if (message.SpeakingAnimation != null)
+            {
+                _animator.Play(message.SpeakingAnimation.name);
+                _window.Show();
+                return;
+            }
+        }
+
+        _window.Hide();
+    }
+
+    private void Awake()
+    {
+        _image = transform.Find("Image").GetComponent<Image>();
+        _window = GetComponent<Window>();
+        _animator = _image.GetComponent<Animator>();
     }
 }

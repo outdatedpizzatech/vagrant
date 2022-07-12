@@ -5,12 +5,6 @@ public class EncounterWindowController : MonoBehaviour, IObserver
     private Animation _animation;
     private Window _window;
     private Subject _flowSubject;
-    
-    private void Awake()
-    {
-        _animation = GetComponent<Animation>();
-        _window = GetComponent<Window>();
-    }
 
     public void Setup(Subject flowSubject)
     {
@@ -37,11 +31,13 @@ public class EncounterWindowController : MonoBehaviour, IObserver
         }
     }
     
+    // Called from animation hook
     public void FinishWipeIn()
     {
         _flowSubject.Notify(SubjectMessage.EncounterFinishedWipeIn);
     }
     
+    // Called from animation hook
     public void FinishWipeOut()
     {
         _flowSubject.Notify(SubjectMessage.EndEncounter);
@@ -59,5 +55,11 @@ public class EncounterWindowController : MonoBehaviour, IObserver
     private void WipeOut()
     {
         _animation.Play("EncounterWipeOut");
+    }
+    
+    private void Awake()
+    {
+        _animation = GetComponent<Animation>();
+        _window = GetComponent<Window>();
     }
 }

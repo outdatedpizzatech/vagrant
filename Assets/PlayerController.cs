@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour, IObserver
 {
-    private List<Item> _items = new();
+    private readonly List<Item> _items = new();
     
     public void Setup(Subject warpAndWipeSubject, InputAction inputAction, Subject occupiedSpacesSubject,
         PositionGrid positionGrid, Subject interactionSubject, Subject flowSubject)
@@ -17,16 +17,6 @@ public class PlayerController : MonoBehaviour, IObserver
         playerAction.Setup(inputAction, interactionSubject);
         
         flowSubject.AddObserver(this);
-    }
-
-    public void AddItem(Item item)
-    {
-        _items.Add(item);
-    }
-
-    public void RemoveItem(Item item)
-    {
-        _items.Remove(item);
     }
 
     public List<Item> Items()
@@ -51,5 +41,15 @@ public class PlayerController : MonoBehaviour, IObserver
 
     public void OnNotify(SubjectMessage message)
     {
+    }
+
+    private void AddItem(Item item)
+    {
+        _items.Add(item);
+    }
+
+    private void RemoveItem(Item item)
+    {
+        _items.Remove(item);
     }
 }

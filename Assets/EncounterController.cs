@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class EncounterController : MonoBehaviour, IObserver
@@ -21,27 +20,15 @@ public class EncounterController : MonoBehaviour, IObserver
     private Transform _opponentsTransform;
     private EventStepMarker _eventStepMarker;
 
-    private void Update()
-    {
-        _state = _nextState;
-    }
-    
-    private void Start()
-    {
-        foreach (Transform child in _opponentsTransform)
-        {
-            _opponents.Add(child.GetComponent<Blinker>());
-        }
-    }
-
-    public void Setup(Subject encounterSubject, Transform opponentsTransform, AbilityAnimation abilityAnimation, Subject interactionSubject)
+    public void Setup(Subject encounterSubject, Transform opponentsTransform, AbilityAnimation abilityAnimation,
+        Subject interactionSubject)
     {
         _encounterSubject = encounterSubject;
         _encounterSubject.AddObserver(this);
         _abilityAnimation = abilityAnimation;
         abilityAnimation.Setup(_encounterSubject);
         _opponentsTransform = opponentsTransform;
-        _eventStepMarker = new EventStepMarker(encounterSubject, messageWindowController);
+        _eventStepMarker = new EventStepMarker(encounterSubject, messageWindowController, interactionSubject);
         interactionSubject.AddObserver(this);
     }
 
@@ -58,8 +45,12 @@ public class EncounterController : MonoBehaviour, IObserver
                 SetState(State.None);
                 _encounterSubject.Notify(SubjectMessage.OpenMainMenu);
                 break;
-            case SubjectMessage.PlayerInputConfirm when _state == State.PickingAttackTarget && _eventStepMarker.InteractionEvent() == null:
+            case SubjectMessage.PlayerInputConfirm
+                when _state == State.PickingAttackTarget && !_eventStepMarker.Active():
                 _encounterSubject.Notify(SubjectMessage.AttackTarget);
+                break;
+            case SubjectMessage.PlayerRequestsSecondaryAction:
+                _encounterSubject.Notify(SubjectMessage.Cancel);
                 break;
             case SubjectMessage.AttackTarget:
             {
@@ -69,15 +60,12 @@ public class EncounterController : MonoBehaviour, IObserver
                 _encounterSubject.Notify(response);
                 break;
             }
-            case SubjectMessage.PlayerInputConfirm when messageWindowController.IsFocused():
-                _encounterSubject.Notify(SubjectMessage.AdvanceEvent);
-                break;
             case SubjectMessage.EndEventSequence when _state == State.PickingAttackTarget:
             {
                 var selectedOpponent = SelectedOpponent();
                 selectedOpponent.shouldBlink = false;
                 _abilityAnimation.PlaySwordAnimationOn(selectedOpponent);
-                
+
                 SetState(State.InAttackAnimation);
                 break;
             }
@@ -98,11 +86,6 @@ public class EncounterController : MonoBehaviour, IObserver
         }
     }
 
-    private Blinker SelectedOpponent()
-    {
-        return _opponents[_selectedTargetIndex];
-    }
-
     public void OnNotify<T>(T parameters)
     {
         switch (parameters)
@@ -110,14 +93,12 @@ public class EncounterController : MonoBehaviour, IObserver
             case MenuNavigation menuNavigation when _state == State.PickingAttackTarget:
                 UpdateTargetSelection(menuNavigation);
                 break;
-            case InteractionResponseEvent:
-                ProcessEvent();
-                break;
         }
     }
 
-    private void ProcessEvent()
+    private Blinker SelectedOpponent()
     {
+        return _opponents[_selectedTargetIndex];
     }
 
     private void UpdateTargetSelection(MenuNavigation menuNavigation)
@@ -152,8 +133,16 @@ public class EncounterController : MonoBehaviour, IObserver
         _nextState = newState;
     }
 
-    private bool AtEndOfEvent()
+    private void Update()
     {
-        return _eventStepMarker.AtEndOfEvent();
+        _state = _nextState;
+    }
+
+    private void Start()
+    {
+        foreach (Transform child in _opponentsTransform)
+        {
+            _opponents.Add(child.GetComponent<Blinker>());
+        }
     }
 }

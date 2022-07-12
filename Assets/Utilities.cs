@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 internal static class Utilities
 {
@@ -7,5 +8,33 @@ internal static class Utilities
         if (!(currentTime > maxTime)) return;
         currentTime = 0;
         doFunction();
+    }
+
+    public static Enums.Direction GetOppositeDirection(Enums.Direction direction)
+    {
+        var newDirection = ((int)direction + 2) % 4;
+        return (Enums.Direction)newDirection;
+    }
+
+    public static string PromptOutput(List<string> prompts, int selectedPromptIndex)
+    {
+        var promptIndex = 0;
+        var text = "";
+        
+        foreach (var prompt in prompts)
+        {
+            if (promptIndex == selectedPromptIndex)
+            {
+                text += $"\n<sprite anim='0,1,4'> {prompt}";
+            }
+            else
+            {
+                text += $"\n<sprite=1> {prompt}";
+            }
+
+            promptIndex++;
+        }
+
+        return text;
     }
 }

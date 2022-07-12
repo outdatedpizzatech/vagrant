@@ -12,12 +12,14 @@ public class WiperController : MonoBehaviour, IObserver
         subject.AddObserver(this);
     }
 
+    // animation hook
     public void FinishWipeOut()
     {
         _subject.Notify(SubjectMessage.ScreenFinishedWipeOut);
         WipeIn();
     }
 
+    // animation hook
     public void FinishWipeIn()
     {
         _subject.Notify(SubjectMessage.ScreenFinishedWipeIn);

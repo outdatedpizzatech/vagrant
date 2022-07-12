@@ -10,38 +10,17 @@ public class EventStepMarker : IObserver
     private readonly Subject _subject;
     private readonly MessageWindowController _messageWindowController;
 
-    public EventStepMarker(Subject subject, MessageWindowController messageWindowController)
+    public EventStepMarker(Subject subject, MessageWindowController messageWindowController, Subject interactionSubject)
     {
         _subject = subject;
         subject.AddObserver(this);
         _messageWindowController = messageWindowController;
+        interactionSubject.AddObserver(this);
     }
 
-    public void StartNextEventStep()
+    public bool Active()
     {
-        _eventStepIndex++;
-        _atEndOfMessage = false;
-        _subject.Notify(new StartEventStep(EventStepIndex()));
-    }
-
-    public bool IsAtEndOfMessage()
-    {
-        return _atEndOfMessage;
-    }
-
-    public InteractionEvent InteractionEvent()
-    {
-        return _interactionEvent;
-    }
-
-    public EventStep CurrentMessage()
-    {
-        return _interactionEvent.EventSteps[_eventStepIndex];
-    }
-
-    public bool AtEndOfEvent()
-    {
-        return _eventStepIndex >= _interactionEvent.EventSteps.Count - 1;
+        return (_interactionEvent != null);
     }
 
     public bool IsReadyToYield(PostEvent postEvent)
@@ -56,13 +35,24 @@ public class EventStepMarker : IObserver
         switch (message)
         {
             case SubjectMessage.ReachedEndOfMessage:
-                ReachedEndOfMessage();
+                _atEndOfMessage = true;
+                
+                var currentMessage = CurrentMessage();
+
+                if (currentMessage.Information is Item item)
+                {
+                    _subject.Notify(new ReceiveItem(item));
+                }
+                
                 break;
             case SubjectMessage.EndEventSequence:
-                End();
+                _interactionEvent = null;
                 break;
-            case SubjectMessage.AdvanceEvent when IsAtEndOfMessage():
+            case SubjectMessage.AdvanceEvent when _atEndOfMessage:
                 AdvanceEventSequence();
+                break;
+            case SubjectMessage.PlayerInputConfirm when _messageWindowController.IsFocused():
+                _subject.Notify(SubjectMessage.AdvanceEvent);
                 break;
         }
     }
@@ -77,34 +67,19 @@ public class EventStepMarker : IObserver
         }
     }
 
-    private void ReachedEndOfMessage()
-    {
-        _atEndOfMessage = true;
-    }
-
-    private int EventStepIndex()
-    {
-        return _eventStepIndex;
-    }
-
     private void StartNew(InteractionEvent interactionEvent)
     {
         _eventStepIndex = 0;
         _interactionEvent = interactionEvent;
         _atEndOfMessage = false;
-        _subject.Notify(new StartEventStep(EventStepIndex()));
-    }
-
-    private void End()
-    {
-        _interactionEvent = null;
+        _subject.Notify(new StartEventStep(_eventStepIndex));
     }
     
     private void AdvanceEventSequence()
     {
         if (AtEndOfEvent())
         {
-            if (InteractionEvent().Information is List<Prompt> prompts && prompts.Any())
+            if (_interactionEvent.Information is List<Prompt> prompts && prompts.Any())
             {
                 var selectedPrompt = _messageWindowController.SelectedPrompt();
                 _subject.Notify(
@@ -118,5 +93,22 @@ public class EventStepMarker : IObserver
         {
             StartNextEventStep();
         }
+    }
+
+    private EventStep CurrentMessage()
+    {
+        return _interactionEvent.EventSteps[_eventStepIndex];
+    }
+
+    private void StartNextEventStep()
+    {
+        _eventStepIndex++;
+        _atEndOfMessage = false;
+        _subject.Notify(new StartEventStep(_eventStepIndex));
+    }
+
+    private bool AtEndOfEvent()
+    {
+        return _eventStepIndex >= _interactionEvent.EventSteps.Count - 1;
     }
 }

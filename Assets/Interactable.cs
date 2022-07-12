@@ -3,8 +3,7 @@ using UnityEngine;
 
 public class Interactable : MonoBehaviour
 {
-    private List<Item> _items = new();
-    private static readonly int FacingDirection = Animator.StringToHash("facingDirection");
+    private readonly List<Item> _items = new();
 
     public InteractionEvent ReceiveItem(Item item)
     {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class InteractionBoxController : MonoBehaviour, IObserver
+public class CommandWindowController : MonoBehaviour, IObserver
 {
     private int _selectedPromptIndex;
     private TMP_Text _text;
@@ -10,12 +10,12 @@ public class InteractionBoxController : MonoBehaviour, IObserver
     private readonly List<string> _prompts = new() { "END", "GIVE" };
     private Window _window;
 
-    public void Setup(Subject flowSubject, Subject interactionSubject, Subject contextSubject)
+    public void Setup(Subject flowSubject, Subject interactionSubject, Subject windowSubject)
     {
         _flowSubject = flowSubject;
         _flowSubject.AddObserver(this);
         interactionSubject.AddObserver(this);
-        _window.Setup(contextSubject);
+        _window.Setup(windowSubject);
     }
 
     private void Awake()
@@ -33,24 +33,12 @@ public class InteractionBoxController : MonoBehaviour, IObserver
 
     private void RenderText()
     {
-        var promptIndex = 0;
-        var text = "";
+        _text.text = Utilities.PromptOutput(_prompts, _selectedPromptIndex);
+    }
 
-        foreach (var prompt in _prompts)
-        {
-            if (promptIndex == _selectedPromptIndex)
-            {
-                text += $"\n<sprite anim='0,1,4'> {prompt}";
-            }
-            else
-            {
-                text += $"\n<sprite=1> {prompt}";
-            }
-
-            promptIndex++;
-        }
-
-        _text.text = text;
+    public bool IsVisible()
+    {
+        return _window.IsVisible();
     }
 
     public void OnNotify<T>(T parameters)
