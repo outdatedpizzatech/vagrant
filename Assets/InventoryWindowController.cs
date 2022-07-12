@@ -14,26 +14,14 @@ public class InventoryWindowController : MonoBehaviour, IObserver
 
     public void OnNotify<T>(T parameters)
     {
-        if (!_window.IsFocused())
-        {
-            return;
-        }
-
         switch (parameters)
         {
             case MenuNavigation menuNavigation when _window.IsFocused():
                 UpdatePromptSelection(menuNavigation);
                 break;
-            case StartEventStep:
+            case StartEventStep when _window.IsFocused():
                 _window.LoseFocus();
                 break;
-        }
-    }
-
-    public void OnNotify(SubjectMessage message)
-    {
-        switch (message)
-        {
             case SubjectMessage.GiveContextToInventoryMenu:
                 _window.Show();
 

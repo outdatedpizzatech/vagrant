@@ -34,10 +34,13 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
         interactionSubject.AddObserver(this);
     }
 
-    public void OnNotify(SubjectMessage message)
+    public void OnNotify<T>(T parameters)
     {
-        switch (message)
+        switch (parameters)
         {
+            case MenuNavigation menuNavigation when _window.IsFocused():
+                UpdatePromptSelection(menuNavigation);
+                break;
             case SubjectMessage.EncounterFinishedWipeIn:
                 Show();
                 break;
@@ -62,16 +65,6 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
                         _flowSubject.Notify(SubjectMessage.EncounterStartWipeOut);
                         break;
                 }
-                break;
-        }
-    }
-
-    public void OnNotify<T>(T parameters)
-    {
-        switch (parameters)
-        {
-            case MenuNavigation menuNavigation when _window.IsFocused():
-                UpdatePromptSelection(menuNavigation);
                 break;
         }
     }

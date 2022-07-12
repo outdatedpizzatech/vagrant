@@ -4,10 +4,6 @@ public class PositionController : MonoBehaviour, IObserver
 {
     public readonly PositionGrid PositionGrid = new();
 
-    public void OnNotify(SubjectMessage subjectMessage)
-    {
-    }
-
     public void Setup(Subject occupiedSpacesSubject)
     {
         occupiedSpacesSubject.AddObserver(this);

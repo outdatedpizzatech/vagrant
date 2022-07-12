@@ -48,13 +48,6 @@ public class CommandWindowController : MonoBehaviour, IObserver
             case MenuNavigation menuNavigation when _window.IsFocused():
                 UpdatePromptSelection(menuNavigation);
                 break; 
-        }
-    }
-
-    public void OnNotify(SubjectMessage message)
-    {
-        switch (message)
-        {
             case SubjectMessage.OpenInteractionMenu:
                 Show();
 

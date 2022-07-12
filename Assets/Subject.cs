@@ -8,14 +8,6 @@ public class Subject
     {
     }
 
-    public void Notify(SubjectMessage message)
-    {
-        foreach (var t in _observers)
-        {
-            t.OnNotify(message);
-        }
-    }
-
     public void Notify<T>(T parameters)
     {
         foreach (var t in _observers)

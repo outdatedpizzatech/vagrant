@@ -21,10 +21,10 @@ public class PersonMovement : MonoBehaviour, IObserver
     private float _tempAnimationSpeed;
     private static readonly int IsMoving = Animator.StringToHash("isMoving");
     private static readonly int FacingDirection = Animator.StringToHash("facingDirection");
-
-    public void OnNotify(SubjectMessage message)
+    
+    public void OnNotify<T>(T parameters)
     {
-        switch (message)
+        switch (parameters)
         {
             case SubjectMessage.TimeShouldFlow:
                 canMakeAnotherMove = true;
@@ -36,10 +36,6 @@ public class PersonMovement : MonoBehaviour, IObserver
                 _animator.speed = 0;
                 break;
         }
-    }
-    
-    public void OnNotify<T>(T parameters)
-    {
     }
 
     public void SetPosition(int x, int y)

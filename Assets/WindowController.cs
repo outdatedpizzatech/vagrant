@@ -13,10 +13,6 @@ public class WindowController : MonoBehaviour, IObserver
         _subject.AddObserver(this);
     }
 
-    public void OnNotify(SubjectMessage subjectMessage)
-    {
-    }
-
     public void OnNotify<T>(T parameters)
     {
         switch (parameters)

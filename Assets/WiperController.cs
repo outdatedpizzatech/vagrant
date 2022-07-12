@@ -24,10 +24,7 @@ public class WiperController : MonoBehaviour, IObserver
     {
         _subject.Notify(SubjectMessage.ScreenFinishedWipeIn);
     }
-
-    public void OnNotify(SubjectMessage message)
-    {
-    }
+    
     public void OnNotify<T>(T parameters)
     {
         if (parameters is PlayerBeganWarpingEvent)

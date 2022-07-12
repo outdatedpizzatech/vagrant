@@ -67,11 +67,6 @@ public class SetupController : MonoBehaviour, IObserver
         }
     }
 
-    public void OnNotify(SubjectMessage message)
-    {
-        print("EVENT: " + message);
-    }
-
     public void OnNotify<T>(T parameters)
     {
         print("EVENT: " + parameters);

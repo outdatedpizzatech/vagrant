@@ -32,10 +32,13 @@ public class EncounterController : MonoBehaviour, IObserver
         interactionSubject.AddObserver(this);
     }
 
-    public void OnNotify(SubjectMessage message)
+    public void OnNotify<T>(T parameters)
     {
-        switch (message)
+        switch (parameters)
         {
+            case MenuNavigation menuNavigation when _state == State.PickingAttackTarget:
+                UpdateTargetSelection(menuNavigation);
+                break;
             case SubjectMessage.PickedAttack:
                 SetState(State.PickingAttackTarget);
                 SelectedOpponent().shouldBlink = true;
@@ -83,16 +86,6 @@ public class EncounterController : MonoBehaviour, IObserver
                 _encounterSubject.Notify(response);
                 break;
             }
-        }
-    }
-
-    public void OnNotify<T>(T parameters)
-    {
-        switch (parameters)
-        {
-            case MenuNavigation menuNavigation when _state == State.PickingAttackTarget:
-                UpdateTargetSelection(menuNavigation);
-                break;
         }
     }
 

@@ -20,10 +20,6 @@ public class PromptController : MonoBehaviour, IObserver
         _selectedPromptIndex = 0;
     }
 
-    public void OnNotify(SubjectMessage message)
-    {
-    }
-
     public void OnNotify<T>(T parameters)
     {
         switch (parameters)

@@ -12,25 +12,6 @@ public class EncounterWindowController : MonoBehaviour, IObserver
         _flowSubject.AddObserver(this);
     }
     
-    public void OnNotify(SubjectMessage message)
-    {
-        switch (message)
-        {
-            case SubjectMessage.StartEncounter:
-                WipeIn();
-                break;
-            case SubjectMessage.EncounterStartWipeOut:
-                WipeOut();
-                break;
-            case SubjectMessage.EndEncounter:
-                _window.Hide();
-                break;
-            case SubjectMessage.EncounterFinishedWipeIn:
-                _window.Show();
-                break;
-        }
-    }
-    
     // Called from animation hook
     public void FinishWipeIn()
     {
@@ -45,6 +26,21 @@ public class EncounterWindowController : MonoBehaviour, IObserver
 
     public void OnNotify<T>(T parameters)
     {
+        switch (parameters)
+        {
+            case SubjectMessage.StartEncounter:
+                WipeIn();
+                break;
+            case SubjectMessage.EncounterStartWipeOut:
+                WipeOut();
+                break;
+            case SubjectMessage.EndEncounter:
+                _window.Hide();
+                break;
+            case SubjectMessage.EncounterFinishedWipeIn:
+                _window.Show();
+                break;
+        }
     }
     
     private void WipeIn()

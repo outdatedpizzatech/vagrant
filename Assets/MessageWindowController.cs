@@ -37,18 +37,13 @@ public class MessageWindowController : MonoBehaviour, IObserver
         _flowSubject.AddObserver(this);
     }
 
-    public void OnNotify(SubjectMessage message)
-    {
-        if (message == SubjectMessage.EndEventSequence)
-        {
-            _window.Hide();
-        }
-    }
-
     public void OnNotify<T>(T parameters)
     {
         switch (parameters)
         {
+            case SubjectMessage.EndEventSequence:
+                _window.Hide();
+                break;
             case InteractionResponseEvent interactionResponseEvent:
                 _interactionEvent = interactionResponseEvent.InteractionEvent;
                 break;

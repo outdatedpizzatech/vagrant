@@ -30,10 +30,6 @@ public class Window : MonoBehaviour, IObserver
         return _visible;
     }
 
-    public void OnNotify(SubjectMessage subjectMessage)
-    {
-    }
-
     public void OnNotify<T>(T parameters)
     {
         switch (parameters)

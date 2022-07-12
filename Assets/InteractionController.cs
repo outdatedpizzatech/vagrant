@@ -67,9 +67,9 @@ public class InteractionController : MonoBehaviour, IObserver
         windowController.Setup(windowSubject);
     }
 
-    public void OnNotify(SubjectMessage subjectMessage)
+    public void OnNotify<T>(T parameters)
     {
-        switch (subjectMessage)
+        switch (parameters)
         {
             case SubjectMessage.StartEncounter:
                 _inEncounter = true;
@@ -77,13 +77,6 @@ public class InteractionController : MonoBehaviour, IObserver
             case SubjectMessage.EndEncounter:
                 _inEncounter = false;
                 break;
-        }
-    }
-
-    public void OnNotify<T>(T parameters)
-    {
-        switch (parameters)
-        {
             case PlayerRequestsPrimaryActionEvent playerActionEvent when IsFreeRoaming():
             {
                 var position = new[] { playerActionEvent.X, playerActionEvent.Y };

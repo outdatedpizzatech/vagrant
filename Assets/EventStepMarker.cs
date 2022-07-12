@@ -30,10 +30,13 @@ public class EventStepMarker : IObserver
                _interactionEvent.Information is PostEvent informationPostEvent && informationPostEvent == postEvent;
     }
 
-    public void OnNotify(SubjectMessage message)
+    public void OnNotify<T>(T parameters)
     {
-        switch (message)
+        switch (parameters)
         {
+            case InteractionResponseEvent interactionResponseEvent:
+                StartNew(interactionResponseEvent.InteractionEvent);
+                break;
             case SubjectMessage.ReachedEndOfMessage:
                 _atEndOfMessage = true;
                 
@@ -53,16 +56,6 @@ public class EventStepMarker : IObserver
                 break;
             case SubjectMessage.PlayerInputConfirm when _messageWindowController.IsFocused():
                 _subject.Notify(SubjectMessage.AdvanceEvent);
-                break;
-        }
-    }
-
-    public void OnNotify<T>(T parameters)
-    {
-        switch (parameters)
-        {
-            case InteractionResponseEvent interactionResponseEvent:
-                StartNew(interactionResponseEvent.InteractionEvent);
                 break;
         }
     }

@@ -39,10 +39,6 @@ public class PlayerController : MonoBehaviour, IObserver
         }
     }
 
-    public void OnNotify(SubjectMessage message)
-    {
-    }
-
     private void AddItem(Item item)
     {
         _items.Add(item);

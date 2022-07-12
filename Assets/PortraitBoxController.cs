@@ -16,28 +16,23 @@ public class PortraitBoxController : MonoBehaviour, IObserver
         _flowSubject.AddObserver(this);
     }
 
-    public void OnNotify(SubjectMessage message)
-    {
-        if (message == SubjectMessage.LoseInteractionTarget)
-        {
-            _window.Hide();
-        }
-
-        if (message != SubjectMessage.ReachedEndOfMessage) return;
-
-        var eventStep = _interactionEvent.EventSteps[_eventStepIndex];
-
-        if (eventStep.Information is not Message messageFromInteraction) return;
-        if (messageFromInteraction.IdleAnimation != null)
-        {
-            _animator.Play(messageFromInteraction.IdleAnimation.name);
-        }
-    }
-
     public void OnNotify<T>(T parameters)
     {
         switch (parameters)
         {
+            case SubjectMessage.LoseInteractionTarget:
+                _window.Hide();
+                break;
+            case SubjectMessage.ReachedEndOfMessage:
+                var eventStep = _interactionEvent.EventSteps[_eventStepIndex];
+
+                if (eventStep.Information is not Message messageFromInteraction) return;
+                if (messageFromInteraction.IdleAnimation != null)
+                {
+                    _animator.Play(messageFromInteraction.IdleAnimation.name);
+                }
+
+                break;
             case InteractionResponseEvent interactionResponseEvent:
                 _interactionEvent = interactionResponseEvent.InteractionEvent;
                 break;

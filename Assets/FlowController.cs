@@ -21,9 +21,9 @@ public class FlowController : MonoBehaviour, IObserver
         interactionSubject.AddObserver(this);
     }
 
-    public void OnNotify(SubjectMessage message)
+    public void OnNotify<T>(T parameters)
     {
-        switch (message)
+        switch (parameters)
         {
             case SubjectMessage.EndEventSequence:
                 if (!_shownInteractionMenu)
@@ -66,13 +66,6 @@ public class FlowController : MonoBehaviour, IObserver
                 }
 
                 break;
-        }
-    }
-
-    public void OnNotify<T>(T parameters)
-    {
-        switch (parameters)
-        {
             case SelectInventoryItemEvent selectInventoryItemEvent:
             {
                 if (_interactable == null)

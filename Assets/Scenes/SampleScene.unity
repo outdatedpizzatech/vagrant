@@ -278,6 +278,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   messageWindowController: {fileID: 998122489}
+  inventoryWindowController: {fileID: 1380753666}
+  commandWindowController: {fileID: 939078276}
 --- !u!1 &144695567
 GameObject:
   m_ObjectHideFlags: 0

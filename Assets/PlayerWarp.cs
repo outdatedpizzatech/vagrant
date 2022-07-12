@@ -26,25 +26,29 @@ public class PlayerWarp : MonoBehaviour, IObserver
         _subject.Notify(SubjectMessage.PlayerRequestingWarp);
         StartCoroutine(BeginWarping(0.25f, x, y, direction));
     }
-    
+
     private IEnumerator BeginWarping(float waitTime, int x, int y, Enums.Direction direction)
     {
         yield return new WaitForSeconds(waitTime);
-        
+
         /*
          * TODO: this is pretty sketchy. We're deferring the position setting because it
          * causes a bug if it's done immediately. This is a race condition waiting to happen.
-         */ 
-        
+         */
+
         var parameters = new PlayerBeganWarpingEvent(direction, x, y);
-        
+
         _subject.Notify(parameters);
     }
-    
-    public void OnNotify(SubjectMessage message)
+
+    public void OnNotify<T>(T parameters)
     {
-        switch (message)
+        switch (parameters)
         {
+            case PlayerBeganWarpingEvent playerBeganWarpingEvent:
+                _personMovement.facingDirection = playerBeganWarpingEvent.FacingDirection;
+                _personMovement.SetPosition(playerBeganWarpingEvent.X, playerBeganWarpingEvent.Y);
+                break;
             case SubjectMessage.PlayerRequestingWarp:
                 _personMovement.canMakeAnotherMove = false;
                 break;
@@ -57,11 +61,5 @@ public class PlayerWarp : MonoBehaviour, IObserver
                 _personMovement.canMakeAnotherMove = true;
                 break;
         }
-    }
-    public void OnNotify<T>(T parameters)
-    {
-        if (parameters is not PlayerBeganWarpingEvent playerBeganWarpingEvent) return;
-        _personMovement.facingDirection = playerBeganWarpingEvent.FacingDirection;
-        _personMovement.SetPosition(playerBeganWarpingEvent.X, playerBeganWarpingEvent.Y);
     }
 }
