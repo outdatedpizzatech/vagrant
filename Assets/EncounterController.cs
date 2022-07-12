@@ -10,6 +10,7 @@ public class EncounterController : MonoBehaviour, IObserver
         InAttackAnimation
     }
 
+    public EncounterMessageBoxController messageBoxController;
     private Subject _encounterSubject;
     private State _state;
     private State _nextState;
@@ -67,7 +68,10 @@ public class EncounterController : MonoBehaviour, IObserver
                 _encounterSubject.Notify(response);
                 break;
             }
-            case SubjectMessage.PlayerInputConfirm when _eventStepMarker.InteractionEvent() != null && _eventStepMarker.IsAtEndOfMessage():
+            case SubjectMessage.PlayerInputConfirm when messageBoxController.IsFocused():
+                _encounterSubject.Notify(SubjectMessage.AdvanceEvent);
+                break;
+            case SubjectMessage.AdvanceEvent when _eventStepMarker.IsAtEndOfMessage():
                 AdvanceEventSequence();
                 break;
             case SubjectMessage.EndEventSequence when _state == State.PickingAttackTarget:

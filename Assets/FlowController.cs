@@ -53,12 +53,8 @@ public class FlowController : MonoBehaviour, IObserver
             case SubjectMessage.PlayerInputConfirm when messageBoxController.IsFocused():
                 _flowSubject.Notify(SubjectMessage.AdvanceEvent);
                 break;
-            case SubjectMessage.AdvanceEvent:
-                if (_eventStepMarker.IsAtEndOfMessage())
-                {
-                    AdvanceEventSequence();
-                }
-
+            case SubjectMessage.AdvanceEvent when _eventStepMarker.IsAtEndOfMessage():
+                AdvanceEventSequence();
                 break;
             case SubjectMessage.ReachedEndOfMessage:
                 var currentMessage = CurrentMessage();
