@@ -10,7 +10,7 @@ public class EncounterController : MonoBehaviour, IObserver
         InAttackAnimation
     }
 
-    public EncounterMessageBoxController messageBoxController;
+    public MessageWindowController messageWindowController;
     private Subject _encounterSubject;
     private State _state;
     private State _nextState;
@@ -68,7 +68,7 @@ public class EncounterController : MonoBehaviour, IObserver
                 _encounterSubject.Notify(response);
                 break;
             }
-            case SubjectMessage.PlayerInputConfirm when messageBoxController.IsFocused():
+            case SubjectMessage.PlayerInputConfirm when messageWindowController.IsFocused():
                 _encounterSubject.Notify(SubjectMessage.AdvanceEvent);
                 break;
             case SubjectMessage.AdvanceEvent when _eventStepMarker.IsAtEndOfMessage():

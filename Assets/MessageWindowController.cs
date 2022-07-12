@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class MessageBoxController : MonoBehaviour, IObserver
+public class MessageWindowController : MonoBehaviour, IObserver
 {
     private InteractionEvent _interactionEvent;
     private Subject _flowSubject;

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class FlowController : MonoBehaviour, IObserver
 {
-    public MessageBoxController messageBoxController;
+    public MessageWindowController messageWindowController;
 
     private Subject _flowSubject;
     private bool _shownInteractionMenu;
@@ -50,7 +50,7 @@ public class FlowController : MonoBehaviour, IObserver
                 }
 
                 break;
-            case SubjectMessage.PlayerInputConfirm when messageBoxController.IsFocused():
+            case SubjectMessage.PlayerInputConfirm when messageWindowController.IsFocused():
                 _flowSubject.Notify(SubjectMessage.AdvanceEvent);
                 break;
             case SubjectMessage.AdvanceEvent when _eventStepMarker.IsAtEndOfMessage():
@@ -136,7 +136,7 @@ public class FlowController : MonoBehaviour, IObserver
         {
             if (_eventStepMarker.InteractionEvent().Information is List<Prompt> prompts && prompts.Any())
             {
-                var selectedPrompt = messageBoxController.SelectedPrompt();
+                var selectedPrompt = messageWindowController.SelectedPrompt();
                 _flowSubject.Notify(
                     new PromptResponseEvent(selectedPrompt.ID));
                 return;

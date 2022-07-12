@@ -6,12 +6,12 @@ public class PromptController : MonoBehaviour, IObserver
 {
     private int _selectedPromptIndex;
     private List<Prompt> _prompts;
-    private MessageBoxController _messageBoxController;
+    private MessageWindowController _messageWindowController;
 
-    public void Setup(Subject subject, MessageBoxController messageBoxController)
+    public void Setup(Subject subject, MessageWindowController messageWindowController)
     {
         subject.AddObserver(this);
-        _messageBoxController = messageBoxController;
+        _messageWindowController = messageWindowController;
     }
 
     public void ResetPrompts(List<Prompt> prompts)
@@ -28,7 +28,7 @@ public class PromptController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case MenuNavigation menuNavigation when _messageBoxController.IsFocused():
+            case MenuNavigation menuNavigation when _messageWindowController.IsFocused():
                 UpdatePromptSelection(menuNavigation);
                 break;
         }
@@ -63,7 +63,7 @@ public class PromptController : MonoBehaviour, IObserver
 
     private void UpdatePromptSelection(MenuNavigation menuNavigation)
     {
-        var currentEvent = _messageBoxController.InteractionEvent();
+        var currentEvent = _messageWindowController.InteractionEvent();
 
         var promptCount = 0;
 
@@ -72,7 +72,7 @@ public class PromptController : MonoBehaviour, IObserver
             promptCount = prompts.Count();
         }
 
-        if (promptCount <= 0 || !_messageBoxController.AtEndOfCurrentMessage()) return;
+        if (promptCount <= 0 || !_messageWindowController.AtEndOfCurrentMessage()) return;
 
         switch (menuNavigation.Direction)
         {
@@ -86,6 +86,6 @@ public class PromptController : MonoBehaviour, IObserver
 
         _selectedPromptIndex = _selectedPromptIndex < 0 ? promptCount - 1 : _selectedPromptIndex % promptCount;
 
-        _messageBoxController.RenderText();
+        _messageWindowController.RenderText();
     }
 }

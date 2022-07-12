@@ -277,7 +277,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 835d1ff429f144278886a0035c18c19e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  messageBoxController: {fileID: 998122489}
+  messageWindowController: {fileID: 0}
 --- !u!1 &144695567
 GameObject:
   m_ObjectHideFlags: 0
@@ -938,7 +938,7 @@ GameObject:
   - component: {fileID: 436070477}
   - component: {fileID: 436070478}
   m_Layer: 5
-  m_Name: EncounterBox
+  m_Name: EncounterWindow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29301,7 +29301,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5af6ce65724247fb81df7ab8c51d5a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  contextController: {fileID: 916460096}
+  windowController: {fileID: 916460096}
   menuDirectionalDebounceTiming: 0.2
 --- !u!4 &757502589
 Transform:
@@ -29805,7 +29805,7 @@ GameObject:
   - component: {fileID: 916460095}
   - component: {fileID: 916460096}
   m_Layer: 0
-  m_Name: ContextController
+  m_Name: WindowController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29960,7 +29960,7 @@ GameObject:
   - component: {fileID: 998122492}
   - component: {fileID: 998122493}
   m_Layer: 5
-  m_Name: MessageBox
+  m_Name: MessageWindow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30108,6 +30108,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bc9df70427ba4d2d959bb70b3ca4e5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  messageWindowController: {fileID: 0}
 --- !u!1 &1097817240
 GameObject:
   m_ObjectHideFlags: 0
@@ -30896,7 +30897,7 @@ GameObject:
   - component: {fileID: 1337890971}
   - component: {fileID: 1337890974}
   m_Layer: 5
-  m_Name: BattleCommandBox
+  m_Name: CommandWindow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31108,10 +31109,11 @@ GameObject:
   - component: {fileID: 1373281477}
   - component: {fileID: 1373281475}
   - component: {fileID: 1373281474}
-  - component: {fileID: 1373281479}
   - component: {fileID: 1373281480}
+  - component: {fileID: 1373281482}
+  - component: {fileID: 1373281481}
   m_Layer: 5
-  m_Name: MessageBox
+  m_Name: MessageWindow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31203,18 +31205,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1373281472}
   m_CullTransparentMesh: 1
---- !u!114 &1373281479
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1373281472}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4774e144675a5460fa19bc4549bd811c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!223 &1373281480
 Canvas:
   m_ObjectHideFlags: 0
@@ -31236,6 +31226,30 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 200
   m_TargetDisplay: 0
+--- !u!114 &1373281481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1373281472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81815a78ac59f4694ab9c1519a230b6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1373281482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1373281472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4aaa652024d445dc8594797ed2ae7ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1380753662
 GameObject:
   m_ObjectHideFlags: 0

@@ -21,7 +21,7 @@ public class SetupController : MonoBehaviour, IObserver
         var inputController = GameObject.Find("Controllers/InputController").GetComponent<InputController>();
         var positionController = GameObject.Find("Controllers/PositionController").GetComponent<PositionController>();
         var interactionController = GameObject.Find("Controllers/InteractionController").GetComponent<InteractionController>();
-        var messageBoxController = GameObject.Find("WorldSpaceCanvas/MessageBox").GetComponent<MessageBoxController>();
+        var messageWindowController = GameObject.Find("WorldSpaceCanvas/MessageWindow").GetComponent<MessageWindowController>();
         var inventoryBoxController = GameObject.Find("WorldSpaceCanvas/InventoryBox").GetComponent<InventoryBoxController>();
         var interactionBoxController = GameObject.Find("WorldSpaceCanvas/InteractionBox").GetComponent<InteractionBoxController>();
         var portraitBoxController = GameObject.Find("WorldSpaceCanvas/PortraitBox").GetComponent<PortraitBoxController>();
@@ -29,7 +29,7 @@ public class SetupController : MonoBehaviour, IObserver
         var opponentsTransform = GameObject.Find("WorldSpaceCanvas/EncounterWindow/Opponents").transform;
         var abilityAnimation = GameObject.Find("WorldSpaceCanvas/EncounterWindow/AbilityAnimation").GetComponent<AbilityAnimation>();
         var battleCommandBoxController = GameObject.Find("WorldSpaceCanvas/EncounterWindow/CommandWindow").GetComponent<EncounterCommandWindowController>();
-        var encounterMessageBoxController = GameObject.Find("WorldSpaceCanvas/EncounterWindow/MessageBox").GetComponent<EncounterMessageBoxController>();
+        var encounterMessageWindowController = GameObject.Find("WorldSpaceCanvas/EncounterWindow/MessageWindow").GetComponent<MessageWindowController>();
         var flowController = GameObject.Find("Controllers/FlowController").GetComponent<FlowController>();
         var encounterController = GameObject.Find("Controllers/EncounterController").GetComponent<EncounterController>();
         var treasureA = GameObject.Find("Objects/TreasureA").GetComponent<TreasureController>();
@@ -42,8 +42,8 @@ public class SetupController : MonoBehaviour, IObserver
         grayson.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         positionController.Setup(occupiedSpacesSubject);
         interactionController.Setup(interactionSubject, positionController.PositionGrid, flowSubject, inputController.InputAction, encounterSubject, windowSubject);
-        messageBoxController.Setup(flowSubject, windowSubject, interactionSubject);
-        encounterMessageBoxController.Setup(encounterSubject);
+        messageWindowController.Setup(flowSubject, windowSubject, interactionSubject);
+        encounterMessageWindowController.Setup(encounterSubject, windowSubject, interactionSubject);
         portraitBoxController.Setup(flowSubject);
         encounterBoxController.Setup(flowSubject);
         battleCommandBoxController.Setup(flowSubject, encounterSubject, interactionSubject);
