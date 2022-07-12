@@ -38,7 +38,7 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case MenuNavigation menuNavigation when _window.IsFocused():
+            case DirectionalNavigation menuNavigation when _window.IsFocused():
                 UpdatePromptSelection(menuNavigation);
                 break;
             case FlowTopic.EncounterFinishedWipeIn:
@@ -75,13 +75,13 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
         _text.text = Utilities.PromptOutput(_prompts, _selectedPromptIndex, _window.IsFocused());
     }
 
-    private void UpdatePromptSelection(MenuNavigation menuNavigation)
+    private void UpdatePromptSelection(DirectionalNavigation directionalNavigation)
     {
         var promptCount = _prompts.Count;
         if (promptCount < 1) return;
 
         _selectedPromptIndex =
-            Utilities.UpdatePromptSelection(menuNavigation.Direction, _selectedPromptIndex, promptCount);
+            Utilities.UpdatePromptSelection(directionalNavigation.Direction, _selectedPromptIndex, promptCount);
 
         RenderText();
     }

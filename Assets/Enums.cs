@@ -7,13 +7,4 @@ public static class Enums
         Down = 2,
         Left = 3,
     }
-
-    public enum ControlContext
-    {
-        Event,
-        InteractionMenu,
-        InventoryMenu,
-        PromptMenu,
-        None
-    }
 }

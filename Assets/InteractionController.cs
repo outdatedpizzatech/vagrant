@@ -43,16 +43,15 @@ public class InteractionController : MonoBehaviour, IObserver
 
         void NotifyMenuInputs()
         {
-            if (IsFreeRoaming() || !_inputAction.InputDirections.Any()) return;
-            
-            _interactionSubject.Notify(new MenuNavigation(_inputAction.InputDirections.Last()));
+            if (!_inputAction.InputDirections.Any()) return;
+            _interactionSubject.Notify(new DirectionalNavigation(_inputAction.InputDirections.Last()));
         }
 
         Utilities.Debounce(ref _timeSinceLastDirectionalInput, menuDirectionalDebounceTiming, NotifyMenuInputs);
     }
 
     public void Setup(Subject interactionSubject, PositionGrid positionGrid, Subject flowSubject,
-        InputAction inputAction, Subject encounterSubject, Subject windowSubject)
+        InputAction inputAction, Subject windowSubject)
     {
         _interactionSubject = interactionSubject;
         _positionGrid = positionGrid;

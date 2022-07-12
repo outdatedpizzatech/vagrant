@@ -16,7 +16,7 @@ public class InventoryWindowController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case MenuNavigation menuNavigation when _window.IsFocused():
+            case DirectionalNavigation menuNavigation when _window.IsFocused():
                 UpdatePromptSelection(menuNavigation);
                 break;
             case StartEventStep when _window.IsFocused():
@@ -99,13 +99,13 @@ public class InventoryWindowController : MonoBehaviour, IObserver
         _text.text = text;
     }
 
-    private void UpdatePromptSelection(MenuNavigation menuNavigation)
+    private void UpdatePromptSelection(DirectionalNavigation directionalNavigation)
     {
         var promptCount = playerController.Items().Count;
         if (promptCount < 1) return;
 
         _selectedPromptIndex =
-            Utilities.UpdatePromptSelection(menuNavigation.Direction, _selectedPromptIndex, promptCount);
+            Utilities.UpdatePromptSelection(directionalNavigation.Direction, _selectedPromptIndex, promptCount);
 
         RenderText();
     }

@@ -45,7 +45,7 @@ public class CommandWindowController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case MenuNavigation menuNavigation when _window.IsFocused():
+            case DirectionalNavigation menuNavigation when _window.IsFocused():
                 UpdatePromptSelection(menuNavigation);
                 break; 
             case FlowTopic.OpenCommandWindow:
@@ -75,13 +75,13 @@ public class CommandWindowController : MonoBehaviour, IObserver
         }
     }
 
-    private void UpdatePromptSelection(MenuNavigation menuNavigation)
+    private void UpdatePromptSelection(DirectionalNavigation directionalNavigation)
     {
         var promptCount = _prompts.Count;
         if (_prompts.Count < 1) return;
 
         _selectedPromptIndex =
-            Utilities.UpdatePromptSelection(menuNavigation.Direction, _selectedPromptIndex, promptCount);
+            Utilities.UpdatePromptSelection(directionalNavigation.Direction, _selectedPromptIndex, promptCount);
 
         RenderText();
     }

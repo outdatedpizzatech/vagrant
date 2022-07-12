@@ -24,7 +24,7 @@ public class PromptController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case MenuNavigation menuNavigation when _messageWindowController.IsFocused():
+            case DirectionalNavigation menuNavigation when _messageWindowController.IsFocused():
                 UpdatePromptSelection(menuNavigation);
                 break;
         }
@@ -45,7 +45,7 @@ public class PromptController : MonoBehaviour, IObserver
         return _prompts[_selectedPromptIndex];
     }
 
-    private void UpdatePromptSelection(MenuNavigation menuNavigation)
+    private void UpdatePromptSelection(DirectionalNavigation directionalNavigation)
     {
         if (!_messageWindowController.AtEndOfCurrentMessage()) return;
 
@@ -53,7 +53,7 @@ public class PromptController : MonoBehaviour, IObserver
         if (currentEvent.Information is not List<Prompt> prompts || prompts.Count < 1) return;
         
         _selectedPromptIndex =
-            Utilities.UpdatePromptSelection(menuNavigation.Direction, _selectedPromptIndex, prompts.Count);
+            Utilities.UpdatePromptSelection(directionalNavigation.Direction, _selectedPromptIndex, prompts.Count);
         
         _messageWindowController.RenderText();
     }

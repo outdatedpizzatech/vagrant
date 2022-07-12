@@ -36,7 +36,7 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case MenuNavigation menuNavigation when _state == State.PickingAttackTarget:
+            case DirectionalNavigation menuNavigation when _state == State.PickingAttackTarget:
                 UpdateTargetSelection(menuNavigation);
                 break;
             case EncounterTopic.PickedAttack:
@@ -94,7 +94,7 @@ public class EncounterController : MonoBehaviour, IObserver
         return _opponents[_selectedTargetIndex];
     }
 
-    private void UpdateTargetSelection(MenuNavigation menuNavigation)
+    private void UpdateTargetSelection(DirectionalNavigation directionalNavigation)
     {
         var targetCount = _opponents.Count;
 
@@ -105,7 +105,7 @@ public class EncounterController : MonoBehaviour, IObserver
 
         SelectedOpponent().shouldBlink = false;
 
-        switch (menuNavigation.Direction)
+        switch (directionalNavigation.Direction)
         {
             case Enums.Direction.Right:
                 _selectedTargetIndex++;

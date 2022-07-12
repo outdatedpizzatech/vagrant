@@ -120,9 +120,9 @@ public class InteractionResponseEvent
     public InteractionEvent InteractionEvent { get; }
 }
 
-public class MenuNavigation
+public class DirectionalNavigation
 {
-    public MenuNavigation(Enums.Direction direction)
+    public DirectionalNavigation(Enums.Direction direction)
     {
         Direction = direction;
     }
