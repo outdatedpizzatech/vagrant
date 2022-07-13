@@ -52,8 +52,10 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
                 RenderText();
                 break;
             case EncounterTopic.OpenMainMenu:
-                _window.GainFocus();
-                RenderText();
+                _window.Show();
+                break;
+            case EncounterTopic.CloseMainMenu:
+                _window.Hide();
                 break;
             case PlayerRequestsPrimaryActionEvent when _window.IsFocused():
                 switch (_selectedPromptIndex)

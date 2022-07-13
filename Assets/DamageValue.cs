@@ -19,9 +19,9 @@ public class DamageValue : MonoBehaviour
         _text.text = "";
     }
 
-    public void ShowDamage(int damage, Opponent opponent)
+    public void ShowDamage(int damage, Transform _transform)
     {
-        transform.position = opponent.transform.position;
+        transform.position = _transform.position;
         _text.text = damage.ToString();
         _animator.Play("Base Layer.TextBounce", -1, 0f);
     }

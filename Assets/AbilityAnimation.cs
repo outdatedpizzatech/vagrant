@@ -20,9 +20,9 @@ public class AbilityAnimation : MonoBehaviour
         _encounterSubject.Notify(EncounterTopic.EndAttackAnimation);
     }
 
-    public void PlaySwordAnimationOn(Opponent opponent)
+    public void PlaySwordAnimationOn(Transform _transform)
     {
-        transform.position = opponent.transform.position;
+        transform.position = _transform.position;
         _animator.Play("Base Layer.SwordSlash", -1, 0f);
     }
 }

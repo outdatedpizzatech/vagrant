@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 class Attack
@@ -18,6 +19,17 @@ class Attack
             Damage *= 3;
         }
     }
+
+    public Attack()
+    {
+        Damage = Random.Range(4, 9);
+
+        if (Random.Range(0f, 1f) > 0.8f)
+        {
+            IsCritical = true;
+            Damage *= 3;
+        }
+    }
 }
 
 public class EncounterController : MonoBehaviour, IObserver
@@ -25,14 +37,21 @@ public class EncounterController : MonoBehaviour, IObserver
     private enum State
     {
         None,
-        PickingAttackTarget,
-        StartingAttack,
-        InAttackAnimation,
-        PostAnimationMessage,
-        ShowDamageValues,
-        NegotiatingDamage,
-        ResolveTurn,
+        PlayerPickingAttackTarget,
+        PlayerStartingAttack,
+        PlayerInAttackAnimation,
+        PlayerPostAnimationMessage,
+        PlayerShowDamageValues,
+        PlayerNegotiatingDamage,
+        PlayerResolveTurn,
         EndingEncounter,
+        EnemyPickingAttackTarget,
+        EnemyStartingAttack,
+        EnemyInAttackAnimation,
+        EnemyPostAnimationMessage,
+        EnemyShowDamageValues,
+        EnemyNegotiatingDamage,
+        EnemyResolveTurn,
     }
 
     public MessageWindowController messageWindowController;
@@ -47,6 +66,14 @@ public class EncounterController : MonoBehaviour, IObserver
     private Transform _opponentsTransform;
     private EventStepMarker _eventStepMarker;
     private Attack _attack;
+    private PlayerAvatar _playerAvatar;
+    private TMP_Text _hpText;
+
+    private void Awake()
+    {
+        _playerAvatar = GameObject.Find("WorldSpaceCanvas/EncounterWindow/PlayerAvatar").GetComponent<PlayerAvatar>();
+        _hpText = GameObject.Find("WorldSpaceCanvas/EncounterWindow/HPBox/Text").GetComponent<TMP_Text>();
+    }
 
     public void Setup(Subject encounterSubject, Transform opponentsTransform, AbilityAnimation abilityAnimation,
         Subject interactionSubject, DamageValue damageValue, Subject flowSubject)
@@ -67,20 +94,20 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case DirectionalNavigation menuNavigation when _state == State.PickingAttackTarget:
+            case DirectionalNavigation menuNavigation when _state == State.PlayerPickingAttackTarget:
                 UpdateTargetSelection(menuNavigation);
                 break;
             case EncounterTopic.PickedAttack:
-                SetState(State.PickingAttackTarget);
+                SetState(State.PlayerPickingAttackTarget);
                 SelectedOpponent().GetComponent<Blinker>().shouldBlink = true;
                 break;
-            case EncounterTopic.Cancel when _state == State.PickingAttackTarget:
+            case EncounterTopic.Cancel when _state == State.PlayerPickingAttackTarget:
                 SelectedOpponent().GetComponent<Blinker>().shouldBlink = false;
                 SetState(State.None);
                 _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
                 break;
             case PlayerRequestsPrimaryActionEvent
-                when _state == State.PickingAttackTarget && !_eventStepMarker.Active():
+                when _state == State.PlayerPickingAttackTarget && !_eventStepMarker.Active():
                 _encounterSubject.Notify(EncounterTopic.AttackTarget);
                 break;
             case GeneralTopic.PlayerRequestsSecondaryAction:
@@ -89,25 +116,25 @@ public class EncounterController : MonoBehaviour, IObserver
             case EncounterTopic.AttackTarget:
             {
                 _attack = new Attack(SelectedOpponent());
-                SetState(State.StartingAttack);
+                SetState(State.PlayerStartingAttack);
                 var newEvent = new InteractionEvent();
                 newEvent.AddMessage("So and so attacks!");
                 var response = new InteractionResponseEvent(newEvent);
                 _encounterSubject.Notify(response);
                 break;
             }
-            case EventTopic.EndEventSequence when _state == State.StartingAttack:
+            case EventTopic.EndEventSequence when _state == State.PlayerStartingAttack:
             {
                 var selectedOpponent = SelectedOpponent();
                 selectedOpponent.GetComponent<Blinker>().shouldBlink = false;
-                _abilityAnimation.PlaySwordAnimationOn(selectedOpponent);
+                _abilityAnimation.PlaySwordAnimationOn(selectedOpponent.transform);
 
-                SetState(State.InAttackAnimation);
+                SetState(State.PlayerInAttackAnimation);
                 break;
             }
-            case EncounterTopic.EndAttackAnimation:
+            case EncounterTopic.EndAttackAnimation when _state == State.PlayerInAttackAnimation:
             {
-                SetState(State.PostAnimationMessage);
+                SetState(State.PlayerPostAnimationMessage);
                 if (_attack.IsCritical)
                 {
                     var newEvent = new InteractionEvent();
@@ -118,22 +145,29 @@ public class EncounterController : MonoBehaviour, IObserver
 
                 break;
             }
-            case EventTopic.EndEventSequence when _state == State.InAttackAnimation:
+            case EncounterTopic.EndAttackAnimation when _state == State.EnemyInAttackAnimation:
             {
-                SetState(State.None);
-                _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
+                SetState(State.EnemyPostAnimationMessage);
+                if (_attack.IsCritical)
+                {
+                    var newEvent = new InteractionEvent();
+                    newEvent.AddMessage("A critical hit!");
+                    var response = new InteractionResponseEvent(newEvent);
+                    _encounterSubject.Notify(response);
+                }
+
                 break;
             }
-            case EncounterTopic.EndDamageAnimation:
+            case EncounterTopic.EndDamageAnimation when _state == State.PlayerShowDamageValues:
             {
-                SetState(State.NegotiatingDamage);
+                SetState(State.PlayerNegotiatingDamage);
 
                 SelectedOpponent().ReceiveDamage(_attack.Damage);
 
                 if (SelectedOpponent().hitPoints > 0)
                 {
-                    SetState(State.None);
-                    _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
+                    SetState(State.EnemyPickingAttackTarget);
+                    _encounterSubject.Notify(EncounterTopic.CloseMainMenu);
                 }
                 else
                 {
@@ -145,9 +179,30 @@ public class EncounterController : MonoBehaviour, IObserver
 
                 break;
             }
-            case EventTopic.EndEventSequence when _state == State.NegotiatingDamage:
+            case EncounterTopic.EndDamageAnimation when _state == State.EnemyShowDamageValues:
             {
-                SetState(State.ResolveTurn);
+                SetState(State.EnemyNegotiatingDamage);
+
+                _playerAvatar.ReceiveDamage(_attack.Damage);
+
+                if (_playerAvatar.hitPoints > 0)
+                {
+                    SetState(State.None);
+                    _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
+                }
+                else
+                {
+                    var newEvent = new InteractionEvent();
+                    newEvent.AddMessage("Player is dead");
+                    var response = new InteractionResponseEvent(newEvent);
+                    _encounterSubject.Notify(response);
+                }
+
+                break;
+            }
+            case EventTopic.EndEventSequence when _state == State.PlayerNegotiatingDamage:
+            {
+                SetState(State.PlayerResolveTurn);
 
                 if (SelectedOpponent().hitPoints < 1)
                 {
@@ -155,6 +210,12 @@ public class EncounterController : MonoBehaviour, IObserver
                     _opponents.Remove(opponent);
                     Destroy(opponent.gameObject);
                 }
+
+                break;
+            }
+            case EventTopic.EndEventSequence when _state == State.EnemyNegotiatingDamage:
+            {
+                SetState(State.EnemyResolveTurn);
 
                 break;
             }
@@ -201,18 +262,25 @@ public class EncounterController : MonoBehaviour, IObserver
     // Transition state on next tick to avoid message collision
     private void SetState(State newState)
     {
+        print("switching state to " + newState);
         _nextState = newState;
     }
 
     private void Update()
     {
+        _hpText.text = _playerAvatar.hitPoints.ToString();
         _state = _nextState;
 
-        if (_state == State.PostAnimationMessage && !messageWindowController.IsVisible())
+        if (_state == State.EnemyPostAnimationMessage && !messageWindowController.IsVisible())
         {
-            SetState(State.ShowDamageValues);
-            _damageValue.ShowDamage(_attack.Damage, SelectedOpponent());
-        } else if(_state == State.ResolveTurn && !messageWindowController.IsVisible())
+            SetState(State.EnemyShowDamageValues);
+            _damageValue.ShowDamage(_attack.Damage, _playerAvatar.transform);
+        } else if(_state == State.PlayerPostAnimationMessage && !messageWindowController.IsVisible())
+        {
+            SetState(State.PlayerShowDamageValues);
+            _damageValue.ShowDamage(_attack.Damage, SelectedOpponent().transform);
+        }
+        else if (_state == State.PlayerResolveTurn && !messageWindowController.IsVisible())
         {
             if (_opponents.Count == 0)
             {
@@ -224,10 +292,41 @@ public class EncounterController : MonoBehaviour, IObserver
             }
             else
             {
+                SetState(State.EnemyPickingAttackTarget);
+                _selectedTargetIndex = 0;
+            }
+        }
+        else if (_state == State.EnemyResolveTurn && !messageWindowController.IsVisible())
+        {
+            if (_playerAvatar.hitPoints < 1)
+            {
+                SetState(State.EndingEncounter);
+                var newEvent = new InteractionEvent();
+                newEvent.AddMessage("You have lost the battle.");
+                var response = new InteractionResponseEvent(newEvent);
+                _encounterSubject.Notify(response);
+            }
+            else
+            {
                 SetState(State.None);
                 _selectedTargetIndex = 0;
                 _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
             }
+        }
+        else if (_state == State.EnemyPickingAttackTarget && !messageWindowController.IsVisible())
+        {
+            _attack = new Attack();
+            SetState(State.EnemyStartingAttack);
+            var newEvent = new InteractionEvent();
+            newEvent.AddMessage("Enemy attacks!");
+            var response = new InteractionResponseEvent(newEvent);
+            _encounterSubject.Notify(response);
+        }
+        else if (_state == State.EnemyStartingAttack && !messageWindowController.IsVisible())
+        {
+            _abilityAnimation.PlaySwordAnimationOn(_playerAvatar.transform);
+
+            SetState(State.EnemyInAttackAnimation);
         }
     }
 

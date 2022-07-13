@@ -36,6 +36,7 @@ public enum EncounterTopic
     AttackTarget,
     EndAttackAnimation,
     OpenMainMenu,
+    CloseMainMenu,
     Cancel,
     PickedAttack,
     EndDamageAnimation,
