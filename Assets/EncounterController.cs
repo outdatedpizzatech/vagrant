@@ -7,7 +7,10 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         None,
         PickingAttackTarget,
-        InAttackAnimation
+        StartingAttack,
+        InAttackAnimation,
+        PostAnimationMessage,
+        ShowDamageValues,
     }
 
     public MessageWindowController messageWindowController;
@@ -17,11 +20,12 @@ public class EncounterController : MonoBehaviour, IObserver
     private int _selectedTargetIndex;
     private readonly List<Blinker> _opponents = new();
     private AbilityAnimation _abilityAnimation;
+    private DamageValue _damageValue;
     private Transform _opponentsTransform;
     private EventStepMarker _eventStepMarker;
 
     public void Setup(Subject encounterSubject, Transform opponentsTransform, AbilityAnimation abilityAnimation,
-        Subject interactionSubject)
+        Subject interactionSubject, DamageValue damageValue)
     {
         _encounterSubject = encounterSubject;
         _encounterSubject.AddObserver(this);
@@ -30,6 +34,8 @@ public class EncounterController : MonoBehaviour, IObserver
         _opponentsTransform = opponentsTransform;
         _eventStepMarker = new EventStepMarker(encounterSubject, messageWindowController, interactionSubject);
         interactionSubject.AddObserver(this);
+        _damageValue = damageValue;
+        _damageValue.Setup(_encounterSubject);
     }
 
     public void OnNotify<T>(T parameters)
@@ -57,13 +63,14 @@ public class EncounterController : MonoBehaviour, IObserver
                 break;
             case EncounterTopic.AttackTarget:
             {
+                SetState(State.StartingAttack);
                 var newEvent = new InteractionEvent();
                 newEvent.AddMessage("So and so attacks!");
                 var response = new InteractionResponseEvent(newEvent);
                 _encounterSubject.Notify(response);
                 break;
             }
-            case EventTopic.EndEventSequence when _state == State.PickingAttackTarget:
+            case EventTopic.EndEventSequence when _state == State.StartingAttack:
             {
                 var selectedOpponent = SelectedOpponent();
                 selectedOpponent.shouldBlink = false;
@@ -72,18 +79,29 @@ public class EncounterController : MonoBehaviour, IObserver
                 SetState(State.InAttackAnimation);
                 break;
             }
+            case EncounterTopic.EndAttackAnimation:
+            {
+                SetState(State.PostAnimationMessage);
+                var newEvent = new InteractionEvent();
+                newEvent.AddMessage("A critical hit!");
+                var response = new InteractionResponseEvent(newEvent);
+                _encounterSubject.Notify(response);
+                break;
+            }
+            case EventTopic.EndEventSequence when _state == State.PostAnimationMessage:
+                SetState(State.ShowDamageValues);
+                _damageValue.ShowDamage(939, SelectedOpponent());
+                break;
             case EventTopic.EndEventSequence when _state == State.InAttackAnimation:
             {
                 SetState(State.None);
                 _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
                 break;
             }
-            case EncounterTopic.EndAttackAnimation:
+            case EncounterTopic.EndDamageAnimation:
             {
-                var newEvent = new InteractionEvent();
-                newEvent.AddMessage("A critical hit!");
-                var response = new InteractionResponseEvent(newEvent);
-                _encounterSubject.Notify(response);
+                SetState(State.None);
+                _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
                 break;
             }
         }

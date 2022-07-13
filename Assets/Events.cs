@@ -38,6 +38,7 @@ public enum EncounterTopic
     OpenMainMenu,
     Cancel,
     PickedAttack,
+    EndDamageAnimation,
 }
 
 public class GainFocus
