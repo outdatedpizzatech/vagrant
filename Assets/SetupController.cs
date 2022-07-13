@@ -65,7 +65,7 @@ public class SetupController : MonoBehaviour, IObserver
         encounterWindowController.Setup(flowSubject);
         encounterCommandWindowController.Setup(flowSubject, encounterSubject, interactionSubject);
         flowController.Setup(flowSubject, interactionSubject);
-        encounterController.Setup(encounterSubject, opponentsTransform, abilityAnimation, interactionSubject, damageValue);
+        encounterController.Setup(encounterSubject, opponentsTransform, abilityAnimation, interactionSubject, damageValue, flowSubject);
         inventoryWindowController.Setup(flowSubject, interactionSubject, windowSubject);
         commandWindowController.Setup(flowSubject, interactionSubject, windowSubject);
         treasureA.Setup(occupiedSpacesSubject);

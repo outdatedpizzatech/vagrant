@@ -19,7 +19,7 @@ public class DamageValue : MonoBehaviour
         _text.text = "";
     }
 
-    public void ShowDamage(int damage, Blinker opponent)
+    public void ShowDamage(int damage, Opponent opponent)
     {
         transform.position = opponent.transform.position;
         _text.text = damage.ToString();

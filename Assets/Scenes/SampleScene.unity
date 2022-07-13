@@ -614,6 +614,7 @@ GameObject:
   - component: {fileID: 282247541}
   - component: {fileID: 282247542}
   - component: {fileID: 282247543}
+  - component: {fileID: 282247544}
   m_Layer: 5
   m_Name: Cragman (1)
   m_TagString: Untagged
@@ -707,6 +708,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blinkMaterial: {fileID: 2100000, guid: be3890ba5394c43908f3e1b49acf2f60, type: 2}
   shouldBlink: 0
+--- !u!114 &282247544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282247540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e48b16c2075f04c5188298b52a8b0483, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _hitPoints: 30
 --- !u!1 &291436306
 GameObject:
   m_ObjectHideFlags: 0
@@ -32158,6 +32172,7 @@ GameObject:
   - component: {fileID: 1705245502}
   - component: {fileID: 1705245503}
   - component: {fileID: 1705245504}
+  - component: {fileID: 1705245505}
   m_Layer: 5
   m_Name: Miasmadame
   m_TagString: Untagged
@@ -32251,6 +32266,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blinkMaterial: {fileID: 2100000, guid: be3890ba5394c43908f3e1b49acf2f60, type: 2}
   shouldBlink: 0
+--- !u!114 &1705245505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1705245501}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e48b16c2075f04c5188298b52a8b0483, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _hitPoints: 50
 --- !u!114 &1730161139 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8362834271064397899, guid: fb2d8285f52524b95ba79b7ea8f606fb, type: 3}
@@ -32498,6 +32526,7 @@ GameObject:
   - component: {fileID: 1839557308}
   - component: {fileID: 1839557309}
   - component: {fileID: 1839557310}
+  - component: {fileID: 1839557311}
   m_Layer: 5
   m_Name: Cragman
   m_TagString: Untagged
@@ -32591,6 +32620,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blinkMaterial: {fileID: 2100000, guid: be3890ba5394c43908f3e1b49acf2f60, type: 2}
   shouldBlink: 0
+--- !u!114 &1839557311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1839557307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e48b16c2075f04c5188298b52a8b0483, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _hitPoints: 30
 --- !u!1 &2000232757
 GameObject:
   m_ObjectHideFlags: 0
