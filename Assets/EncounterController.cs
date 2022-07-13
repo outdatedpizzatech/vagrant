@@ -68,6 +68,7 @@ public class EncounterController : MonoBehaviour, IObserver
     private Attack _attack;
     private PlayerAvatar _playerAvatar;
     private TMP_Text _hpText;
+    private int _attackingOpponentIndex;
 
     private void Awake()
     {
@@ -118,15 +119,16 @@ public class EncounterController : MonoBehaviour, IObserver
                 _attack = new Attack(SelectedOpponent());
                 SetState(State.PlayerStartingAttack);
                 var newEvent = new InteractionEvent();
-                newEvent.AddMessage("So and so attacks!");
+                newEvent.AddMessage("Player attacks!");
                 var response = new InteractionResponseEvent(newEvent);
                 _encounterSubject.Notify(response);
+                var selectedOpponent = SelectedOpponent();
+                selectedOpponent.GetComponent<Blinker>().shouldBlink = false;
                 break;
             }
             case EventTopic.EndEventSequence when _state == State.PlayerStartingAttack:
             {
                 var selectedOpponent = SelectedOpponent();
-                selectedOpponent.GetComponent<Blinker>().shouldBlink = false;
                 _abilityAnimation.PlaySwordAnimationOn(selectedOpponent.transform);
 
                 SetState(State.PlayerInAttackAnimation);
@@ -185,12 +187,7 @@ public class EncounterController : MonoBehaviour, IObserver
 
                 _playerAvatar.ReceiveDamage(_attack.Damage);
 
-                if (_playerAvatar.hitPoints > 0)
-                {
-                    SetState(State.None);
-                    _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
-                }
-                else
+                if (_playerAvatar.hitPoints < 1)
                 {
                     var newEvent = new InteractionEvent();
                     newEvent.AddMessage("Player is dead");
@@ -210,12 +207,6 @@ public class EncounterController : MonoBehaviour, IObserver
                     _opponents.Remove(opponent);
                     Destroy(opponent.gameObject);
                 }
-
-                break;
-            }
-            case EventTopic.EndEventSequence when _state == State.EnemyNegotiatingDamage:
-            {
-                SetState(State.EnemyResolveTurn);
 
                 break;
             }
@@ -275,7 +266,12 @@ public class EncounterController : MonoBehaviour, IObserver
         {
             SetState(State.EnemyShowDamageValues);
             _damageValue.ShowDamage(_attack.Damage, _playerAvatar.transform);
-        } else if(_state == State.PlayerPostAnimationMessage && !messageWindowController.IsVisible())
+        }
+        else if (_state == State.EnemyNegotiatingDamage && !messageWindowController.IsVisible())
+        {
+            SetState(State.EnemyResolveTurn);
+        }
+        else if (_state == State.PlayerPostAnimationMessage && !messageWindowController.IsVisible())
         {
             SetState(State.PlayerShowDamageValues);
             _damageValue.ShowDamage(_attack.Damage, SelectedOpponent().transform);
@@ -294,6 +290,7 @@ public class EncounterController : MonoBehaviour, IObserver
             {
                 SetState(State.EnemyPickingAttackTarget);
                 _selectedTargetIndex = 0;
+                _attackingOpponentIndex = 0;
             }
         }
         else if (_state == State.EnemyResolveTurn && !messageWindowController.IsVisible())
@@ -308,9 +305,18 @@ public class EncounterController : MonoBehaviour, IObserver
             }
             else
             {
-                SetState(State.None);
-                _selectedTargetIndex = 0;
-                _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
+                if (_attackingOpponentIndex < _opponents.Count - 1)
+                {
+                    _attackingOpponentIndex++;
+                    SetState(State.EnemyPickingAttackTarget);
+                }
+                else
+                {
+                    SetState(State.None);
+                    _selectedTargetIndex = 0;
+                    _attackingOpponentIndex = 0;
+                    _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
+                }
             }
         }
         else if (_state == State.EnemyPickingAttackTarget && !messageWindowController.IsVisible())
@@ -318,8 +324,9 @@ public class EncounterController : MonoBehaviour, IObserver
             _attack = new Attack();
             SetState(State.EnemyStartingAttack);
             var newEvent = new InteractionEvent();
-            newEvent.AddMessage("Enemy attacks!");
+            newEvent.AddMessage($"{_opponents[_attackingOpponentIndex].gameObject.name} attacks!");
             var response = new InteractionResponseEvent(newEvent);
+            _opponents[_attackingOpponentIndex].GetComponent<Blinker>().FlashFor(1f);
             _encounterSubject.Notify(response);
         }
         else if (_state == State.EnemyStartingAttack && !messageWindowController.IsVisible())
