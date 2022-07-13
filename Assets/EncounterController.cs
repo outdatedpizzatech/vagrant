@@ -1,6 +1,25 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+class Attack
+{
+    public int Damage;
+    public Opponent Opponent;
+    public bool IsCritical;
+
+    public Attack(Opponent opponent)
+    {
+        Opponent = opponent;
+        Damage = Random.Range(4, 9);
+
+        if (Random.Range(0f, 1f) > 0.8f)
+        {
+            IsCritical = true;
+            Damage *= 3;
+        }
+    }
+}
+
 public class EncounterController : MonoBehaviour, IObserver
 {
     private enum State
@@ -27,6 +46,7 @@ public class EncounterController : MonoBehaviour, IObserver
     private DamageValue _damageValue;
     private Transform _opponentsTransform;
     private EventStepMarker _eventStepMarker;
+    private Attack _attack;
 
     public void Setup(Subject encounterSubject, Transform opponentsTransform, AbilityAnimation abilityAnimation,
         Subject interactionSubject, DamageValue damageValue, Subject flowSubject)
@@ -68,6 +88,7 @@ public class EncounterController : MonoBehaviour, IObserver
                 break;
             case EncounterTopic.AttackTarget:
             {
+                _attack = new Attack(SelectedOpponent());
                 SetState(State.StartingAttack);
                 var newEvent = new InteractionEvent();
                 newEvent.AddMessage("So and so attacks!");
@@ -87,16 +108,16 @@ public class EncounterController : MonoBehaviour, IObserver
             case EncounterTopic.EndAttackAnimation:
             {
                 SetState(State.PostAnimationMessage);
-                var newEvent = new InteractionEvent();
-                newEvent.AddMessage("A critical hit!");
-                var response = new InteractionResponseEvent(newEvent);
-                _encounterSubject.Notify(response);
+                if (_attack.IsCritical)
+                {
+                    var newEvent = new InteractionEvent();
+                    newEvent.AddMessage("A critical hit!");
+                    var response = new InteractionResponseEvent(newEvent);
+                    _encounterSubject.Notify(response);
+                }
+
                 break;
             }
-            case EventTopic.EndEventSequence when _state == State.PostAnimationMessage:
-                SetState(State.ShowDamageValues);
-                _damageValue.ShowDamage(939, SelectedOpponent());
-                break;
             case EventTopic.EndEventSequence when _state == State.InAttackAnimation:
             {
                 SetState(State.None);
@@ -107,7 +128,7 @@ public class EncounterController : MonoBehaviour, IObserver
             {
                 SetState(State.NegotiatingDamage);
 
-                SelectedOpponent().ReceiveDamage(939);
+                SelectedOpponent().ReceiveDamage(_attack.Damage);
 
                 if (SelectedOpponent().hitPoints > 0)
                 {
@@ -187,7 +208,11 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         _state = _nextState;
 
-        if (_state == State.ResolveTurn && !messageWindowController.IsVisible())
+        if (_state == State.PostAnimationMessage && !messageWindowController.IsVisible())
+        {
+            SetState(State.ShowDamageValues);
+            _damageValue.ShowDamage(_attack.Damage, SelectedOpponent());
+        } else if(_state == State.ResolveTurn && !messageWindowController.IsVisible())
         {
             if (_opponents.Count == 0)
             {

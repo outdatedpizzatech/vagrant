@@ -720,7 +720,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e48b16c2075f04c5188298b52a8b0483, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _hitPoints: 30
+  hitPoints: 30
 --- !u!1 &291436306
 GameObject:
   m_ObjectHideFlags: 0
@@ -32278,7 +32278,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e48b16c2075f04c5188298b52a8b0483, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _hitPoints: 50
+  hitPoints: 50
 --- !u!114 &1730161139 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8362834271064397899, guid: fb2d8285f52524b95ba79b7ea8f606fb, type: 3}
@@ -32632,7 +32632,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e48b16c2075f04c5188298b52a8b0483, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _hitPoints: 30
+  hitPoints: 30
 --- !u!1 &2000232757
 GameObject:
   m_ObjectHideFlags: 0
