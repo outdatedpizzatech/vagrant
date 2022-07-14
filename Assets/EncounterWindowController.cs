@@ -24,6 +24,11 @@ public class EncounterWindowController : MonoBehaviour, IObserver
         _flowSubject.Notify(FlowTopic.EndEncounter);
     }
 
+    public bool IsVisible()
+    {
+        return _window.IsVisible();
+    }
+
     public void OnNotify<T>(T parameters)
     {
         switch (parameters)

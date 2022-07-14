@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Opponent : MonoBehaviour
+public class Damageable : MonoBehaviour
 {
     public int hitPoints;
 

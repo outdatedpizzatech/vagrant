@@ -33,7 +33,7 @@ public enum FlowTopic
 
 public enum EncounterTopic
 {
-    AttackTarget,
+    AttemptingToFlee,
     EndAttackAnimation,
     OpenMainMenu,
     CloseMainMenu,

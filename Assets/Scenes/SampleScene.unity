@@ -29835,6 +29835,7 @@ GameObject:
   - component: {fileID: 896984027}
   - component: {fileID: 896984026}
   - component: {fileID: 896984025}
+  - component: {fileID: 896984028}
   m_Layer: 5
   m_Name: PlayerAvatar
   m_TagString: Untagged
@@ -29874,7 +29875,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ff895dfe38484e7baca253c6c53ce47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hitPoints: 50
 --- !u!95 &896984026
 Animator:
   serializedVersion: 4
@@ -29947,6 +29947,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &896984028
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 896984023}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e48b16c2075f04c5188298b52a8b0483, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hitPoints: 50
 --- !u!1 &916460094
 GameObject:
   m_ObjectHideFlags: 0
@@ -30262,6 +30275,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   messageWindowController: {fileID: 1373281482}
+  encounterWindowController: {fileID: 436070477}
+  encounterCommandWindowController: {fileID: 1337890974}
 --- !u!1 &1097817240
 GameObject:
   m_ObjectHideFlags: 0

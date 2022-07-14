@@ -53,6 +53,7 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
                 break;
             case EncounterTopic.OpenMainMenu:
                 _window.Show();
+                RenderText();
                 break;
             case EncounterTopic.CloseMainMenu:
                 _window.Hide();
@@ -64,12 +65,17 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
                         _encounterSubject.Notify(EncounterTopic.PickedAttack);
                         break;
                     case 1:
-                        _flowSubject.Notify(FlowTopic.EncounterStartWipeOut);
+                        _encounterSubject.Notify(EncounterTopic.AttemptingToFlee);
                         break;
                 }
 
                 break;
         }
+    }
+
+    public bool IsFocused()
+    {
+        return (_window.IsFocused());
     }
 
     private void RenderText()

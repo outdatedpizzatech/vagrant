@@ -5,20 +5,7 @@ using UnityEngine;
 class Attack
 {
     public int Damage;
-    public Opponent Opponent;
     public bool IsCritical;
-
-    public Attack(Opponent opponent)
-    {
-        Opponent = opponent;
-        Damage = Random.Range(4, 9);
-
-        if (Random.Range(0f, 1f) > 0.8f)
-        {
-            IsCritical = true;
-            Damage *= 3;
-        }
-    }
 
     public Attack()
     {
@@ -34,41 +21,48 @@ class Attack
 
 public class EncounterController : MonoBehaviour, IObserver
 {
-    private enum State
+    private enum ActionPhase
     {
-        None,
-        PlayerPickingAttackTarget,
-        PlayerStartingAttack,
-        PlayerInAttackAnimation,
-        PlayerPostAnimationMessage,
-        PlayerShowDamageValues,
-        PlayerNegotiatingDamage,
-        PlayerResolveTurn,
+        InMenu,
+        PickingAttackTarget,
+        AnnounceAndCalculateAttack,
+        DoAttackAnimation,
+        AnnounceAttackEffects,
+        ShowDamage,
+        CommitDamageAndAnnounceDeaths,
+        RemoveDeadOpponentsFromPlay,
+        ResolveTurn,
         EndingEncounter,
-        EnemyPickingAttackTarget,
-        EnemyStartingAttack,
-        EnemyInAttackAnimation,
-        EnemyPostAnimationMessage,
-        EnemyShowDamageValues,
-        EnemyNegotiatingDamage,
-        EnemyResolveTurn,
+    }
+
+    private enum WhoseTurn
+    {
+        Player,
+        Opponent
     }
 
     public MessageWindowController messageWindowController;
+    public EncounterWindowController encounterWindowController;
+    public EncounterCommandWindowController encounterCommandWindowController;
     private Subject _encounterSubject;
     private Subject _flowSubject;
-    private State _state;
-    private State _nextState;
+    private ActionPhase _actionPhase;
+    private ActionPhase _nextActionPhase;
+    private WhoseTurn _whoseTurn;
+    private WhoseTurn _nextWhoseTurn;
     private int _selectedTargetIndex;
-    private readonly List<Opponent> _opponents = new();
+    private readonly List<Damageable> _opponents = new();
     private AbilityAnimation _abilityAnimation;
     private DamageValue _damageValue;
     private Transform _opponentsTransform;
     private EventStepMarker _eventStepMarker;
     private Attack _attack;
     private PlayerAvatar _playerAvatar;
+    private PlayerController _player;
     private TMP_Text _hpText;
     private int _attackingOpponentIndex;
+    private bool _playingAnimation;
+    private Damageable _targeted;
 
     private void Awake()
     {
@@ -95,131 +89,48 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case DirectionalNavigation menuNavigation when _state == State.PlayerPickingAttackTarget:
+            case EncounterTopic.AttemptingToFlee:
+                EndEncounter("Getting out of here...");
+                _encounterSubject.Notify(EncounterTopic.CloseMainMenu);
+                break;
+            case FlowTopic.EncounterFinishedWipeIn:
+                SetActionPhase(ActionPhase.InMenu);
+                SetWhoseTurn(WhoseTurn.Player);
+                break;
+            case EncounterTopic.PickedAttack when _whoseTurn == WhoseTurn.Player && _actionPhase == ActionPhase.InMenu:
+                SetActionPhase(ActionPhase.PickingAttackTarget);
+                break;
+            case DirectionalNavigation menuNavigation
+                when _actionPhase == ActionPhase.PickingAttackTarget && _whoseTurn == WhoseTurn.Player:
                 UpdateTargetSelection(menuNavigation);
                 break;
-            case EncounterTopic.PickedAttack:
-                SetState(State.PlayerPickingAttackTarget);
-                SelectedOpponent().GetComponent<Blinker>().shouldBlink = true;
-                break;
-            case EncounterTopic.Cancel when _state == State.PlayerPickingAttackTarget:
+            case EncounterTopic.Cancel
+                when _actionPhase == ActionPhase.PickingAttackTarget && _whoseTurn == WhoseTurn.Player:
                 SelectedOpponent().GetComponent<Blinker>().shouldBlink = false;
-                SetState(State.None);
-                _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
+                SetActionPhase(ActionPhase.InMenu);
                 break;
             case PlayerRequestsPrimaryActionEvent
-                when _state == State.PlayerPickingAttackTarget && !_eventStepMarker.Active():
-                _encounterSubject.Notify(EncounterTopic.AttackTarget);
+                when _actionPhase == ActionPhase.PickingAttackTarget && !_eventStepMarker.Active():
+                SetActionPhase(ActionPhase.AnnounceAndCalculateAttack);
+                _encounterSubject.Notify(EncounterTopic.CloseMainMenu);
                 break;
             case GeneralTopic.PlayerRequestsSecondaryAction:
                 _encounterSubject.Notify(EncounterTopic.Cancel);
                 break;
-            case EncounterTopic.AttackTarget:
+            case EncounterTopic.EndAttackAnimation:
             {
-                _attack = new Attack(SelectedOpponent());
-                SetState(State.PlayerStartingAttack);
-                var newEvent = new InteractionEvent();
-                newEvent.AddMessage("Player attacks!");
-                var response = new InteractionResponseEvent(newEvent);
-                _encounterSubject.Notify(response);
-                var selectedOpponent = SelectedOpponent();
-                selectedOpponent.GetComponent<Blinker>().shouldBlink = false;
+                _playingAnimation = false;
                 break;
             }
-            case EventTopic.EndEventSequence when _state == State.PlayerStartingAttack:
+            case EncounterTopic.EndDamageAnimation:
             {
-                var selectedOpponent = SelectedOpponent();
-                _abilityAnimation.PlaySwordAnimationOn(selectedOpponent.transform);
-
-                SetState(State.PlayerInAttackAnimation);
-                break;
-            }
-            case EncounterTopic.EndAttackAnimation when _state == State.PlayerInAttackAnimation:
-            {
-                SetState(State.PlayerPostAnimationMessage);
-                if (_attack.IsCritical)
-                {
-                    var newEvent = new InteractionEvent();
-                    newEvent.AddMessage("A critical hit!");
-                    var response = new InteractionResponseEvent(newEvent);
-                    _encounterSubject.Notify(response);
-                }
-
-                break;
-            }
-            case EncounterTopic.EndAttackAnimation when _state == State.EnemyInAttackAnimation:
-            {
-                SetState(State.EnemyPostAnimationMessage);
-                if (_attack.IsCritical)
-                {
-                    var newEvent = new InteractionEvent();
-                    newEvent.AddMessage("A critical hit!");
-                    var response = new InteractionResponseEvent(newEvent);
-                    _encounterSubject.Notify(response);
-                }
-
-                break;
-            }
-            case EncounterTopic.EndDamageAnimation when _state == State.PlayerShowDamageValues:
-            {
-                SetState(State.PlayerNegotiatingDamage);
-
-                SelectedOpponent().ReceiveDamage(_attack.Damage);
-
-                if (SelectedOpponent().hitPoints > 0)
-                {
-                    SetState(State.EnemyPickingAttackTarget);
-                    _encounterSubject.Notify(EncounterTopic.CloseMainMenu);
-                }
-                else
-                {
-                    var newEvent = new InteractionEvent();
-                    newEvent.AddMessage("This opponent is dead");
-                    var response = new InteractionResponseEvent(newEvent);
-                    _encounterSubject.Notify(response);
-                }
-
-                break;
-            }
-            case EncounterTopic.EndDamageAnimation when _state == State.EnemyShowDamageValues:
-            {
-                SetState(State.EnemyNegotiatingDamage);
-
-                _playerAvatar.ReceiveDamage(_attack.Damage);
-
-                if (_playerAvatar.hitPoints < 1)
-                {
-                    var newEvent = new InteractionEvent();
-                    newEvent.AddMessage("Player is dead");
-                    var response = new InteractionResponseEvent(newEvent);
-                    _encounterSubject.Notify(response);
-                }
-
-                break;
-            }
-            case EventTopic.EndEventSequence when _state == State.PlayerNegotiatingDamage:
-            {
-                SetState(State.PlayerResolveTurn);
-
-                if (SelectedOpponent().hitPoints < 1)
-                {
-                    var opponent = SelectedOpponent();
-                    _opponents.Remove(opponent);
-                    Destroy(opponent.gameObject);
-                }
-
-                break;
-            }
-            case EventTopic.EndEventSequence when _state == State.EndingEncounter:
-            {
-                _flowSubject.Notify(FlowTopic.EncounterStartWipeOut);
-
+                _playingAnimation = false;
                 break;
             }
         }
     }
 
-    private Opponent SelectedOpponent()
+    private Damageable SelectedOpponent()
     {
         return _opponents[_selectedTargetIndex];
     }
@@ -251,89 +162,83 @@ public class EncounterController : MonoBehaviour, IObserver
     }
 
     // Transition state on next tick to avoid message collision
-    private void SetState(State newState)
+    private void SetActionPhase(ActionPhase newActionPhase)
     {
-        print("switching state to " + newState);
-        _nextState = newState;
+        print("setting turn phase to " + newActionPhase);
+        _nextActionPhase = newActionPhase;
+    }
+
+    // Transition state on next tick to avoid message collision
+    private void SetWhoseTurn(WhoseTurn newWhoseTurn)
+    {
+        print("setting whose turn to " + newWhoseTurn);
+        _nextWhoseTurn = newWhoseTurn;
     }
 
     private void Update()
     {
-        _hpText.text = _playerAvatar.hitPoints.ToString();
-        _state = _nextState;
+        _hpText.text = _playerAvatar.GetComponent<Damageable>().hitPoints.ToString();
+        _actionPhase = _nextActionPhase;
+        _whoseTurn = _nextWhoseTurn;
 
-        if (_state == State.EnemyPostAnimationMessage && !messageWindowController.IsVisible())
-        {
-            SetState(State.EnemyShowDamageValues);
-            _damageValue.ShowDamage(_attack.Damage, _playerAvatar.transform);
-        }
-        else if (_state == State.EnemyNegotiatingDamage && !messageWindowController.IsVisible())
-        {
-            SetState(State.EnemyResolveTurn);
-        }
-        else if (_state == State.PlayerPostAnimationMessage && !messageWindowController.IsVisible())
-        {
-            SetState(State.PlayerShowDamageValues);
-            _damageValue.ShowDamage(_attack.Damage, SelectedOpponent().transform);
-        }
-        else if (_state == State.PlayerResolveTurn && !messageWindowController.IsVisible())
-        {
-            if (_opponents.Count == 0)
-            {
-                SetState(State.EndingEncounter);
-                var newEvent = new InteractionEvent();
-                newEvent.AddMessage("All opponents dead");
-                var response = new InteractionResponseEvent(newEvent);
-                _encounterSubject.Notify(response);
-            }
-            else
-            {
-                SetState(State.EnemyPickingAttackTarget);
-                _selectedTargetIndex = 0;
-                _attackingOpponentIndex = 0;
-            }
-        }
-        else if (_state == State.EnemyResolveTurn && !messageWindowController.IsVisible())
-        {
-            if (_playerAvatar.hitPoints < 1)
-            {
-                SetState(State.EndingEncounter);
-                var newEvent = new InteractionEvent();
-                newEvent.AddMessage("You have lost the battle.");
-                var response = new InteractionResponseEvent(newEvent);
-                _encounterSubject.Notify(response);
-            }
-            else
-            {
-                if (_attackingOpponentIndex < _opponents.Count - 1)
-                {
-                    _attackingOpponentIndex++;
-                    SetState(State.EnemyPickingAttackTarget);
-                }
-                else
-                {
-                    SetState(State.None);
-                    _selectedTargetIndex = 0;
-                    _attackingOpponentIndex = 0;
-                    _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
-                }
-            }
-        }
-        else if (_state == State.EnemyPickingAttackTarget && !messageWindowController.IsVisible())
-        {
-            _attack = new Attack();
-            SetState(State.EnemyStartingAttack);
-            var newEvent = new InteractionEvent();
-            newEvent.AddMessage($"{_opponents[_attackingOpponentIndex].gameObject.name} attacks!");
-            var response = new InteractionResponseEvent(newEvent);
-            _opponents[_attackingOpponentIndex].GetComponent<Blinker>().FlashFor(1f);
-            _encounterSubject.Notify(response);
-        }
-        else if (_state == State.EnemyStartingAttack && !messageWindowController.IsVisible())
-        {
-            _abilityAnimation.PlaySwordAnimationOn(_playerAvatar.transform);
+        if (!encounterWindowController.IsVisible()) return;
+        if (_eventStepMarker.Active() || _playingAnimation) return;
 
-            SetState(State.EnemyInAttackAnimation);
+        switch (_actionPhase)
+        {
+            case ActionPhase.InMenu when !encounterCommandWindowController.IsFocused():
+                _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
+                break;
+
+            case ActionPhase.PickingAttackTarget when _whoseTurn == WhoseTurn.Player:
+                SelectedOpponent().GetComponent<Blinker>().shouldBlink = true;
+                break;
+
+            case ActionPhase.AnnounceAndCalculateAttack:
+            {
+                AnnounceAndCalculateAttack();
+                break;
+            }
+
+            case ActionPhase.DoAttackAnimation:
+                DoAttackAnimation();
+                break;
+
+            case ActionPhase.AnnounceAttackEffects:
+            {
+                AnnounceAttackEffects();
+                break;
+            }
+
+            case ActionPhase.ShowDamage:
+                ShowDamage();
+                break;
+
+            case ActionPhase.CommitDamageAndAnnounceDeaths:
+            {
+                CommitDamageAndAnnounceDeaths();
+
+                break;
+            }
+
+            case ActionPhase.RemoveDeadOpponentsFromPlay:
+            {
+                RemoveDeadOpponentsFromPlay();
+                break;
+            }
+
+            case ActionPhase.ResolveTurn:
+            {
+                ResolveTurn();
+                break;
+            }
+
+            case ActionPhase.EndingEncounter:
+            {
+                _flowSubject.Notify(FlowTopic.EncounterStartWipeOut);
+
+                break;
+            }
         }
     }
 
@@ -341,7 +246,156 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         foreach (Transform child in _opponentsTransform)
         {
-            _opponents.Add(child.GetComponent<Opponent>());
+            _opponents.Add(child.GetComponent<Damageable>());
+        }
+    }
+
+    private void AnnounceAndCalculateAttack()
+    {
+        _attack = new Attack();
+        _targeted = _whoseTurn == WhoseTurn.Opponent
+            ? _playerAvatar.GetComponent<Damageable>()
+            : SelectedOpponent();
+
+        var blinker = _targeted.GetComponent<Blinker>();
+
+        if (blinker != null)
+        {
+            blinker.shouldBlink = false;
+        }
+
+        var actor = _whoseTurn == WhoseTurn.Opponent
+            ? _opponents[_attackingOpponentIndex].GetComponent<Damageable>()
+            : _playerAvatar.GetComponent<Damageable>();
+
+        blinker = actor.GetComponent<Blinker>();
+
+        if (blinker != null)
+        {
+            blinker.FlashFor(1f);
+        }
+
+        AddMessage($"{actor.name} attacks!");
+        SetActionPhase(ActionPhase.DoAttackAnimation);
+    }
+
+    private void DoAttackAnimation()
+    {
+        _playingAnimation = true;
+        _abilityAnimation.PlaySwordAnimationOn(_targeted.transform);
+
+        SetActionPhase(ActionPhase.AnnounceAttackEffects);
+    }
+
+    private void AnnounceAttackEffects()
+    {
+        SetActionPhase(ActionPhase.ShowDamage);
+
+        if (_attack.IsCritical)
+        {
+            AddMessage("A critical hit!");
+        }
+    }
+
+    private void ShowDamage()
+    {
+        SetActionPhase(ActionPhase.CommitDamageAndAnnounceDeaths);
+        _playingAnimation = true;
+        _damageValue.ShowDamage(_attack.Damage, _targeted.transform);
+    }
+
+    private void CommitDamageAndAnnounceDeaths()
+    {
+        SetActionPhase(ActionPhase.RemoveDeadOpponentsFromPlay);
+
+        _targeted.ReceiveDamage(_attack.Damage);
+
+        if (_targeted.hitPoints < 1)
+        {
+            AddMessage($"{_targeted.name} is dead");
+        }
+    }
+
+    private void ResolveTurn()
+    {
+        if (_playerAvatar.GetComponent<Damageable>().hitPoints < 1)
+        {
+            EndEncounter("You have lost the battle.");
+            return;
+        }
+
+        if (_opponents.Count == 0)
+        {
+            EndEncounter("All opponents dead");
+        }
+        
+        if (_whoseTurn == WhoseTurn.Player)
+        {
+            FlipTurn();
+            _selectedTargetIndex = 0;
+            _attackingOpponentIndex = 0;
+        }
+        else
+        {
+            if (_attackingOpponentIndex < _opponents.Count - 1)
+            {
+                _attackingOpponentIndex++;
+                SetActionPhase(ActionPhase.AnnounceAndCalculateAttack);
+            }
+            else
+            {
+                FlipTurn();
+                _selectedTargetIndex = 0;
+                _attackingOpponentIndex = 0;
+            }
+        }
+    }
+
+    private void FlipTurn()
+    {
+        if (_whoseTurn == WhoseTurn.Player)
+        {
+            SetWhoseTurn(WhoseTurn.Opponent);
+            SetActionPhase(ActionPhase.AnnounceAndCalculateAttack);
+        }
+        else
+        {
+            SetWhoseTurn(WhoseTurn.Player);
+            SetActionPhase(ActionPhase.InMenu);
+        }
+    }
+
+    private void EndEncounter(string message)
+    {
+        SetActionPhase(ActionPhase.EndingEncounter);
+        AddMessage(message);
+    }
+
+    private void AddMessage(string message)
+    {
+        var newEvent = new InteractionEvent();
+        newEvent.AddMessage(message);
+        var response = new InteractionResponseEvent(newEvent);
+        _encounterSubject.Notify(response);
+    }
+
+
+    private void RemoveDeadOpponentsFromPlay()
+    {
+        if (_whoseTurn == WhoseTurn.Player)
+        {
+            SetActionPhase(ActionPhase.ResolveTurn);
+
+            if (SelectedOpponent().hitPoints < 1)
+            {
+                var opponent = SelectedOpponent();
+                _opponents.Remove(opponent);
+                Destroy(opponent.gameObject);
+            }
+        }
+        else
+        {
+            SetActionPhase(ActionPhase.ResolveTurn);
         }
     }
 }
