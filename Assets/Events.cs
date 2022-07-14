@@ -176,14 +176,16 @@ public class PlayerRequestsPrimaryActionEvent
 
 public class LeftPositionEvent
 {
-    public LeftPositionEvent(int x, int y)
+    public LeftPositionEvent(int x, int y, bool isPlayer)
     {
         X = x;
         Y = y;
+        IsPlayer = isPlayer;
     }
 
     public int X { get; }
     public int Y { get; }
+    public bool IsPlayer { get; }
 }
 
 public class StartEventStep

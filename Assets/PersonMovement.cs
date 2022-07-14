@@ -9,7 +9,8 @@ public class PersonMovement : MonoBehaviour, IObserver
     public int[] position = { 0, 0 };
     public Enums.Direction facingDirection = Enums.Direction.Down;
     public bool marchingInPlace;
-    
+    public bool corporeal;
+
     private Collider2D _myCollider;
     private InputAction _inputAction;
     private bool _isMoving;
@@ -17,11 +18,12 @@ public class PersonMovement : MonoBehaviour, IObserver
     private Subject _occupiedSpacesSubject;
     private Subject _flowSubject;
     private PositionGrid _positionGrid;
+    private bool _isPlayer;
 
     private float _tempAnimationSpeed;
     private static readonly int IsMoving = Animator.StringToHash("isMoving");
     private static readonly int FacingDirection = Animator.StringToHash("facingDirection");
-    
+
     public void OnNotify<T>(T parameters)
     {
         switch (parameters)
@@ -38,12 +40,14 @@ public class PersonMovement : MonoBehaviour, IObserver
         }
     }
 
-    public void SetPosition(int x, int y)
+    public void RefreshPosition(int x, int y)
     {
-        _occupiedSpacesSubject.Notify(new LeftPositionEvent(position[0], position[1]));
-        _occupiedSpacesSubject.Notify(new EnteredPositionEvent(this.gameObject, x, y));
-        position[0] = x;
-        position[1] = y;
+        if (corporeal)
+        {
+            _occupiedSpacesSubject.Notify(new LeftPositionEvent(position[0], position[1], _isPlayer));
+        }
+
+        SetPosition(x, y);
     }
 
     public void MoveTransformToPosition()
@@ -51,13 +55,14 @@ public class PersonMovement : MonoBehaviour, IObserver
         transform.position = new Vector2(position[0], position[1]);
     }
 
-    public void Setup(InputAction inputAction, Subject occupiedSpacesSubject, PositionGrid positionGrid, Subject flowSubject)
+    public void Setup(InputAction inputAction, Subject occupiedSpacesSubject, PositionGrid positionGrid,
+        Subject flowSubject)
     {
         _inputAction = inputAction;
         _occupiedSpacesSubject = occupiedSpacesSubject;
         _flowSubject = flowSubject;
         _positionGrid = positionGrid;
-        
+
         _flowSubject.AddObserver(this);
     }
 
@@ -67,6 +72,11 @@ public class PersonMovement : MonoBehaviour, IObserver
         _animator = GetComponent<Animator>();
         var currentPosition = transform.position;
         SetPosition((int)currentPosition.x, (int)currentPosition.y);
+    }
+
+    private void Awake()
+    {
+        _isPlayer = GetComponent<PlayerController>() != null;
     }
 
     private void Update()
@@ -86,14 +96,14 @@ public class PersonMovement : MonoBehaviour, IObserver
                 }
 
                 var direction = _inputAction.InputDirections[i];
-                
+
                 facingDirection = direction;
 
                 if (WouldBeObstructed(direction)) continue;
                 _isMoving = true;
                 _animator.SetBool(IsMoving, true);
             }
-            
+
             _animator.SetInteger(FacingDirection, (int)facingDirection);
 
             switch (_isMoving)
@@ -104,23 +114,24 @@ public class PersonMovement : MonoBehaviour, IObserver
                     {
                         _animator.speed = 0.5f;
                     }
+
                     break;
                 case true:
                     _animator.speed = 1;
-                    
+
                     switch (facingDirection)
                     {
                         case Enums.Direction.Down:
-                            SetPosition(position[0], position[1] - 1);
+                            RefreshPosition(position[0], position[1] - 1);
                             break;
                         case Enums.Direction.Up:
-                            SetPosition(position[0], position[1] + 1);
+                            RefreshPosition(position[0], position[1] + 1);
                             break;
                         case Enums.Direction.Left:
-                            SetPosition(position[0] - 1, position[1]);
+                            RefreshPosition(position[0] - 1, position[1]);
                             break;
                         case Enums.Direction.Right:
-                            SetPosition(position[0] + 1, position[1]);
+                            RefreshPosition(position[0] + 1, position[1]);
                             break;
                     }
 
@@ -129,7 +140,7 @@ public class PersonMovement : MonoBehaviour, IObserver
 
             return;
         }
-        
+
         var destination = new Vector2(position[0], position[1]);
         var distance = destination - (Vector2)transform.position;
 
@@ -162,11 +173,16 @@ public class PersonMovement : MonoBehaviour, IObserver
 
     private bool WouldBeObstructed(Enums.Direction direction)
     {
+        if (!corporeal)
+        {
+            return false;
+        }
+        
         _myCollider.enabled = false;
 
-        var nextPosition = new int[2]; 
+        var nextPosition = new int[2];
         position.CopyTo(nextPosition, 0);
-        
+
         switch (facingDirection)
         {
             case Enums.Direction.Down:
@@ -183,16 +199,27 @@ public class PersonMovement : MonoBehaviour, IObserver
                 break;
         }
 
-        if (_positionGrid.Has(nextPosition[0],nextPosition[1]))
+        if (_positionGrid.Has(nextPosition[0], nextPosition[1]))
         {
             return true;
         }
-        
+
         var obstruction = Physics2D.Raycast(
             (Vector2)transform.position + _myCollider.offset,
             ToVector2(direction), 1).collider;
         var isObstructive = obstruction != null && obstruction.GetComponent<Doorway>() == null;
         _myCollider.enabled = true;
         return isObstructive;
+    }
+
+    private void SetPosition(int x, int y)
+    {
+        if (corporeal)
+        {
+            _occupiedSpacesSubject.Notify(new EnteredPositionEvent(this.gameObject, x, y));
+        }
+
+        position[0] = x;
+        position[1] = y;
     }
 }

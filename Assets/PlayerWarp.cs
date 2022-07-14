@@ -47,7 +47,7 @@ public class PlayerWarp : MonoBehaviour, IObserver
         {
             case PlayerBeganWarpingEvent playerBeganWarpingEvent:
                 _personMovement.facingDirection = playerBeganWarpingEvent.FacingDirection;
-                _personMovement.SetPosition(playerBeganWarpingEvent.X, playerBeganWarpingEvent.Y);
+                _personMovement.RefreshPosition(playerBeganWarpingEvent.X, playerBeganWarpingEvent.Y);
                 break;
             case GeneralTopic.PlayerRequestingWarp:
                 _personMovement.canMakeAnotherMove = false;

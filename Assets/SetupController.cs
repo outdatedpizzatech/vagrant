@@ -16,7 +16,8 @@ public class SetupController : MonoBehaviour, IObserver
 
         // NPCs
         var npcs = GameObject.Find("NPCs").transform;
-        var player = GameObject.Find("Player").GetComponent<PlayerController>();
+        var tanner = GameObject.Find("Party/Tanner").GetComponent<PlayerController>();
+        var march = GameObject.Find("Party/March").GetComponent<PartyMemberController>();
         var klara = npcs.Find("Klara").GetComponent<NpcController>();
         var grayson = npcs.Find("Grayson").GetComponent<NpcController>();
         var keever = npcs.Find("Keever").GetComponent<NpcController>();
@@ -53,7 +54,8 @@ public class SetupController : MonoBehaviour, IObserver
         
         // Setup
         wiperController.Setup(warpingAndWiping);
-        player.Setup(warpingAndWiping, inputController.InputAction, occupiedSpacesSubject, positionController.PositionGrid, interactionSubject, flowSubject);
+        tanner.Setup(warpingAndWiping, inputController.InputAction, occupiedSpacesSubject, positionController.PositionGrid, interactionSubject, flowSubject);
+        march.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         klara.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         keever.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         grayson.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);

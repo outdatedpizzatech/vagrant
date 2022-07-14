@@ -14,12 +14,15 @@ public class PositionController : MonoBehaviour, IObserver
         switch (parameters)
         {
             case EnteredPositionEvent enteredPositionEvent:
-                PositionGrid.Add(enteredPositionEvent.X,enteredPositionEvent.Y, enteredPositionEvent.GameObject);
+                if (!PositionGrid.Has(enteredPositionEvent.X, enteredPositionEvent.Y))
+                {
+                    PositionGrid.Add(enteredPositionEvent.X, enteredPositionEvent.Y, enteredPositionEvent.GameObject);
+                }
+
                 break;
             case LeftPositionEvent leftPositionEvent:
-                PositionGrid.Remove(leftPositionEvent.X,leftPositionEvent.Y);
+                PositionGrid.Remove(leftPositionEvent.X, leftPositionEvent.Y);
                 break;
         }
     }
-    
 }
