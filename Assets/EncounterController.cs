@@ -2,23 +2,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-class Attack
-{
-    public int Damage;
-    public bool IsCritical;
-
-    public Attack()
-    {
-        Damage = Random.Range(4, 9);
-
-        if (Random.Range(0f, 1f) > 0.8f)
-        {
-            IsCritical = true;
-            Damage *= 3;
-        }
-    }
-}
-
 public class EncounterController : MonoBehaviour, IObserver
 {
     private enum ActionPhase
@@ -386,12 +369,10 @@ public class EncounterController : MonoBehaviour, IObserver
         {
             SetActionPhase(ActionPhase.ResolveTurn);
 
-            if (SelectedOpponent().hitPoints < 1)
-            {
-                var opponent = SelectedOpponent();
-                _opponents.Remove(opponent);
-                Destroy(opponent.gameObject);
-            }
+            if (SelectedOpponent().hitPoints >= 1) return;
+            var opponent = SelectedOpponent();
+            _opponents.Remove(opponent);
+            Destroy(opponent.gameObject);
         }
         else
         {
