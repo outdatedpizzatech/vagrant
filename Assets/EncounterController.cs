@@ -431,16 +431,20 @@ public class EncounterController : MonoBehaviour, IObserver
 
     private void PlaceParty()
     {
+        print("starting encounter");
         Transform partyContainer = encounterWindowController.transform.Find("Party");
 
-        var sourceTransform = GameObject.Find("Party").transform;
+        var sourceTransform = GameObject.Find("/Party").transform;
+        
+        print(sourceTransform);
 
         const float inc = 1f;
         _partyMemberCount = sourceTransform.childCount;
         var x = (_partyMemberCount - 1) * inc * -1;
         
-        foreach (Transform source in GameObject.Find("Party").transform)
+        foreach (Transform source in sourceTransform)
         {
+            print("adding member");
             var copy = Instantiate(new GameObject(), Vector3.zero, Quaternion.identity);
             copy.transform.parent = partyContainer;
 
