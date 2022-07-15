@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlayerAvatar : MonoBehaviour
+public class PartyAvatar : MonoBehaviour
 {
     private static readonly int IsMoving = Animator.StringToHash("isMoving");
     private static readonly int FacingDirection = Animator.StringToHash("facingDirection");

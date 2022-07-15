@@ -27,6 +27,8 @@ public class EncounterController : MonoBehaviour, IObserver
     public MessageWindowController messageWindowController;
     public EncounterWindowController encounterWindowController;
     public EncounterCommandWindowController encounterCommandWindowController;
+    public HpBox hpBoxPrefab;
+    
     private Subject _encounterSubject;
     private Subject _flowSubject;
     private ActionPhase _actionPhase;
@@ -34,23 +36,25 @@ public class EncounterController : MonoBehaviour, IObserver
     private WhoseTurn _whoseTurn;
     private WhoseTurn _nextWhoseTurn;
     private int _selectedTargetIndex;
+    private int _targetedPartyTargetIndex;
     private readonly List<Damageable> _opponents = new();
+    private readonly List<Damageable> _partyMembers = new();
     private AbilityAnimation _abilityAnimation;
     private DamageValue _damageValue;
     private Transform _opponentsTransform;
     private EventStepMarker _eventStepMarker;
     private Attack _attack;
-    private PlayerAvatar _playerAvatar;
     private PlayerController _player;
-    private TMP_Text _hpText;
     private int _attackingOpponentIndex;
+    private int _activePartyMemberIndex;
     private bool _playingAnimation;
     private Damageable _targeted;
+    private HpBox _hpBox;
+    private int _partyMemberCount;
 
     private void Awake()
     {
-        _playerAvatar = GameObject.Find("WorldSpaceCanvas/EncounterWindow/PlayerAvatar").GetComponent<PlayerAvatar>();
-        _hpText = GameObject.Find("WorldSpaceCanvas/EncounterWindow/HPBox/Text").GetComponent<TMP_Text>();
+        _hpBox = GameObject.Find("WorldSpaceCanvas/EncounterWindow/HPBox").GetComponent<HpBox>();
     }
 
     public void Setup(Subject encounterSubject, Transform opponentsTransform, AbilityAnimation abilityAnimation,
@@ -66,12 +70,16 @@ public class EncounterController : MonoBehaviour, IObserver
         _damageValue = damageValue;
         _damageValue.Setup(_encounterSubject);
         _flowSubject = flowSubject;
+        _flowSubject.AddObserver(this);
     }
 
     public void OnNotify<T>(T parameters)
     {
         switch (parameters)
         {
+            case FlowTopic.StartEncounter:
+                PlaceParty();
+                break;
             case EncounterTopic.AttemptingToFlee:
                 EndEncounter("Getting out of here...");
                 _encounterSubject.Notify(EncounterTopic.CloseMainMenu);
@@ -117,6 +125,16 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         return _opponents[_selectedTargetIndex];
     }
+    
+    private Damageable ActivePartyMember()
+    {
+        return _partyMembers[_activePartyMemberIndex];
+    }
+    
+    private Damageable TargetedPartyMember()
+    {
+        return _partyMembers[_targetedPartyTargetIndex];
+    }
 
     private void UpdateTargetSelection(DirectionalNavigation directionalNavigation)
     {
@@ -160,7 +178,6 @@ public class EncounterController : MonoBehaviour, IObserver
 
     private void Update()
     {
-        _hpText.text = _playerAvatar.GetComponent<Damageable>().hitPoints.ToString();
         _actionPhase = _nextActionPhase;
         _whoseTurn = _nextWhoseTurn;
 
@@ -170,11 +187,30 @@ public class EncounterController : MonoBehaviour, IObserver
         switch (_actionPhase)
         {
             case ActionPhase.InMenu when !encounterCommandWindowController.IsFocused():
-                _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
+                if (ActivePartyMember().hitPoints > 0)
+                {
+                    _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
+                }
+                else
+                {
+                    SetActionPhase(ActionPhase.ResolveTurn);
+                }
                 break;
 
             case ActionPhase.PickingAttackTarget when _whoseTurn == WhoseTurn.Player:
                 SelectedOpponent().GetComponent<Blinker>().shouldBlink = true;
+                break;
+            
+            case ActionPhase.PickingAttackTarget when _whoseTurn == WhoseTurn.Opponent:
+                _targetedPartyTargetIndex = Random.Range(0, _partyMemberCount);
+                print("got targetedPartyIndex of " + _targetedPartyTargetIndex + " from 0," + _partyMemberCount);
+
+                while (TargetedPartyMember().hitPoints < 1)
+                {
+                    _targetedPartyTargetIndex = Random.Range(0, _partyMemberCount);
+                }
+                
+                SetActionPhase(ActionPhase.AnnounceAndCalculateAttack);
                 break;
 
             case ActionPhase.AnnounceAndCalculateAttack:
@@ -237,7 +273,7 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         _attack = new Attack();
         _targeted = _whoseTurn == WhoseTurn.Opponent
-            ? _playerAvatar.GetComponent<Damageable>()
+            ? TargetedPartyMember()
             : SelectedOpponent();
 
         var blinker = _targeted.GetComponent<Blinker>();
@@ -249,7 +285,7 @@ public class EncounterController : MonoBehaviour, IObserver
 
         var actor = _whoseTurn == WhoseTurn.Opponent
             ? _opponents[_attackingOpponentIndex].GetComponent<Damageable>()
-            : _playerAvatar.GetComponent<Damageable>();
+            : ActivePartyMember();
 
         blinker = actor.GetComponent<Blinker>();
 
@@ -258,7 +294,7 @@ public class EncounterController : MonoBehaviour, IObserver
             blinker.FlashFor(1f);
         }
 
-        AddMessage($"{actor.name} attacks!");
+        AddMessage($"{actor.name} attacks {_targeted.name}!");
         SetActionPhase(ActionPhase.DoAttackAnimation);
     }
 
@@ -301,7 +337,7 @@ public class EncounterController : MonoBehaviour, IObserver
 
     private void ResolveTurn()
     {
-        if (_playerAvatar.GetComponent<Damageable>().hitPoints < 1)
+        if (_partyMembers.Find(x => x.hitPoints > 0) == null)
         {
             EndEncounter("You have lost the battle.");
             return;
@@ -311,27 +347,39 @@ public class EncounterController : MonoBehaviour, IObserver
         {
             EndEncounter("All opponents dead");
         }
-        
+
         if (_whoseTurn == WhoseTurn.Player)
         {
-            FlipTurn();
-            _selectedTargetIndex = 0;
-            _attackingOpponentIndex = 0;
+            if (_activePartyMemberIndex < _partyMemberCount - 1)
+            {
+                _activePartyMemberIndex++;
+                SetActionPhase(ActionPhase.InMenu);
+            }
+            else
+            {
+                FlipTurn();
+            }
         }
         else
         {
             if (_attackingOpponentIndex < _opponents.Count - 1)
             {
                 _attackingOpponentIndex++;
-                SetActionPhase(ActionPhase.AnnounceAndCalculateAttack);
+                SetActionPhase(ActionPhase.PickingAttackTarget);
             }
             else
             {
                 FlipTurn();
-                _selectedTargetIndex = 0;
-                _attackingOpponentIndex = 0;
             }
         }
+    }
+
+    private void ResetIndexes()
+    {
+        _selectedTargetIndex = 0;
+        _targetedPartyTargetIndex = 0;
+        _attackingOpponentIndex = 0;
+        _activePartyMemberIndex = 0;
     }
 
     private void FlipTurn()
@@ -339,13 +387,14 @@ public class EncounterController : MonoBehaviour, IObserver
         if (_whoseTurn == WhoseTurn.Player)
         {
             SetWhoseTurn(WhoseTurn.Opponent);
-            SetActionPhase(ActionPhase.AnnounceAndCalculateAttack);
+            SetActionPhase(ActionPhase.PickingAttackTarget);
         }
         else
         {
             SetWhoseTurn(WhoseTurn.Player);
             SetActionPhase(ActionPhase.InMenu);
         }
+        ResetIndexes();
     }
 
     private void EndEncounter(string message)
@@ -377,6 +426,47 @@ public class EncounterController : MonoBehaviour, IObserver
         else
         {
             SetActionPhase(ActionPhase.ResolveTurn);
+        }
+    }
+
+    private void PlaceParty()
+    {
+        Transform partyContainer = encounterWindowController.transform.Find("Party");
+
+        var sourceTransform = GameObject.Find("Party").transform;
+
+        const float inc = 1f;
+        _partyMemberCount = sourceTransform.childCount;
+        var x = (_partyMemberCount - 1) * inc * -1;
+        
+        foreach (Transform source in GameObject.Find("Party").transform)
+        {
+            var copy = Instantiate(new GameObject(), Vector3.zero, Quaternion.identity);
+            copy.transform.parent = partyContainer;
+
+            copy.name = source.name;
+
+            var spriteRenderer = copy.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = source.GetComponent<SpriteRenderer>().sprite;
+            spriteRenderer.sortingOrder = 150;
+
+            var rectTransform = copy.AddComponent<RectTransform>();
+            rectTransform.localScale = Vector3.one;
+            rectTransform.anchoredPosition = new Vector2(x, -3.5f);
+
+            var animator = copy.AddComponent<Animator>();
+            animator.runtimeAnimatorController = source.GetComponent<Animator>().runtimeAnimatorController;
+
+            var damageable = copy.AddComponent<Damageable>();
+            damageable.hitPoints = 50;
+            
+            copy.AddComponent<PartyAvatar>();
+
+            _hpBox.AddDamageable(damageable);
+            
+            x += inc * 2;
+
+            _partyMembers.Add(damageable);
         }
     }
 }
