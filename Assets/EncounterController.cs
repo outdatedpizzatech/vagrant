@@ -5,11 +5,11 @@ public class EncounterController : MonoBehaviour, IObserver
 {
     private enum ActionPhase
     {
-        InMenu,
-        PickingAttackTarget,
+        PickingAction,
+        PickingAbilityTarget,
         AnnounceAndCalculateAttack,
-        DoAttackAnimation,
-        AnnounceAttackEffects,
+        DoAbilityAnimation,
+        AnnounceAbilityEffects,
         ShowDamage,
         CommitDamageAndAnnounceDeaths,
         RemoveDeadOpponentsFromPlay,
@@ -27,7 +27,7 @@ public class EncounterController : MonoBehaviour, IObserver
     public EncounterWindowController encounterWindowController;
     public EncounterCommandWindowController encounterCommandWindowController;
     public HpBox hpBoxPrefab;
-    
+
     private Subject _encounterSubject;
     private Subject _flowSubject;
     private ActionPhase _actionPhase;
@@ -50,6 +50,8 @@ public class EncounterController : MonoBehaviour, IObserver
     private Damageable _targeted;
     private HpBox _hpBox;
     private int _partyMemberCount;
+    private Ability _pickedAbility;
+    private Ability _roundhouse = new Ability("Roundhouse");
 
     private void Awake()
     {
@@ -84,23 +86,25 @@ public class EncounterController : MonoBehaviour, IObserver
                 _encounterSubject.Notify(EncounterTopic.CloseMainMenu);
                 break;
             case FlowTopic.EncounterFinishedWipeIn:
-                SetActionPhase(ActionPhase.InMenu);
+                SetActionPhase(ActionPhase.PickingAction);
                 SetWhoseTurn(WhoseTurn.Player);
                 break;
-            case EncounterTopic.PickedAttack when _whoseTurn == WhoseTurn.Player && _actionPhase == ActionPhase.InMenu:
-                SetActionPhase(ActionPhase.PickingAttackTarget);
+            case PickedAbility pickedAbility
+                when _whoseTurn == WhoseTurn.Player && _actionPhase == ActionPhase.PickingAction:
+                SetActionPhase(ActionPhase.PickingAbilityTarget);
+                _pickedAbility = pickedAbility.Ability;
                 break;
             case DirectionalNavigation menuNavigation
-                when _actionPhase == ActionPhase.PickingAttackTarget && _whoseTurn == WhoseTurn.Player:
+                when _actionPhase == ActionPhase.PickingAbilityTarget && _whoseTurn == WhoseTurn.Player:
                 UpdateTargetSelection(menuNavigation);
                 break;
             case EncounterTopic.Cancel
-                when _actionPhase == ActionPhase.PickingAttackTarget && _whoseTurn == WhoseTurn.Player:
+                when _actionPhase == ActionPhase.PickingAbilityTarget && _whoseTurn == WhoseTurn.Player:
                 SelectedOpponent().GetComponent<Blinker>().shouldBlink = false;
-                SetActionPhase(ActionPhase.InMenu);
+                SetActionPhase(ActionPhase.PickingAction);
                 break;
             case PlayerRequestsPrimaryActionEvent
-                when _actionPhase == ActionPhase.PickingAttackTarget && !_eventStepMarker.Active():
+                when _actionPhase == ActionPhase.PickingAbilityTarget && !_eventStepMarker.Active():
                 SetActionPhase(ActionPhase.AnnounceAndCalculateAttack);
                 _encounterSubject.Notify(EncounterTopic.CloseMainMenu);
                 break;
@@ -124,12 +128,12 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         return _opponents[_selectedTargetIndex];
     }
-    
+
     private Damageable ActivePartyMember()
     {
         return _partyMembers[_activePartyMemberIndex];
     }
-    
+
     private Damageable TargetedPartyMember()
     {
         return _partyMembers[_targetedPartyTargetIndex];
@@ -185,31 +189,37 @@ public class EncounterController : MonoBehaviour, IObserver
 
         switch (_actionPhase)
         {
-            case ActionPhase.InMenu when !encounterCommandWindowController.IsFocused():
+            case ActionPhase.PickingAction
+                when _whoseTurn == WhoseTurn.Player && !encounterCommandWindowController.IsFocused():
                 if (ActivePartyMember().hitPoints > 0)
                 {
-                    print(ActivePartyMember());
                     _encounterSubject.Notify(new OpenEncounterCommandWindow(ActivePartyMember()));
                 }
                 else
                 {
                     SetActionPhase(ActionPhase.ResolveTurn);
                 }
+
+                break;
+            case ActionPhase.PickingAction
+                when _whoseTurn == WhoseTurn.Opponent:
+                _pickedAbility = _roundhouse;
+                SetActionPhase(ActionPhase.PickingAbilityTarget);
+
                 break;
 
-            case ActionPhase.PickingAttackTarget when _whoseTurn == WhoseTurn.Player:
+            case ActionPhase.PickingAbilityTarget when _whoseTurn == WhoseTurn.Player:
                 SelectedOpponent().GetComponent<Blinker>().shouldBlink = true;
                 break;
-            
-            case ActionPhase.PickingAttackTarget when _whoseTurn == WhoseTurn.Opponent:
+
+            case ActionPhase.PickingAbilityTarget when _whoseTurn == WhoseTurn.Opponent:
                 _targetedPartyTargetIndex = Random.Range(0, _partyMemberCount);
-                print("got targetedPartyIndex of " + _targetedPartyTargetIndex + " from 0," + _partyMemberCount);
 
                 while (TargetedPartyMember().hitPoints < 1)
                 {
                     _targetedPartyTargetIndex = Random.Range(0, _partyMemberCount);
                 }
-                
+
                 SetActionPhase(ActionPhase.AnnounceAndCalculateAttack);
                 break;
 
@@ -219,11 +229,11 @@ public class EncounterController : MonoBehaviour, IObserver
                 break;
             }
 
-            case ActionPhase.DoAttackAnimation:
+            case ActionPhase.DoAbilityAnimation:
                 DoAttackAnimation();
                 break;
 
-            case ActionPhase.AnnounceAttackEffects:
+            case ActionPhase.AnnounceAbilityEffects:
             {
                 AnnounceAttackEffects();
                 break;
@@ -294,8 +304,8 @@ public class EncounterController : MonoBehaviour, IObserver
             blinker.FlashFor(1f);
         }
 
-        AddMessage($"{actor.name} attacks {_targeted.name}!");
-        SetActionPhase(ActionPhase.DoAttackAnimation);
+        AddMessage($"{actor.name} uses {_pickedAbility.name} on {_targeted.name}!");
+        SetActionPhase(ActionPhase.DoAbilityAnimation);
     }
 
     private void DoAttackAnimation()
@@ -303,7 +313,7 @@ public class EncounterController : MonoBehaviour, IObserver
         _playingAnimation = true;
         _abilityAnimation.PlaySwordAnimationOn(_targeted.transform);
 
-        SetActionPhase(ActionPhase.AnnounceAttackEffects);
+        SetActionPhase(ActionPhase.AnnounceAbilityEffects);
     }
 
     private void AnnounceAttackEffects()
@@ -353,7 +363,7 @@ public class EncounterController : MonoBehaviour, IObserver
             if (_activePartyMemberIndex < _partyMemberCount - 1)
             {
                 _activePartyMemberIndex++;
-                SetActionPhase(ActionPhase.InMenu);
+                SetActionPhase(ActionPhase.PickingAction);
             }
             else
             {
@@ -365,7 +375,7 @@ public class EncounterController : MonoBehaviour, IObserver
             if (_attackingOpponentIndex < _opponents.Count - 1)
             {
                 _attackingOpponentIndex++;
-                SetActionPhase(ActionPhase.PickingAttackTarget);
+                SetActionPhase(ActionPhase.PickingAbilityTarget);
             }
             else
             {
@@ -387,13 +397,14 @@ public class EncounterController : MonoBehaviour, IObserver
         if (_whoseTurn == WhoseTurn.Player)
         {
             SetWhoseTurn(WhoseTurn.Opponent);
-            SetActionPhase(ActionPhase.PickingAttackTarget);
+            SetActionPhase(ActionPhase.PickingAction);
         }
         else
         {
             SetWhoseTurn(WhoseTurn.Player);
-            SetActionPhase(ActionPhase.InMenu);
+            SetActionPhase(ActionPhase.PickingAction);
         }
+
         ResetIndexes();
     }
 
@@ -431,20 +442,16 @@ public class EncounterController : MonoBehaviour, IObserver
 
     private void PlaceParty()
     {
-        print("starting encounter");
         Transform partyContainer = encounterWindowController.transform.Find("Party");
 
         var sourceTransform = GameObject.Find("/Party").transform;
-        
-        print(sourceTransform);
 
         const float inc = 1f;
         _partyMemberCount = sourceTransform.childCount;
         var x = (_partyMemberCount - 1) * inc * -1;
-        
+
         foreach (Transform source in sourceTransform)
         {
-            print("adding member");
             var copy = Instantiate(new GameObject(), Vector3.zero, Quaternion.identity);
             copy.transform.parent = partyContainer;
 
@@ -463,11 +470,11 @@ public class EncounterController : MonoBehaviour, IObserver
 
             var damageable = copy.AddComponent<Damageable>();
             damageable.hitPoints = 50;
-            
+
             copy.AddComponent<PartyAvatar>();
 
             _hpBox.AddDamageable(damageable);
-            
+
             x += inc * 2;
 
             _partyMembers.Add(damageable);

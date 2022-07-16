@@ -8,9 +8,11 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
     private Window _window;
     private Subject _flowSubject;
     private Subject _encounterSubject;
-    private readonly List<string> _prompts = new() { "ATTACK", "FLEE" };
+    private readonly List<string> _prompts = new() { "ATTACK", "FLARE", "FLEE" };
     private TMP_Text _text;
     private TMP_Text _title;
+    private Ability _attack = new Ability("Attack");
+    private Ability _flare = new Ability("Flare");
 
     private void Show(Damageable damageable)
     {
@@ -47,7 +49,7 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
             case FlowTopic.EncounterStartWipeOut:
                 _window.Hide();
                 break;
-            case EncounterTopic.PickedAttack:
+            case PickedAbility:
                 _window.LoseFocus();
                 RenderText();
                 break;
@@ -61,9 +63,12 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
                 switch (_selectedPromptIndex)
                 {
                     case 0:
-                        _encounterSubject.Notify(EncounterTopic.PickedAttack);
+                        _encounterSubject.Notify(new PickedAbility(_attack));
                         break;
                     case 1:
+                        _encounterSubject.Notify(new PickedAbility(_flare));
+                        break;
+                    case 2:
                         _encounterSubject.Notify(EncounterTopic.AttemptingToFlee);
                         break;
                 }

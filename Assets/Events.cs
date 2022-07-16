@@ -37,8 +37,17 @@ public enum EncounterTopic
     EndAttackAnimation,
     CloseMainMenu,
     Cancel,
-    PickedAttack,
     EndDamageAnimation,
+}
+
+public class PickedAbility
+{
+    public PickedAbility(Ability ability)
+    {
+        Ability = ability;
+    }
+
+    public Ability Ability { get; }
 }
 
 public class OpenEncounterCommandWindow
