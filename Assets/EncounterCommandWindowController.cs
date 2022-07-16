@@ -11,8 +11,8 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
     private readonly List<string> _prompts = new() { "ATTACK", "FLARE", "FLEE" };
     private TMP_Text _text;
     private TMP_Text _title;
-    private Ability _attack = new Ability("Attack");
-    private Ability _flare = new Ability("Flare");
+    private Ability _attack = new Ability("Attack", "SwordSlash");
+    private Ability _flare = new Ability("Flare", "Flare");
 
     private void Show(Damageable damageable)
     {

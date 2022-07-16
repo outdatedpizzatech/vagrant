@@ -51,7 +51,7 @@ public class EncounterController : MonoBehaviour, IObserver
     private HpBox _hpBox;
     private int _partyMemberCount;
     private Ability _pickedAbility;
-    private Ability _roundhouse = new Ability("Roundhouse");
+    private Ability _roundhouse = new Ability("Roundhouse", "SwordSlash");
 
     private void Awake()
     {
@@ -311,7 +311,7 @@ public class EncounterController : MonoBehaviour, IObserver
     private void DoAttackAnimation()
     {
         _playingAnimation = true;
-        _abilityAnimation.PlaySwordAnimationOn(_targeted.transform);
+        _abilityAnimation.PlayAnimation(_targeted.transform, _pickedAbility.animationName);
 
         SetActionPhase(ActionPhase.AnnounceAbilityEffects);
     }
