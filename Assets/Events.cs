@@ -35,11 +35,20 @@ public enum EncounterTopic
 {
     AttemptingToFlee,
     EndAttackAnimation,
-    OpenMainMenu,
     CloseMainMenu,
     Cancel,
     PickedAttack,
     EndDamageAnimation,
+}
+
+public class OpenEncounterCommandWindow
+{
+    public OpenEncounterCommandWindow(Damageable damageable)
+    {
+        Damageable = damageable;
+    }
+
+    public Damageable Damageable { get; }
 }
 
 public class GainFocus

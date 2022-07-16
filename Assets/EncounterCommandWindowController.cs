@@ -10,11 +10,13 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
     private Subject _encounterSubject;
     private readonly List<string> _prompts = new() { "ATTACK", "FLEE" };
     private TMP_Text _text;
+    private TMP_Text _title;
 
-    private void Show()
+    private void Show(Damageable damageable)
     {
         _window.Show();
         _selectedPromptIndex = 0;
+        _title.text = $"-{damageable.name}-";
         RenderText();
     }
 
@@ -22,6 +24,7 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
     {
         _window = GetComponent<Window>();
         _text = transform.Find("Text").GetComponent<TMP_Text>();
+        _title = transform.Find("Title").GetComponent<TMP_Text>();
     }
 
     public void Setup(Subject flowSubject, Subject encounterSubject, Subject interactionSubject)
@@ -41,9 +44,6 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
             case DirectionalNavigation menuNavigation when _window.IsFocused():
                 UpdatePromptSelection(menuNavigation);
                 break;
-            case FlowTopic.EncounterFinishedWipeIn:
-                Show();
-                break;
             case FlowTopic.EncounterStartWipeOut:
                 _window.Hide();
                 break;
@@ -51,9 +51,8 @@ public class EncounterCommandWindowController : MonoBehaviour, IObserver
                 _window.LoseFocus();
                 RenderText();
                 break;
-            case EncounterTopic.OpenMainMenu:
-                _window.Show();
-                RenderText();
+            case OpenEncounterCommandWindow openEncounterCommandWindow:
+                Show(openEncounterCommandWindow.Damageable);
                 break;
             case EncounterTopic.CloseMainMenu:
                 _window.Hide();

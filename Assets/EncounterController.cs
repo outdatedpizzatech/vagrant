@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 public class EncounterController : MonoBehaviour, IObserver
@@ -189,7 +188,8 @@ public class EncounterController : MonoBehaviour, IObserver
             case ActionPhase.InMenu when !encounterCommandWindowController.IsFocused():
                 if (ActivePartyMember().hitPoints > 0)
                 {
-                    _encounterSubject.Notify(EncounterTopic.OpenMainMenu);
+                    print(ActivePartyMember());
+                    _encounterSubject.Notify(new OpenEncounterCommandWindow(ActivePartyMember()));
                 }
                 else
                 {
