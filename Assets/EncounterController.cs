@@ -26,7 +26,6 @@ public class EncounterController : MonoBehaviour, IObserver
     public MessageWindowController messageWindowController;
     public EncounterWindowController encounterWindowController;
     public EncounterCommandWindowController encounterCommandWindowController;
-    public HpBox hpBoxPrefab;
 
     private Subject _encounterSubject;
     private Subject _flowSubject;
@@ -51,11 +50,16 @@ public class EncounterController : MonoBehaviour, IObserver
     private HpBox _hpBox;
     private int _partyMemberCount;
     private Ability _pickedAbility;
-    private Ability _roundhouse = new Ability("Roundhouse", "SwordSlash");
+    private Ability _roundhouse = new Ability("Roundhouse", "SwordSlash", Ability.TargetingMode.Single);
+    private List<Damageable> _selectedTargets = new();
+    private List<Damageable> _allParticipants = new();
+    private bool _targetingOpponents;
+    private Material _blinkMaterial;
 
     private void Awake()
     {
         _hpBox = GameObject.Find("WorldSpaceCanvas/EncounterWindow/HPBox").GetComponent<HpBox>();
+        _blinkMaterial = Resources.Load<Material>("Materials/Blink");
     }
 
     public void Setup(Subject encounterSubject, Transform opponentsTransform, AbilityAnimation abilityAnimation,
@@ -79,7 +83,7 @@ public class EncounterController : MonoBehaviour, IObserver
         switch (parameters)
         {
             case FlowTopic.StartEncounter:
-                PlaceParty();
+                SetupField();
                 break;
             case EncounterTopic.AttemptingToFlee:
                 EndEncounter("Getting out of here...");
@@ -100,7 +104,7 @@ public class EncounterController : MonoBehaviour, IObserver
                 break;
             case EncounterTopic.Cancel
                 when _actionPhase == ActionPhase.PickingAbilityTarget && _whoseTurn == WhoseTurn.Player:
-                SelectedOpponent().GetComponent<Blinker>().shouldBlink = false;
+                _selectedTargets.ForEach(x => x.GetComponent<Blinker>().shouldBlink = false);
                 SetActionPhase(ActionPhase.PickingAction);
                 break;
             case PlayerRequestsPrimaryActionEvent
@@ -124,9 +128,9 @@ public class EncounterController : MonoBehaviour, IObserver
         }
     }
 
-    private Damageable SelectedOpponent()
+    private List<Damageable> SelectedTargets()
     {
-        return _opponents[_selectedTargetIndex];
+        return _selectedTargets;
     }
 
     private Damageable ActivePartyMember()
@@ -134,21 +138,30 @@ public class EncounterController : MonoBehaviour, IObserver
         return _partyMembers[_activePartyMemberIndex];
     }
 
-    private Damageable TargetedPartyMember()
-    {
-        return _partyMembers[_targetedPartyTargetIndex];
-    }
-
     private void UpdateTargetSelection(DirectionalNavigation directionalNavigation)
     {
-        var targetCount = _opponents.Count;
+        switch (directionalNavigation.Direction)
+        {
+            case Enums.Direction.Up:
+                _targetingOpponents = !_targetingOpponents;
+                _selectedTargetIndex = 0;
+                break;
+            case Enums.Direction.Down:
+                _targetingOpponents = !_targetingOpponents;
+                _selectedTargetIndex = 0;
+                break;
+        }
+        
+        var targetList = _targetingOpponents ? _opponents : _partyMembers;
+        var targetCount = targetList.Count;
 
         if (targetCount == 0)
         {
             return;
         }
 
-        SelectedOpponent().GetComponent<Blinker>().shouldBlink = false;
+        _selectedTargets.ForEach(x => x.GetComponent<Blinker>().shouldBlink = false);
+        _selectedTargets.Clear();
 
         switch (directionalNavigation.Direction)
         {
@@ -162,7 +175,7 @@ public class EncounterController : MonoBehaviour, IObserver
 
         _selectedTargetIndex = _selectedTargetIndex < 0 ? targetCount - 1 : _selectedTargetIndex % targetCount;
 
-        SelectedOpponent().GetComponent<Blinker>().shouldBlink = true;
+        _selectedTargets.Add(targetList[_selectedTargetIndex]);
     }
 
     // Transition state on next tick to avoid message collision
@@ -193,6 +206,9 @@ public class EncounterController : MonoBehaviour, IObserver
                 when _whoseTurn == WhoseTurn.Player && !encounterCommandWindowController.IsFocused():
                 if (ActivePartyMember().hitPoints > 0)
                 {
+                    _selectedTargets.Clear();
+                    _selectedTargets.Add(_opponents[0]);
+                    _targetingOpponents = true;
                     _encounterSubject.Notify(new OpenEncounterCommandWindow(ActivePartyMember()));
                 }
                 else
@@ -209,16 +225,17 @@ public class EncounterController : MonoBehaviour, IObserver
                 break;
 
             case ActionPhase.PickingAbilityTarget when _whoseTurn == WhoseTurn.Player:
-                SelectedOpponent().GetComponent<Blinker>().shouldBlink = true;
+                _selectedTargets.ForEach(x => x.GetComponent<Blinker>().shouldBlink = true);
                 break;
 
             case ActionPhase.PickingAbilityTarget when _whoseTurn == WhoseTurn.Opponent:
-                _targetedPartyTargetIndex = Random.Range(0, _partyMemberCount);
+                _selectedTargetIndex = Random.Range(0, _partyMemberCount);
 
-                while (TargetedPartyMember().hitPoints < 1)
+                while (_partyMembers[_selectedTargetIndex].hitPoints < 1)
                 {
-                    _targetedPartyTargetIndex = Random.Range(0, _partyMemberCount);
+                    _selectedTargetIndex = Random.Range(0, _partyMemberCount);
                 }
+                _selectedTargets.Add(_partyMembers[_selectedTargetIndex]);
 
                 SetActionPhase(ActionPhase.AnnounceAndCalculateAttack);
                 break;
@@ -271,20 +288,10 @@ public class EncounterController : MonoBehaviour, IObserver
         }
     }
 
-    private void Start()
-    {
-        foreach (Transform child in _opponentsTransform)
-        {
-            _opponents.Add(child.GetComponent<Damageable>());
-        }
-    }
-
     private void AnnounceAndCalculateAttack()
     {
         _attack = new Attack();
-        _targeted = _whoseTurn == WhoseTurn.Opponent
-            ? TargetedPartyMember()
-            : SelectedOpponent();
+        _targeted = SelectedTargets()[0];
 
         var blinker = _targeted.GetComponent<Blinker>();
 
@@ -429,8 +436,8 @@ public class EncounterController : MonoBehaviour, IObserver
         {
             SetActionPhase(ActionPhase.ResolveTurn);
 
-            if (SelectedOpponent().hitPoints >= 1) return;
-            var opponent = SelectedOpponent();
+            var opponent = SelectedTargets()[0];
+            if (opponent.hitPoints >= 1) return;
             _opponents.Remove(opponent);
             Destroy(opponent.gameObject);
         }
@@ -440,7 +447,7 @@ public class EncounterController : MonoBehaviour, IObserver
         }
     }
 
-    private void PlaceParty()
+    private void SetupField()
     {
         Transform partyContainer = encounterWindowController.transform.Find("Party");
 
@@ -472,12 +479,21 @@ public class EncounterController : MonoBehaviour, IObserver
             damageable.hitPoints = 50;
 
             copy.AddComponent<PartyAvatar>();
+            var blinker = copy.AddComponent<Blinker>();
+            blinker.blinkMaterial = _blinkMaterial;
 
             _hpBox.AddDamageable(damageable);
 
             x += inc * 2;
 
             _partyMembers.Add(damageable);
+            
+            _allParticipants.Add(damageable);
+        }
+        
+        foreach (Transform child in _opponentsTransform)
+        {
+            _opponents.Add(child.GetComponent<Damageable>());
         }
     }
 }
