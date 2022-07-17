@@ -53,12 +53,14 @@ public class EncounterController : MonoBehaviour, IObserver
     private int _currentTargetIndex;
     public AbilityAnimation abilityAnimationPrefab;
     private EncounterTargeter _targeter;
+    private AbilityProcessor _abilityProcessor;
 
     private void Awake()
     {
         _hpBox = GameObject.Find("WorldSpaceCanvas/EncounterWindow/HPBox").GetComponent<HpBox>();
         _blinkMaterial = Resources.Load<Material>("Materials/Blink");
         _targeter = new EncounterTargeter(_opponents, _partyMembers);
+        _abilityProcessor = new AbilityProcessor();
     }
 
     public void Setup(Subject encounterSubject, Transform opponentsTransform,
@@ -267,15 +269,7 @@ public class EncounterController : MonoBehaviour, IObserver
 
     private void DoAbilityAnimation()
     {
-        _targeter.SelectedTargets().ForEach(x =>
-        {
-            _activeAnimationCount++;
-            var abilityAnimation = Instantiate(abilityAnimationPrefab, Vector2.zero, Quaternion.identity)
-                .GetComponent<AbilityAnimation>();
-            abilityAnimation.transform.parent = encounterWindowController.transform;
-            abilityAnimation.Setup(_encounterSubject);
-            abilityAnimation.PlayAnimation(x.transform, _pickedAbility.animationName);
-        });
+        _abilityProcessor.DoAbilityAnimation(_targeter, ref _activeAnimationCount, abilityAnimationPrefab, _pickedAbility, _encounterSubject, encounterWindowController);
 
         SetActionPhase(ActionPhase.AnnounceAbilityEffects);
     }
@@ -283,9 +277,6 @@ public class EncounterController : MonoBehaviour, IObserver
     private void AnnounceAttackEffects()
     {
         SetActionPhase(ActionPhase.ShowDamage);
-        
-        print(_attacks.Count);
-        print(_currentTargetIndex);
 
         if (_attacks[_currentTargetIndex].IsCritical)
         {
