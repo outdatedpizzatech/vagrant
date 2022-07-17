@@ -18,6 +18,7 @@ public class AbilityAnimation : MonoBehaviour
     public void EndAnimation()
     {
         _encounterSubject.Notify(EncounterTopic.EndAttackAnimation);
+        Destroy(gameObject);
     }
 
     public void PlayAnimation(Transform _transform, string animationName)

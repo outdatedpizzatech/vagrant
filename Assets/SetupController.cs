@@ -47,7 +47,6 @@ public class SetupController : MonoBehaviour, IObserver
         var encounterWindow = worldSpaceCanvas.Find("EncounterWindow");
         var encounterWindowController = worldSpaceCanvas.Find("EncounterWindow").GetComponent<EncounterWindowController>();
         var opponentsTransform = encounterWindow.Find("Opponents").transform;
-        var abilityAnimation = encounterWindow.Find("AbilityAnimation").GetComponent<AbilityAnimation>();
         var damageValue = encounterWindow.Find("DamageValue").GetComponent<DamageValue>();
         var encounterCommandWindowController = encounterWindow.Find("CommandWindow").GetComponent<EncounterCommandWindowController>();
         var encounterMessageWindowController = encounterWindow.Find("MessageWindow").GetComponent<MessageWindowController>();
@@ -67,7 +66,7 @@ public class SetupController : MonoBehaviour, IObserver
         encounterWindowController.Setup(flowSubject);
         encounterCommandWindowController.Setup(flowSubject, encounterSubject, interactionSubject);
         flowController.Setup(flowSubject, interactionSubject);
-        encounterController.Setup(encounterSubject, opponentsTransform, abilityAnimation, interactionSubject, damageValue, flowSubject);
+        encounterController.Setup(encounterSubject, opponentsTransform, interactionSubject, damageValue, flowSubject);
         inventoryWindowController.Setup(flowSubject, interactionSubject, windowSubject);
         commandWindowController.Setup(flowSubject, interactionSubject, windowSubject);
         treasureA.Setup(occupiedSpacesSubject);
