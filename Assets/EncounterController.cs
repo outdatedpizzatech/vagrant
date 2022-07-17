@@ -33,7 +33,6 @@ public class EncounterController : MonoBehaviour, IObserver
     private ActionPhase _nextActionPhase;
     private WhoseTurn _whoseTurn;
     private WhoseTurn _nextWhoseTurn;
-    private int _selectedTargetIndex;
     private int _targetedPartyTargetIndex;
     private readonly List<Damageable> _opponents = new();
     private readonly List<Damageable> _partyMembers = new();
@@ -49,17 +48,17 @@ public class EncounterController : MonoBehaviour, IObserver
     private int _partyMemberCount;
     private Ability _pickedAbility;
     private Ability _roundhouse = new Ability("Roundhouse", "SwordSlash", Ability.TargetingMode.Single);
-    private List<Damageable> _selectedTargets = new();
     private List<Damageable> _allParticipants = new();
-    private bool _targetingOpponents;
     private Material _blinkMaterial;
     private int _currentTargetIndex;
     public AbilityAnimation abilityAnimationPrefab;
+    private EncounterTargeter _targeter;
 
     private void Awake()
     {
         _hpBox = GameObject.Find("WorldSpaceCanvas/EncounterWindow/HPBox").GetComponent<HpBox>();
         _blinkMaterial = Resources.Load<Material>("Materials/Blink");
+        _targeter = new EncounterTargeter(_opponents, _partyMembers);
     }
 
     public void Setup(Subject encounterSubject, Transform opponentsTransform,
@@ -95,35 +94,15 @@ public class EncounterController : MonoBehaviour, IObserver
                 when _whoseTurn == WhoseTurn.Player && _actionPhase == ActionPhase.PickingAction:
                 SetActionPhase(ActionPhase.PickingAbilityTarget);
                 _pickedAbility = pickedAbility.Ability;
-                if (_pickedAbility.targetingMode == Ability.TargetingMode.Single)
-                {
-                    var index = 0;
-
-                    while (_opponents[index].hitPoints < 1)
-                    {
-                        index++;
-                    }
-
-                    _selectedTargetIndex = index;
-                    _selectedTargets.Add(_opponents[index]);
-                }
-                else
-                {
-                    _opponents.ForEach(x =>
-                    {
-                        if(x.hitPoints > 0) _selectedTargets.Add(x);
-                    });
-                }
-
-                _targetingOpponents = true;
+                _targeter.PickDefaultTargetForPlayer(_pickedAbility.targetingMode);
                 break;
             case DirectionalNavigation menuNavigation
                 when _actionPhase == ActionPhase.PickingAbilityTarget && _whoseTurn == WhoseTurn.Player:
-                UpdateTargetSelection(menuNavigation);
+                _targeter.UpdateTargetSelection(menuNavigation, _pickedAbility.targetingMode);
                 break;
             case EncounterTopic.Cancel
                 when _actionPhase == ActionPhase.PickingAbilityTarget && _whoseTurn == WhoseTurn.Player:
-                _selectedTargets.ForEach(x => x.GetComponent<Blinker>().shouldBlink = false);
+                _targeter.ClearSelection();
                 SetActionPhase(ActionPhase.PickingAction);
                 break;
             case PlayerRequestsPrimaryActionEvent
@@ -147,82 +126,11 @@ public class EncounterController : MonoBehaviour, IObserver
         }
     }
 
-    private List<Damageable> SelectedTargets()
-    {
-        return _selectedTargets;
-    }
-
     private Damageable ActivePartyMember()
     {
         return _partyMembers[_activePartyMemberIndex];
     }
 
-    private void UpdateTargetSelection(DirectionalNavigation directionalNavigation)
-    {
-        switch (directionalNavigation.Direction)
-        {
-            case Enums.Direction.Up:
-                _targetingOpponents = !_targetingOpponents;
-                _selectedTargetIndex = 0;
-                break;
-            case Enums.Direction.Down:
-                _targetingOpponents = !_targetingOpponents;
-                _selectedTargetIndex = 0;
-                break;
-        }
-        
-        var targetList = _targetingOpponents ? _opponents : _partyMembers;
-        var targetCount = targetList.Count;
-        
-        while (targetList[_selectedTargetIndex].hitPoints < 1)
-        {
-            _selectedTargetIndex++;
-            _selectedTargetIndex = _selectedTargetIndex < 0 ? targetCount - 1 : _selectedTargetIndex % targetCount;
-        }
-
-        if (targetCount == 0)
-        {
-            return;
-        }
-
-        _selectedTargets.ForEach(x => x.GetComponent<Blinker>().shouldBlink = false);
-        _selectedTargets.Clear();
-
-        switch (directionalNavigation.Direction)
-        {
-            case Enums.Direction.Right:
-                _selectedTargetIndex++;
-                _selectedTargetIndex = _selectedTargetIndex < 0 ? targetCount - 1 : _selectedTargetIndex % targetCount;
-                
-                while (targetList[_selectedTargetIndex].hitPoints < 1)
-                {
-                    _selectedTargetIndex++;
-                    _selectedTargetIndex = _selectedTargetIndex < 0 ? targetCount - 1 : _selectedTargetIndex % targetCount;
-                }
-
-                break;
-            case Enums.Direction.Left:
-                _selectedTargetIndex--;
-                _selectedTargetIndex = _selectedTargetIndex < 0 ? targetCount - 1 : _selectedTargetIndex % targetCount;
-                
-                while (targetList[_selectedTargetIndex].hitPoints < 1)
-                {
-                    _selectedTargetIndex--;
-                    _selectedTargetIndex = _selectedTargetIndex < 0 ? targetCount - 1 : _selectedTargetIndex % targetCount;
-                }
-
-                break;
-        }
-
-        if (_pickedAbility.targetingMode == Ability.TargetingMode.Single)
-        {
-            _selectedTargets.Add(targetList[_selectedTargetIndex]);
-        }
-        else
-        {
-            targetList.ForEach(x => _selectedTargets.Add(x));
-        }
-    }
 
     // Transition state on next tick to avoid message collision
     private void SetActionPhase(ActionPhase newActionPhase)
@@ -250,9 +158,9 @@ public class EncounterController : MonoBehaviour, IObserver
         {
             case ActionPhase.PickingAction
                 when _whoseTurn == WhoseTurn.Player && !encounterCommandWindowController.IsFocused():
+                _targeter.ClearSelection();
                 if (ActivePartyMember().hitPoints > 0)
                 {
-                    _selectedTargets.Clear();
                     _encounterSubject.Notify(new OpenEncounterCommandWindow(ActivePartyMember()));
                 }
                 else
@@ -263,12 +171,11 @@ public class EncounterController : MonoBehaviour, IObserver
                 break;
             case ActionPhase.PickingAction
                 when _whoseTurn == WhoseTurn.Opponent:
+                _targeter.ClearSelection();
                 if (_opponents[_attackingOpponentIndex].hitPoints > 0)
                 {
                     _pickedAbility = _roundhouse;
-                    _targetingOpponents = true;
                     SetActionPhase(ActionPhase.PickingAbilityTarget);
-                    _selectedTargetIndex = 0;
                 }
                 else
                 {
@@ -278,19 +185,11 @@ public class EncounterController : MonoBehaviour, IObserver
                 break;
 
             case ActionPhase.PickingAbilityTarget when _whoseTurn == WhoseTurn.Player:
-                _selectedTargets.ForEach(x => x.GetComponent<Blinker>().shouldBlink = true);
+                _targeter.BlinkSelectedTargets();
                 break;
 
             case ActionPhase.PickingAbilityTarget when _whoseTurn == WhoseTurn.Opponent:
-                _selectedTargetIndex = Random.Range(0, _partyMemberCount);
-
-                while (_partyMembers[_selectedTargetIndex].hitPoints < 1)
-                {
-                    _selectedTargetIndex = Random.Range(0, _partyMemberCount);
-                }
-
-                _selectedTargets.Add(_partyMembers[_selectedTargetIndex]);
-
+                _targeter.PickTargetForOpponent();
                 SetActionPhase(ActionPhase.AnnounceAndCalculateAttack);
                 break;
 
@@ -345,8 +244,8 @@ public class EncounterController : MonoBehaviour, IObserver
     private void AnnounceAndCalculateAttack()
     {
         _currentTargetIndex = 0;
-        _selectedTargets.ForEach((_) => { _attacks.Add(new Attack()); });
-        _selectedTargets.ForEach(x => x.GetComponent<Blinker>().shouldBlink = false);
+        _targeter.SelectedTargets().ForEach((_) => { _attacks.Add(new Attack()); });
+        _targeter.BlinkSelectedTargets(false);
 
         var actor = _whoseTurn == WhoseTurn.Opponent
             ? _opponents[_attackingOpponentIndex].GetComponent<Damageable>()
@@ -362,17 +261,13 @@ public class EncounterController : MonoBehaviour, IObserver
             }
         }
 
-        var targetName = _selectedTargets.Count == 1
-            ? _selectedTargets[0].name
-            : (_targetingOpponents ? "the enemies" : "the party");
-
-        AddMessage($"{actor.name} uses {_pickedAbility.name} on {targetName}!");
+        AddMessage($"{actor.name} uses {_pickedAbility.name} on {_targeter.TargetName()}!");
         SetActionPhase(ActionPhase.DoAbilityAnimation);
     }
 
     private void DoAbilityAnimation()
     {
-        _selectedTargets.ForEach(x =>
+        _targeter.SelectedTargets().ForEach(x =>
         {
             _activeAnimationCount++;
             var abilityAnimation = Instantiate(abilityAnimationPrefab, Vector2.zero, Quaternion.identity)
@@ -388,6 +283,9 @@ public class EncounterController : MonoBehaviour, IObserver
     private void AnnounceAttackEffects()
     {
         SetActionPhase(ActionPhase.ShowDamage);
+        
+        print(_attacks.Count);
+        print(_currentTargetIndex);
 
         if (_attacks[_currentTargetIndex].IsCritical)
         {
@@ -399,14 +297,14 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         SetActionPhase(ActionPhase.CommitDamageAndAnnounceDeaths);
         _activeAnimationCount++;
-        _damageValue.ShowDamage(_attacks[_currentTargetIndex].Damage, _selectedTargets[_currentTargetIndex].transform);
+        _damageValue.ShowDamage(_attacks[_currentTargetIndex].Damage, _targeter.SelectedTarget(_currentTargetIndex).transform);
     }
 
     private void CommitDamageAndAnnounceDeaths()
     {
         SetActionPhase(ActionPhase.RemoveDeadOpponentsFromPlay);
 
-        var targeted = _selectedTargets[_currentTargetIndex];
+        var targeted = _targeter.SelectedTarget(_currentTargetIndex);
 
         targeted.ReceiveDamage(_attacks[_currentTargetIndex].Damage);
 
@@ -448,7 +346,6 @@ public class EncounterController : MonoBehaviour, IObserver
             {
                 _attackingOpponentIndex++;
                 SetActionPhase(ActionPhase.PickingAction);
-                _selectedTargets.Clear();
             }
             else
             {
@@ -460,8 +357,6 @@ public class EncounterController : MonoBehaviour, IObserver
     private void ResetIndexes()
     {
         _attacks.Clear();
-        _selectedTargets.Clear();
-        _selectedTargetIndex = 0;
         _targetedPartyTargetIndex = 0;
         _attackingOpponentIndex = 0;
         _activePartyMemberIndex = 0;
@@ -502,21 +397,21 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         if (_whoseTurn == WhoseTurn.Player)
         {
-            var opponent = SelectedTargets()[_currentTargetIndex];
+            var opponent = _targeter.SelectedTarget(_currentTargetIndex);
             if (opponent.hitPoints < 1)
             {
                 opponent.GetComponent<SpriteRenderer>().color = Color.black;
             }
         }
 
-        if (_currentTargetIndex < _selectedTargets.Count - 1)
+        if (_targeter.AtEndOfTargetList(_currentTargetIndex))
         {
-            SetActionPhase(ActionPhase.AnnounceAbilityEffects);
-            _currentTargetIndex++;
+            SetActionPhase(ActionPhase.ResolveTurn);
         }
         else
         {
-            SetActionPhase(ActionPhase.ResolveTurn);
+            SetActionPhase(ActionPhase.AnnounceAbilityEffects);
+            _currentTargetIndex++;
         }
     }
 
