@@ -237,3 +237,28 @@ public class InteractWith
     public Interactable Interactable { get; }
     public Enums.Direction Direction { get; }
 }
+
+namespace EncounterEvents
+{
+    public class EncounterMessage
+    {
+        public EncounterMessage(string message)
+        {
+            Message = message;
+        }
+
+        public string Message;
+    }
+
+    public class BeginAction
+    {
+        public BeginAction(Damageable actor, Ability ability)
+        {
+            Actor = actor;
+            Ability = ability;
+        }
+
+        public Damageable Actor;
+        public Ability Ability;
+    }
+}

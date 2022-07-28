@@ -1,6 +1,6 @@
 using UnityEngine;
 
-class Attack
+public class Attack
 {
     public int Damage;
     public bool IsCritical;

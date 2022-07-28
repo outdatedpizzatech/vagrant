@@ -8,11 +8,6 @@ public class EncounterController : MonoBehaviour, IObserver
         PickingAction,
         PickingAbilityTarget,
         AnnounceAndCalculateAttack,
-        DoAbilityAnimation,
-        AnnounceAbilityEffects,
-        ShowDamage,
-        CommitDamageAndAnnounceDeaths,
-        RemoveDeadOpponentsFromPlay,
         ResolveTurn,
         EndingEncounter,
     }
@@ -26,6 +21,7 @@ public class EncounterController : MonoBehaviour, IObserver
     public MessageWindowController messageWindowController;
     public EncounterWindowController encounterWindowController;
     public EncounterCommandWindowController encounterCommandWindowController;
+    public AbilityAnimation abilityAnimationPrefab;
 
     private Subject _encounterSubject;
     private Subject _flowSubject;
@@ -33,13 +29,11 @@ public class EncounterController : MonoBehaviour, IObserver
     private ActionPhase _nextActionPhase;
     private WhoseTurn _whoseTurn;
     private WhoseTurn _nextWhoseTurn;
-    private int _targetedPartyTargetIndex;
     private readonly List<Damageable> _opponents = new();
     private readonly List<Damageable> _partyMembers = new();
     private DamageValue _damageValue;
     private Transform _opponentsTransform;
     private EventStepMarker _eventStepMarker;
-    private List<Attack> _attacks = new();
     private PlayerController _player;
     private int _attackingOpponentIndex;
     private int _activePartyMemberIndex;
@@ -47,20 +41,17 @@ public class EncounterController : MonoBehaviour, IObserver
     private HpBox _hpBox;
     private int _partyMemberCount;
     private Ability _pickedAbility;
-    private Ability _roundhouse = new Ability("Roundhouse", "SwordSlash", Ability.TargetingMode.Single);
-    private List<Damageable> _allParticipants = new();
+    private Ability _roundhouse = new("Roundhouse", "SwordSlash", Ability.TargetingMode.Single);
     private Material _blinkMaterial;
-    private int _currentTargetIndex;
-    public AbilityAnimation abilityAnimationPrefab;
     private EncounterTargeter _targeter;
-    private AbilityProcessor _abilityProcessor;
+    private ActionProcessor _actionProcessor;
 
     private void Awake()
     {
         _hpBox = GameObject.Find("WorldSpaceCanvas/EncounterWindow/HPBox").GetComponent<HpBox>();
         _blinkMaterial = Resources.Load<Material>("Materials/Blink");
         _targeter = new EncounterTargeter(_opponents, _partyMembers);
-        _abilityProcessor = new AbilityProcessor();
+        _actionProcessor = transform.Find("AbilityProcessor").GetComponent<ActionProcessor>();
     }
 
     public void Setup(Subject encounterSubject, Transform opponentsTransform,
@@ -75,6 +66,8 @@ public class EncounterController : MonoBehaviour, IObserver
         _damageValue.Setup(_encounterSubject);
         _flowSubject = flowSubject;
         _flowSubject.AddObserver(this);
+        _actionProcessor.Setup(_targeter, abilityAnimationPrefab, _encounterSubject, encounterWindowController,
+            _damageValue, _eventStepMarker);
     }
 
     public void OnNotify<T>(T parameters)
@@ -115,16 +108,12 @@ public class EncounterController : MonoBehaviour, IObserver
             case GeneralTopic.PlayerRequestsSecondaryAction:
                 _encounterSubject.Notify(EncounterTopic.Cancel);
                 break;
-            case EncounterTopic.EndAttackAnimation:
-            {
-                _activeAnimationCount--;
+            case EncounterEvents.EncounterMessage battleMessage:
+                AddMessage(battleMessage.Message);
                 break;
-            }
-            case EncounterTopic.EndDamageAnimation:
-            {
-                _activeAnimationCount--;
+            case EncounterEvents.BeginAction:
+                SetActionPhase(ActionPhase.ResolveTurn);
                 break;
-            }
         }
     }
 
@@ -132,7 +121,6 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         return _partyMembers[_activePartyMemberIndex];
     }
-
 
     // Transition state on next tick to avoid message collision
     private void SetActionPhase(ActionPhase newActionPhase)
@@ -154,7 +142,7 @@ public class EncounterController : MonoBehaviour, IObserver
         _whoseTurn = _nextWhoseTurn;
 
         if (!encounterWindowController.IsVisible()) return;
-        if (_eventStepMarker.Active() || _activeAnimationCount > 0) return;
+        if (_eventStepMarker.Active() || _actionProcessor.Active()) return;
 
         switch (_actionPhase)
         {
@@ -197,34 +185,7 @@ public class EncounterController : MonoBehaviour, IObserver
 
             case ActionPhase.AnnounceAndCalculateAttack:
             {
-                AnnounceAndCalculateAttack();
-                break;
-            }
-
-            case ActionPhase.DoAbilityAnimation:
-                DoAbilityAnimation();
-                break;
-
-            case ActionPhase.AnnounceAbilityEffects:
-            {
-                AnnounceAttackEffects();
-                break;
-            }
-
-            case ActionPhase.ShowDamage:
-                ShowDamage();
-                break;
-
-            case ActionPhase.CommitDamageAndAnnounceDeaths:
-            {
-                CommitDamageAndAnnounceDeaths();
-
-                break;
-            }
-
-            case ActionPhase.RemoveDeadOpponentsFromPlay:
-            {
-                RemoveDeadOpponentsFromPlay();
+                BeginAction();
                 break;
             }
 
@@ -243,10 +204,8 @@ public class EncounterController : MonoBehaviour, IObserver
         }
     }
 
-    private void AnnounceAndCalculateAttack()
+    private void BeginAction()
     {
-        _currentTargetIndex = 0;
-        _targeter.SelectedTargets().ForEach((_) => { _attacks.Add(new Attack()); });
         _targeter.BlinkSelectedTargets(false);
 
         var actor = _whoseTurn == WhoseTurn.Opponent
@@ -263,46 +222,7 @@ public class EncounterController : MonoBehaviour, IObserver
             }
         }
 
-        AddMessage($"{actor.name} uses {_pickedAbility.name} on {_targeter.TargetName()}!");
-        SetActionPhase(ActionPhase.DoAbilityAnimation);
-    }
-
-    private void DoAbilityAnimation()
-    {
-        _abilityProcessor.DoAbilityAnimation(_targeter, ref _activeAnimationCount, abilityAnimationPrefab, _pickedAbility, _encounterSubject, encounterWindowController);
-
-        SetActionPhase(ActionPhase.AnnounceAbilityEffects);
-    }
-
-    private void AnnounceAttackEffects()
-    {
-        SetActionPhase(ActionPhase.ShowDamage);
-
-        if (_attacks[_currentTargetIndex].IsCritical)
-        {
-            AddMessage("A critical hit!");
-        }
-    }
-
-    private void ShowDamage()
-    {
-        SetActionPhase(ActionPhase.CommitDamageAndAnnounceDeaths);
-        _activeAnimationCount++;
-        _damageValue.ShowDamage(_attacks[_currentTargetIndex].Damage, _targeter.SelectedTarget(_currentTargetIndex).transform);
-    }
-
-    private void CommitDamageAndAnnounceDeaths()
-    {
-        SetActionPhase(ActionPhase.RemoveDeadOpponentsFromPlay);
-
-        var targeted = _targeter.SelectedTarget(_currentTargetIndex);
-
-        targeted.ReceiveDamage(_attacks[_currentTargetIndex].Damage);
-
-        if (targeted.hitPoints < 1)
-        {
-            AddMessage($"{targeted.name} is dead");
-        }
+        _encounterSubject.Notify(new EncounterEvents.BeginAction(actor, _pickedAbility));
     }
 
     private void ResolveTurn()
@@ -347,8 +267,6 @@ public class EncounterController : MonoBehaviour, IObserver
 
     private void ResetIndexes()
     {
-        _attacks.Clear();
-        _targetedPartyTargetIndex = 0;
         _attackingOpponentIndex = 0;
         _activePartyMemberIndex = 0;
     }
@@ -381,29 +299,6 @@ public class EncounterController : MonoBehaviour, IObserver
         newEvent.AddMessage(message);
         var response = new InteractionResponseEvent(newEvent);
         _encounterSubject.Notify(response);
-    }
-
-
-    private void RemoveDeadOpponentsFromPlay()
-    {
-        if (_whoseTurn == WhoseTurn.Player)
-        {
-            var opponent = _targeter.SelectedTarget(_currentTargetIndex);
-            if (opponent.hitPoints < 1)
-            {
-                opponent.GetComponent<SpriteRenderer>().color = Color.black;
-            }
-        }
-
-        if (_targeter.AtEndOfTargetList(_currentTargetIndex))
-        {
-            SetActionPhase(ActionPhase.ResolveTurn);
-        }
-        else
-        {
-            SetActionPhase(ActionPhase.AnnounceAbilityEffects);
-            _currentTargetIndex++;
-        }
     }
 
     private void SetupField()
@@ -446,8 +341,6 @@ public class EncounterController : MonoBehaviour, IObserver
             x += inc * 2;
 
             _partyMembers.Add(damageable);
-
-            _allParticipants.Add(damageable);
         }
 
         foreach (Transform child in _opponentsTransform)
