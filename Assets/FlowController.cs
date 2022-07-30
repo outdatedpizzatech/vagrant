@@ -8,7 +8,7 @@ public class FlowController : MonoBehaviour, IObserver
 
     private Subject _flowSubject;
     private bool _shownInteractionMenu;
-    private bool _encounterIsEnqueued;
+    private Encounter _queuedEncounter;
     private Interactable _interactable;
     private EventStepMarker _eventStepMarker;
     private bool _inEncounter;
@@ -31,10 +31,10 @@ public class FlowController : MonoBehaviour, IObserver
                     _flowSubject.Notify(FlowTopic.LoseInteractionTarget);
                 }
 
-                if (_encounterIsEnqueued)
+                if (_queuedEncounter != null)
                 {
-                    _encounterIsEnqueued = false;
-                    _flowSubject.Notify(FlowTopic.StartEncounter);
+                    _flowSubject.Notify(new StartEncounter(_queuedEncounter));
+                    _queuedEncounter = null;
                 }
 
                 break;
@@ -52,7 +52,7 @@ public class FlowController : MonoBehaviour, IObserver
                 _interactable = null;
 
                 break;
-            case FlowTopic.StartEncounter:
+            case StartEncounter:
                 _inEncounter = true;
                 break;
             case FlowTopic.EndEncounter:
@@ -118,8 +118,8 @@ public class FlowController : MonoBehaviour, IObserver
 
     private bool ShouldStartEncounter()
     {
-        return _eventStepMarker.IsReadyToYield(PostEvent.TriggersEncounter) &&
-               !_encounterIsEnqueued;
+        return _eventStepMarker.IsReadyToYieldEncounter() &&
+               _queuedEncounter == null;
     }
 
     private void Update()
@@ -131,7 +131,7 @@ public class FlowController : MonoBehaviour, IObserver
         }
         else if (ShouldStartEncounter())
         {
-            _encounterIsEnqueued = true;
+            _queuedEncounter = _eventStepMarker.Encounter();
         }
     }
 }

@@ -30,6 +30,22 @@ public class EventStepMarker : IObserver
                _interactionEvent.Information is PostEvent informationPostEvent && informationPostEvent == postEvent;
     }
 
+    public bool IsReadyToYieldEncounter()
+    {
+        return _interactionEvent != null && _atEndOfMessage && AtEndOfEvent() &&
+               _interactionEvent.Information is Encounter;
+    }
+
+    public Encounter Encounter()
+    {
+        if (_interactionEvent.Information is Encounter encounter)
+        {
+            return encounter;
+        }
+
+        return null;
+    }
+
     public void OnNotify<T>(T parameters)
     {
         switch (parameters)
@@ -39,14 +55,14 @@ public class EventStepMarker : IObserver
                 break;
             case EventTopic.ReachedEndOfMessage:
                 _atEndOfMessage = true;
-                
+
                 var currentMessage = CurrentMessage();
 
                 if (currentMessage.Information is Item item)
                 {
                     _subject.Notify(new ReceiveItem(item));
                 }
-                
+
                 break;
             case EventTopic.EndEventSequence:
                 _interactionEvent = null;
@@ -67,7 +83,7 @@ public class EventStepMarker : IObserver
         _atEndOfMessage = false;
         _subject.Notify(new StartEventStep(_eventStepIndex));
     }
-    
+
     private void AdvanceEventSequence()
     {
         if (AtEndOfEvent())
@@ -79,7 +95,7 @@ public class EventStepMarker : IObserver
                     new PromptResponseEvent(selectedPrompt.ID));
                 return;
             }
-            
+
             _subject.Notify(EventTopic.EndEventSequence);
         }
         else

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class EncounterController : MonoBehaviour, IObserver
@@ -74,8 +75,8 @@ public class EncounterController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case FlowTopic.StartEncounter:
-                SetupField();
+            case StartEncounter startEncounter:
+                SetupField(startEncounter.Encounter);
                 break;
             case EncounterTopic.AttemptingToFlee:
                 EndEncounter("Getting out of here...");
@@ -113,6 +114,24 @@ public class EncounterController : MonoBehaviour, IObserver
                 break;
             case EncounterEvents.BeginAction:
                 SetActionPhase(ActionPhase.ResolveTurn);
+                break;
+            case FlowTopic.EndEncounter:
+                foreach (Damageable partyMember in _partyMembers)
+                {
+                    // TODO: use observables
+                    Destroy(partyMember.gameObject);
+                }
+                
+                foreach (Damageable opponent in _opponents)
+                {
+                    // TODO: use observables
+                    Destroy(opponent.gameObject);
+                }
+                
+                _hpBox.Clear();
+                _partyMembers.Clear();
+                _opponents.Clear();
+
                 break;
         }
     }
@@ -301,13 +320,13 @@ public class EncounterController : MonoBehaviour, IObserver
         _encounterSubject.Notify(response);
     }
 
-    private void SetupField()
+    private void SetupField(Encounter encounter)
     {
         Transform partyContainer = encounterWindowController.transform.Find("Party");
-
+        
         var sourceTransform = GameObject.Find("/Party").transform;
 
-        const float inc = 1f;
+        float inc = 1f;
         _partyMemberCount = sourceTransform.childCount;
         var x = (_partyMemberCount - 1) * inc * -1;
 
@@ -342,10 +361,31 @@ public class EncounterController : MonoBehaviour, IObserver
 
             _partyMembers.Add(damageable);
         }
-
-        foreach (Transform child in _opponentsTransform)
+        
+        inc = 5f;
+        x = (encounter.Opponents.Count - 1) * inc * -1;
+        
+        encounter.Opponents.ForEach((o) =>
         {
-            _opponents.Add(child.GetComponent<Damageable>());
+            var opponent = Instantiate(o, Vector3.zero, Quaternion.identity) as GameObject;
+            opponent.transform.parent = _opponentsTransform;
+            opponent.transform.localScale = Vector3.one;
+            opponent.AddComponent<Blinker>();
+            _opponents.Add(opponent.GetComponent<Damageable>());
+
+            x += inc * 2;
+        });
+
+        var maxWidth = _opponents.Sum(x => x.GetComponent<SpriteRenderer>().sprite.bounds.size.x) + (_opponents.Count - 1);
+
+        var prevWidth = 0f;
+        
+        foreach (Damageable opponent in _opponents)
+        {
+            var currentWidth = opponent.GetComponent<SpriteRenderer>().sprite.bounds.size.x;
+            var adjustedX = -maxWidth / 2 + prevWidth + (currentWidth / 2);
+            opponent.GetComponent<RectTransform>().anchoredPosition = new Vector2(adjustedX, 1f);
+            prevWidth += opponent.GetComponent<SpriteRenderer>().sprite.bounds.size.x + 1;
         }
     }
 }

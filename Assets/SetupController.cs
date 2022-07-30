@@ -21,6 +21,7 @@ public class SetupController : MonoBehaviour, IObserver
         var klara = npcs.Find("Klara").GetComponent<NpcController>();
         var grayson = npcs.Find("Grayson").GetComponent<NpcController>();
         var keever = npcs.Find("Keever").GetComponent<NpcController>();
+        var plorus = npcs.Find("Plorus").GetComponent<NpcController>();
         
         // Objects
         var objects = GameObject.Find("Objects").transform;
@@ -57,6 +58,7 @@ public class SetupController : MonoBehaviour, IObserver
         march.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         klara.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         keever.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
+        plorus.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         grayson.Setup(occupiedSpacesSubject, positionController.PositionGrid, flowSubject);
         positionController.Setup(occupiedSpacesSubject);
         interactionController.Setup(interactionSubject, positionController.PositionGrid, flowSubject, inputController.InputAction, windowSubject);

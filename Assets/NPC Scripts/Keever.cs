@@ -40,7 +40,11 @@ namespace NPC_Scripts
             {
                 case PromptKeys.Yes:
                 {
-                    var response = new InteractionEvent(PostEvent.TriggersEncounter);
+                    var encounter = new Encounter();
+                    encounter.Add(EncounterLoader.Encounterable.Cragman);
+                    encounter.Add(EncounterLoader.Encounterable.Miasmadame);
+                    encounter.Add(EncounterLoader.Encounterable.Cragman);
+                    var response = new InteractionEvent(encounter);
                     response.AddMessage("Very well. Prepare yourselves!");
                     return response;
                 }

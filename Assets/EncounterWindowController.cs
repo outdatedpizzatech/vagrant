@@ -33,7 +33,7 @@ public class EncounterWindowController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case FlowTopic.StartEncounter:
+            case StartEncounter:
                 WipeIn();
                 break;
             case FlowTopic.EncounterStartWipeOut:

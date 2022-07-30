@@ -4,7 +4,16 @@ using UnityEngine;
 public enum PostEvent
 {
     CanFollowUp,
-    TriggersEncounter,
+}
+
+public class Encounter
+{
+    public List<UnityEngine.Object> Opponents = new();
+
+    public void Add(EncounterLoader.Encounterable encounterable)
+    {
+        Opponents.Add(EncounterLoader.Get(encounterable));
+    }
 }
 
 public class Message
@@ -43,6 +52,11 @@ public class InteractionEvent
 
     public InteractionEvent()
     {
+    }
+
+    public InteractionEvent(Encounter encounter)
+    {
+        Information = encounter;
     }
 
     public InteractionEvent(List<Prompt> prompts)

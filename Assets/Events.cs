@@ -18,7 +18,6 @@ public enum EventTopic
 public enum FlowTopic
 {
     LoseInteractionTarget,
-    StartEncounter,
     EndEncounter,
     EncounterFinishedWipeIn,
     EncounterStartWipeOut,
@@ -236,6 +235,16 @@ public class InteractWith
 
     public Interactable Interactable { get; }
     public Enums.Direction Direction { get; }
+}
+
+public class StartEncounter
+{
+    public StartEncounter(Encounter encounter)
+    {
+        Encounter = encounter;
+    }
+    
+    public Encounter Encounter;
 }
 
 namespace EncounterEvents

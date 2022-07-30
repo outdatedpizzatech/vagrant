@@ -68,7 +68,7 @@ public class InteractionController : MonoBehaviour, IObserver
     {
         switch (parameters)
         {
-            case FlowTopic.StartEncounter:
+            case StartEncounter:
                 _inEncounter = true;
                 break;
             case FlowTopic.EndEncounter:

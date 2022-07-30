@@ -16,6 +16,12 @@ public class HpBox : MonoBehaviour
         _rectTransform.sizeDelta = new Vector2(_damageables.Count * 2 + 1, 1.5f);
     }
 
+    // TODO: use observables
+    public void Clear()
+    {
+        _damageables.Clear();
+    }
+
     private void Awake()
     {
         _text = transform.Find("Text").GetComponent<TMP_Text>();
